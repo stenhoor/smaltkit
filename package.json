@@ -1,0 +1,25 @@
+{
+  "name": "smaltkit",
+  "version": "0.1.0",
+  "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
+  "license": "MIT",
+  "type": "module",
+  "repository": { "type": "git", "url": "git+https://github.com/stenhoor/smaltkit.git" },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./urls": { "types": "./dist/urls.d.ts", "default": "./dist/urls.js" }
+  },
+  "files": ["dist", "src"],
+  "sideEffects": false,
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "typecheck": "tsc -p .",
+    "test": "npm run build && node --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.0"
+  }
+}
