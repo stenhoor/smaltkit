@@ -1,19 +1,25 @@
 {
   "name": "smaltkit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
   "repository": { "type": "git", "url": "git+https://github.com/stenhoor/smaltkit.git" },
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./urls": { "types": "./dist/urls.d.ts", "default": "./dist/urls.js" }
+    "./urls": { "types": "./dist/urls.d.ts", "default": "./dist/urls.js" },
+    "./format": { "types": "./dist/format.d.ts", "default": "./dist/format.js" },
+    "./svg": { "types": "./dist/svg.d.ts", "default": "./dist/svg.js" },
+    "./charts": { "types": "./dist/charts.d.ts", "default": "./dist/charts.js" },
+    "./table": { "types": "./dist/table.d.ts", "default": "./dist/table.js" },
+    "./dom": { "types": "./dist/dom.d.ts", "default": "./dist/dom.js" },
+    "./ui.css": "./dist/ui.css"
   },
   "files": ["dist", "src"],
-  "sideEffects": false,
+  "sideEffects": ["*.css"],
   "engines": { "node": ">=22.18" },
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/ui.css dist/ui.css",
     "prepare": "npm run build",
     "typecheck": "tsc -p .",
     "test": "npm run build && node --test test/*.test.ts"

@@ -1,0 +1,143 @@
+/* smaltkit ui.css: styles for smaltkit/charts, smaltkit/table and smaltkit/dom.
+   Everything reads --sk-* custom properties. The defaults below come from the smalt brand tokens
+   (stenhoor/smalt-brand tokens.css: --text, --surface, --primary, ...), with fallbacks when those are absent.
+   An app restyles the kit by setting --sk-* on any ancestor of the rendered markup. */
+
+:where(:root) {
+  --sk-font: var(--font-sans, Geist, system-ui, sans-serif);
+  --sk-font-num: var(--sk-font);
+  --sk-fs-label: 11px;
+  --sk-fs-sub: 12px;
+  --sk-fs-small: 11px;
+  --sk-fs-kpi: 34px;
+  --sk-text: var(--text, #151922);
+  --sk-muted: var(--text-3, #5c6375);
+  --sk-surface: var(--surface, #ffffff);
+  --sk-border: var(--border, #d6dbe4);
+  --sk-grid: color-mix(in oklab, var(--sk-border) 70%, transparent);
+  --sk-gridlines: 1;
+  --sk-accent: var(--primary, #003399);
+  --sk-on-accent: var(--on-primary, #ffffff);
+  --sk-sel: var(--sk-accent);
+  --sk-pos: var(--success, #1d6b3a);
+  --sk-neg: var(--danger, #a3195b);
+  --sk-on-mark: #ffffff;
+  --sk-bar-radius: 2;
+  --sk-line-width: 2px;
+  --sk-toast-bg: #151922;
+  --sk-toast-text: #e9ebf0;
+  /* Series colours: the Smalt report theme's palette until smalt-brand defines a chart palette. */
+  --sk-c0: var(--smalt-500, #2F5BB7);
+  --sk-c1: #E5622F;
+  --sk-c2: #6E4BC2;
+  --sk-c3: #0E7FAE;
+  --sk-c4: #B07D1A;
+  --sk-c5: #2E8B6E;
+  --sk-c6: #C2417A;
+  --sk-c7: #5C6375;
+  --sk-c8: #1F5F8B;
+  --sk-c9: #A33A12;
+  --sk-c10: #8E6BD8;
+  --sk-c11: #3F4656;
+  --sk-seq-lo: color-mix(in oklab, var(--sk-accent) 8%, var(--sk-surface));
+  --sk-seq-hi: var(--sk-accent);
+  --sk-div-lo: var(--sk-neg);
+  --sk-div-mid: var(--sk-surface);
+  --sk-div-hi: var(--sk-accent);
+}
+
+/* ---------------------------------------------------------------- charts */
+.sk-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--sk-muted); font-size: var(--sk-fs-sub); text-align: center; padding: 8px; }
+.sk-note { font-size: var(--sk-fs-small); color: var(--sk-muted); padding: 6px 2px 0; }
+
+.sk-c0 { --c: var(--sk-c0); } .sk-c1 { --c: var(--sk-c1); } .sk-c2 { --c: var(--sk-c2); } .sk-c3 { --c: var(--sk-c3); }
+.sk-c4 { --c: var(--sk-c4); } .sk-c5 { --c: var(--sk-c5); } .sk-c6 { --c: var(--sk-c6); } .sk-c7 { --c: var(--sk-c7); }
+.sk-c8 { --c: var(--sk-c8); } .sk-c9 { --c: var(--sk-c9); } .sk-c10 { --c: var(--sk-c10); } .sk-c11 { --c: var(--sk-c11); }
+.sk-pos { --c: var(--sk-pos); } .sk-neg { --c: var(--sk-neg); }
+
+.sk-chart { display: flex; flex-direction: column; height: 100%; }
+.sk-chart.sk-legend-right { flex-direction: row; align-items: center; }
+.sk-svg { display: block; overflow: visible; flex: 1; }
+.sk-svg text { font-family: var(--sk-font); }
+.sk-tick { font-size: var(--sk-fs-label); fill: var(--sk-muted); }
+.sk-axis-title { font-size: var(--sk-fs-label); fill: var(--sk-muted); font-weight: 600; }
+.sk-gridline { stroke: var(--sk-grid); stroke-width: 1; opacity: var(--sk-gridlines); shape-rendering: crispEdges; }
+.sk-axis { stroke: color-mix(in oklab, var(--sk-muted) 45%, transparent); stroke-width: 1; shape-rendering: crispEdges; }
+.sk-mark { cursor: pointer; transition: opacity 0.18s, filter 0.18s; }
+.sk-bar, .sk-tile, .sk-slice, .sk-dot { fill: var(--c); }
+.sk-bar { rx: calc(var(--sk-bar-radius) * 1px); }
+.sk-slice { stroke: var(--sk-surface); stroke-width: 1.5; }
+.sk-tile { rx: 3; }
+.sk-dot { fill-opacity: 0.72; stroke: var(--c); stroke-width: 1; }
+.sk-cell { rx: 2; }
+.sk-line { fill: none; stroke: var(--c); stroke-width: var(--sk-line-width); stroke-linejoin: round; stroke-linecap: round; }
+.sk-area { fill: var(--c); fill-opacity: 0.16; stroke: none; }
+.sk-hit { fill: transparent; stroke: none; }
+.sk-hit.sk-marker { fill: var(--sk-surface); stroke: var(--c); stroke-width: 2; }
+.sk-hit:hover { fill: var(--c); }
+.sk-connector { stroke: var(--sk-muted); stroke-dasharray: 2 2; opacity: 0.6; }
+.sk-label { font-size: var(--sk-fs-label); fill: var(--sk-text); font-family: var(--sk-font-num); }
+.sk-label.sk-on-mark { fill: var(--sk-on-mark); font-weight: 600; }
+.sk-label.sk-sub { font-weight: 400; opacity: 0.9; }
+.sk-mark:hover { filter: brightness(1.08) saturate(1.05); }
+.sk-mark.sk-dim { opacity: 0.25; }
+.sk-donut-total { font-size: calc(var(--sk-fs-kpi) * 0.6); font-weight: 650; fill: var(--sk-text); font-family: var(--sk-font-num); }
+.sk-donut-caption { font-size: var(--sk-fs-small); fill: var(--sk-muted); }
+.sk-gauge-track { fill: var(--sk-grid); }
+.sk-gauge-target { stroke: var(--sk-text); stroke-width: 2.5; }
+.sk-gauge-value { font-size: calc(var(--sk-fs-kpi) * 0.75); font-weight: 650; fill: var(--sk-text); font-family: var(--sk-font-num); }
+.sk-gauge-track + .sk-mark { fill: var(--c); }
+path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
+
+.sk-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: var(--sk-fs-label); color: var(--sk-muted); padding: 0 0 6px; max-height: 44px; overflow: hidden; }
+.sk-legend-right .sk-legend { flex-direction: column; flex-wrap: nowrap; max-height: none; overflow: auto; padding: 0 0 0 12px; max-width: 40%; }
+.sk-legend-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.sk-legend-item i { width: 9px; height: 9px; border-radius: 3px; background: var(--c); flex: none; }
+
+/* ---------------------------------------------------------------- KPI card */
+.sk-kpi { display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 2px; position: relative; }
+.sk-kpi-value { font-family: var(--sk-font-num); font-size: var(--sk-fs-kpi); font-weight: 650; letter-spacing: -0.02em; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sk-kpi-caption { color: var(--sk-muted); font-size: var(--sk-fs-sub); }
+.sk-kpi-cmp { font-size: var(--sk-fs-label); font-weight: 600; margin-top: 2px; }
+.sk-good { color: var(--sk-pos); } .sk-bad { color: var(--sk-neg); }
+.sk-spark { display: block; width: 100%; margin-top: auto; }
+.sk-spark .sk-line { stroke-width: 1.5; }
+
+.sk-table-wrap { height: 100%; overflow: auto; scrollbar-width: thin; }
+.sk-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--sk-fs-sub); font-variant-numeric: tabular-nums; }
+.sk-table th { position: sticky; top: 0; z-index: 1; background: var(--sk-surface); text-align: left; font-weight: 600; color: var(--sk-muted); font-size: var(--sk-fs-label); text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px; border-bottom: 1px solid var(--sk-border); cursor: default; white-space: nowrap; }
+.sk-table thead th[data-col] { cursor: pointer; }
+.sk-table td { padding: 6px 10px; border-bottom: 1px solid var(--sk-grid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+.sk-density-compact td { padding: 3px 8px; } .sk-density-relaxed td { padding: 10px 12px; }
+.sk-table .sk-num { text-align: right; font-family: var(--sk-font-num); }
+.sk-table tbody tr.sk-mark:hover td, .sk-table td.sk-mark:hover { background: color-mix(in oklab, var(--sk-accent) 7%, transparent); }
+.sk-table tr.sk-on td, .sk-table td.sk-on { background: color-mix(in oklab, var(--sk-sel) 14%, transparent); }
+.sk-table tfoot td, .sk-table tfoot th { position: sticky; bottom: 0; background: var(--sk-surface); font-weight: 650; border-top: 1px solid var(--sk-border); border-bottom: 0; color: var(--sk-text); text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); }
+.sk-table td[data-bar] { background-image: linear-gradient(90deg, color-mix(in oklab, var(--sk-accent) 22%, transparent) var(--bar), transparent var(--bar)); background-repeat: no-repeat; }
+.sk-matrix th.sk-rowhead { position: static; text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); color: var(--sk-text); border-bottom-color: var(--sk-grid); font-weight: 500; }
+.sk-matrix th.sk-colhead { text-align: right; }
+.sk-matrix .sk-total { font-weight: 650; background: color-mix(in oklab, var(--sk-text) 3%, var(--sk-surface)); }
+.sk-matrix tbody .sk-mark { cursor: pointer; }
+
+/* ---------------------------------------------------------------- menus, dialogs, toasts */
+.sk-menu { position: fixed; z-index: 1000; min-width: 180px; background: var(--sk-surface); color: var(--sk-text); border: 1px solid var(--sk-border); border-radius: 9px; padding: 4px; box-shadow: 0 12px 32px rgba(16, 24, 40, 0.16); font: 13px var(--sk-font); }
+.sk-menu-item { display: flex; justify-content: space-between; gap: 18px; width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; padding: 7px 10px; border-radius: 6px; cursor: pointer; }
+.sk-menu-item:hover:not(:disabled), .sk-menu-item:focus { background: color-mix(in oklab, var(--sk-accent) 9%, transparent); outline: none; }
+.sk-menu-item:disabled { opacity: 0.4; cursor: default; }
+.sk-menu-hint { opacity: 0.55; }
+.sk-menu-sep { height: 1px; background: var(--sk-border); margin: 4px 2px; }
+.sk-toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.sk-toast { background: var(--sk-toast-bg); color: var(--sk-toast-text); font: 13px var(--sk-font); padding: 9px 14px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); max-width: 80vw; }
+.sk-toast.sk-error { background: var(--sk-neg); } .sk-toast.sk-ok { background: var(--sk-pos); }
+.sk-dialog { border: 1px solid var(--sk-border); border-radius: 12px; padding: 0; width: min(520px, 94vw); max-height: 88vh; background: var(--sk-surface); color: var(--sk-text); box-shadow: 0 24px 64px rgba(16, 24, 40, 0.28); }
+.sk-dialog.sk-wide { width: min(760px, 96vw); }
+.sk-dialog[open] { display: flex; flex-direction: column; }
+.sk-dialog::backdrop { background: rgba(15, 20, 30, 0.38); backdrop-filter: blur(2px); }
+.sk-dialog-head { padding: 16px 20px 0; }
+.sk-dialog-head h2 { margin: 0; font-size: 17px; }
+.sk-dialog-body { padding: 14px 20px; overflow: auto; }
+.sk-dialog-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--sk-border); }
+.sk-dialog-foot button { background: var(--sk-surface); border: 1px solid var(--sk-border); border-radius: 7px; padding: 7px 14px; cursor: pointer; }
+.sk-dialog-foot .sk-primary { background: var(--sk-accent); color: var(--sk-on-accent); border-color: var(--sk-accent); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { .sk-mark { transition: none; } }
