@@ -4,20 +4,56 @@
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
-  "repository": { "type": "git", "url": "git+https://github.com/stenhoor/smaltkit.git" },
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./urls": { "types": "./dist/urls.d.ts", "default": "./dist/urls.js" },
-    "./format": { "types": "./dist/format.d.ts", "default": "./dist/format.js" },
-    "./svg": { "types": "./dist/svg.d.ts", "default": "./dist/svg.js" },
-    "./charts": { "types": "./dist/charts.d.ts", "default": "./dist/charts.js" },
-    "./table": { "types": "./dist/table.d.ts", "default": "./dist/table.js" },
-    "./dom": { "types": "./dist/dom.d.ts", "default": "./dist/dom.js" },
-    "./ui.css": "./dist/ui.css"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stenhoor/smaltkit.git"
   },
-  "files": ["dist", "src"],
-  "sideEffects": ["*.css"],
-  "engines": { "node": ">=22.18" },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "default": "./dist/engine.js"
+    },
+    "./urls": {
+      "types": "./dist/urls.d.ts",
+      "default": "./dist/urls.js"
+    },
+    "./format": {
+      "types": "./dist/format.d.ts",
+      "default": "./dist/format.js"
+    },
+    "./svg": {
+      "types": "./dist/svg.d.ts",
+      "default": "./dist/svg.js"
+    },
+    "./charts": {
+      "types": "./dist/charts.d.ts",
+      "default": "./dist/charts.js"
+    },
+    "./table": {
+      "types": "./dist/table.d.ts",
+      "default": "./dist/table.js"
+    },
+    "./dom": {
+      "types": "./dist/dom.d.ts",
+      "default": "./dist/dom.js"
+    },
+    "./ui.css": "./dist/ui.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/ui.css dist/ui.css",
     "prepare": "npm run build",
@@ -26,6 +62,15 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "~5.9.0"
+    "typescript": "~5.9.0",
+    "smaltdb": "^0.8.3"
+  },
+  "peerDependencies": {
+    "smaltdb": ">=0.8.3 <0.10.0"
+  },
+  "peerDependenciesMeta": {
+    "smaltdb": {
+      "optional": true
+    }
   }
 }

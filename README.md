@@ -8,6 +8,7 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 
 | Import | What it does |
 | --- | --- |
+| `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy, npm (jsDelivr) or a URL, starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. |
 | `smaltkit/urls` | Rewrites pasted data URLs (GitHub, Hugging Face file pages) to raw-file URLs a page can fetch, and explains CORS errors. |
 | `smaltkit/format` | Number and date formatting: presets (`currency0`, `percent`, `month`, …), format objects and patterns, compact axis labels. Dates never shift time zones. |
 | `smaltkit/svg` | SVG helpers for charts: nice ticks, linear and band scales, arcs, line paths, text measuring, colour ramps. |
@@ -16,7 +17,7 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | `smaltkit/dom` | A small DOM toolkit: the `h()` element builder, menus, dialogs, toasts, downloads and file pickers. |
 | `smaltkit/ui.css` | Styles for the charts, tables, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
 
-Everything except the CSS is also exported from `smaltkit`. Planned next: the smaltdb engine loader, the environment manifest format,
+Everything except the CSS is also exported from `smaltkit`. Planned next: the environment manifest format,
 the dev server and vendor scripts, then the SQL editor and the virtualized grid
 ([smaltbi ADR 0005](https://github.com/stenhoor/smaltbi/blob/main/docs/adr/0005-smaltkit-and-smalt-brand.md)).
 
@@ -34,7 +35,16 @@ repeatable, and update it deliberately. Once smaltkit is published, change the l
 
 ```ts
 import { normalizeDataUrl, corsHint } from 'smaltkit/urls';
+import { engineSpec, loadEngine } from 'smaltkit/engine';
+
+const engine = await loadEngine(engineSpec('myapp.engine'), { vendorUrl: 'vendor/smaltdb/', appName: 'myapp' });
+const db = await engine.open('sales', { storage: 'opfs' });
 ```
+
+`smaltkit/engine` uses smaltdb's types (`import type`, nothing at run time), so `smaltdb` is an optional peer
+dependency: an app that imports the engine module has smaltdb installed already. From smaltdb 0.9, an app that builds
+its own worker entry with plugins puts it in its vendor folder (as `smaltdb-worker.js`, or names it with
+`workerFile`); engines from npm or a URL run smaltdb's stock worker, without the app's plugins.
 
 ### Charts and tables
 
