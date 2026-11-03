@@ -22,3 +22,10 @@ test('helpers', () => {
   assert.equal(toNum('12.5'), 12.5);
   assert.ok(Number.isNaN(toNum(null)));
 });
+
+test('download-safe file names', async () => {
+  const { fileName } = await import('smaltkit/dom');
+  assert.equal(fileName('Sales Report 2025!'), 'sales-report-2025');
+  assert.equal(fileName('***'), 'download');
+  assert.equal(fileName('', 'report'), 'report');
+});

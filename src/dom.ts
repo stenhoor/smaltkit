@@ -149,7 +149,7 @@ export function toast(text: string, kind: 'info' | 'error' | 'ok' = 'info', ms =
   setTimeout(() => t.remove(), ms);
 }
 
-/** Download-safe file name. */
-export function fileName(s: string): string {
-  return s.replace(/[^\w.-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'download';
+/** Download-safe file name; `fallback` when nothing is left of `s`. */
+export function fileName(s: string, fallback = 'download'): string {
+  return s.replace(/[^\w.-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || fallback;
 }
