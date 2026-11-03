@@ -10,8 +10,14 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | --- | --- |
 | `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy, npm (jsDelivr) or a URL, starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. |
 | `smaltkit/urls` | Rewrites pasted data URLs (GitHub, Hugging Face file pages) to raw-file URLs a page can fetch, and explains CORS errors. |
+| `smaltkit/format` | Number and date formatting: presets (`currency0`, `percent`, `month`, …), format objects and patterns, compact axis labels. Dates never shift time zones. |
+| `smaltkit/svg` | SVG helpers for charts: nice ticks, linear and band scales, arcs, line paths, text measuring, colour ramps. |
+| `smaltkit/charts` | Charts drawn as SVG/HTML strings: bar, column, line, area, combo, pie, donut, funnel, treemap, waterfall, gauge, KPI card, scatter, heatmap. |
+| `smaltkit/table` | A flat table (sortable headers, totals, data bars, heat colours) and a pivot matrix with row, column and grand totals. |
+| `smaltkit/dom` | A small DOM toolkit: the `h()` element builder, menus, dialogs, toasts, downloads and file pickers. |
+| `smaltkit/ui.css` | Styles for the charts, tables, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
 
-Everything is also exported from `smaltkit`. Planned next: the environment manifest format,
+Everything except the CSS is also exported from `smaltkit`. Planned next: the environment manifest format,
 the dev server and vendor scripts, then the SQL editor and the virtualized grid
 ([smaltbi ADR 0005](https://github.com/stenhoor/smaltbi/blob/main/docs/adr/0005-smaltkit-and-smalt-brand.md)).
 
@@ -39,6 +45,32 @@ const db = await engine.open('sales', { storage: 'opfs' });
 dependency: an app that imports the engine module has smaltdb installed already. From smaltdb 0.9, an app that builds
 its own worker entry with plugins puts it in its vendor folder (as `smaltdb-worker.js`, or names it with
 `workerFile`); engines from npm or a URL run smaltdb's stock worker, without the app's plugins.
+
+### Charts and tables
+
+A renderer takes a `ChartContext`: the element to draw into, its size, the options, and the data as columns tagged
+with a role (`category`, `series`, `values`, `x`, `rows`, …) and a kind (`dimension` or `measure`). It writes the
+chart in one `innerHTML` assignment. Marks carry `data-row="<row>"`, so the page can add selection, tooltips and drill
+on top, and get `sk-dim` / `sk-on` when `ctx.selected(row)` returns false / true.
+
+```ts
+import { chartData, columnChart, type ChartColumn } from 'smaltkit/charts';
+
+const columns: ChartColumn[] = [
+  { key: 'c', role: 'category', label: 'Category', kind: 'dimension', values: ['Tea', 'Coffee'], fmt: String },
+  { key: 'v', role: 'values', label: 'Revenue', kind: 'measure', values: [120, 340], fmt: String },
+];
+columnChart({
+  el: document.querySelector('#chart')!, width: 480, height: 280, options: { labels: true },
+  data: chartData(columns, 2), extra: {}, palette: 12, selected: () => null,
+});
+```
+
+Load `dist/ui.css` with the page (after the brand's `tokens.css`, if it has it). To restyle, set `--sk-*` properties
+on any ancestor: `--sk-text`, `--sk-muted`, `--sk-surface`, `--sk-border`, `--sk-grid`, `--sk-accent`, `--sk-pos`,
+`--sk-neg`, `--sk-on-mark`, the series colours `--sk-c0` … `--sk-c11`, the ramps `--sk-seq-lo/hi` and
+`--sk-div-lo/mid/hi`, the fonts `--sk-font`, `--sk-font-num`, and the sizes `--sk-fs-label`, `--sk-fs-sub`,
+`--sk-fs-small`, `--sk-fs-kpi`. A report theme is a set of these values.
 
 The output is plain ES2022 modules with no dependencies, one file per module (`dist/urls.js`), so a page can load them
 without a bundler: copy `node_modules/smaltkit/dist/` next to the app, or use a bundler that resolves the package.
