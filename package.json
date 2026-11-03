@@ -4,14 +4,33 @@
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
-  "repository": { "type": "git", "url": "git+https://github.com/stenhoor/smaltkit.git" },
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./urls": { "types": "./dist/urls.d.ts", "default": "./dist/urls.js" }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stenhoor/smaltkit.git"
   },
-  "files": ["dist", "src"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "default": "./dist/engine.js"
+    },
+    "./urls": {
+      "types": "./dist/urls.d.ts",
+      "default": "./dist/urls.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
   "sideEffects": false,
-  "engines": { "node": ">=22.18" },
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "prepare": "npm run build",
@@ -20,6 +39,15 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "~5.9.0"
+    "typescript": "~5.9.0",
+    "smaltdb": "^0.8.3"
+  },
+  "peerDependencies": {
+    "smaltdb": ">=0.8.3 <0.10.0"
+  },
+  "peerDependenciesMeta": {
+    "smaltdb": {
+      "optional": true
+    }
   }
 }

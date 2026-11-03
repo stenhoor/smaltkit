@@ -8,9 +8,10 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 
 | Import | What it does |
 | --- | --- |
+| `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy, npm (jsDelivr) or a URL, starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. |
 | `smaltkit/urls` | Rewrites pasted data URLs (GitHub, Hugging Face file pages) to raw-file URLs a page can fetch, and explains CORS errors. |
 
-Everything is also exported from `smaltkit`. Planned next: the smaltdb engine loader, the environment manifest format,
+Everything is also exported from `smaltkit`. Planned next: the environment manifest format,
 the dev server and vendor scripts, then the SQL editor and the virtualized grid
 ([smaltbi ADR 0005](https://github.com/stenhoor/smaltbi/blob/main/docs/adr/0005-smaltkit-and-smalt-brand.md)).
 
@@ -28,7 +29,16 @@ repeatable, and update it deliberately. Once smaltkit is published, change the l
 
 ```ts
 import { normalizeDataUrl, corsHint } from 'smaltkit/urls';
+import { engineSpec, loadEngine } from 'smaltkit/engine';
+
+const engine = await loadEngine(engineSpec('myapp.engine'), { vendorUrl: 'vendor/smaltdb/', appName: 'myapp' });
+const db = await engine.open('sales', { storage: 'opfs' });
 ```
+
+`smaltkit/engine` uses smaltdb's types (`import type`, nothing at run time), so `smaltdb` is an optional peer
+dependency: an app that imports the engine module has smaltdb installed already. From smaltdb 0.9, an app that builds
+its own worker entry with plugins puts it in its vendor folder (as `smaltdb-worker.js`, or names it with
+`workerFile`); engines from npm or a URL run smaltdb's stock worker, without the app's plugins.
 
 The output is plain ES2022 modules with no dependencies, one file per module (`dist/urls.js`), so a page can load them
 without a bundler: copy `node_modules/smaltkit/dist/` next to the app, or use a bundler that resolves the package.
