@@ -41,6 +41,14 @@
       "types": "./dist/grid.d.ts",
       "default": "./dist/grid.js"
     },
+    "./sql": {
+      "types": "./dist/sql.d.ts",
+      "default": "./dist/sql.js"
+    },
+    "./editor": {
+      "types": "./dist/editor.d.ts",
+      "default": "./dist/editor.js"
+    },
     "./dom": {
       "types": "./dist/dom.d.ts",
       "default": "./dist/dom.js"

@@ -1,4 +1,4 @@
-/* smaltkit ui.css: styles for smaltkit/charts, smaltkit/table, smaltkit/grid and smaltkit/dom.
+/* smaltkit ui.css: styles for smaltkit/charts, smaltkit/table, smaltkit/grid, smaltkit/editor and smaltkit/dom.
    Everything reads --sk-* custom properties. The defaults below come from the smalt brand tokens
    (stenhoor/smalt-brand tokens.css: --text, --surface, --primary, ...), with fallbacks when those are absent.
    An app restyles the kit by setting --sk-* on any ancestor of the rendered markup. */
@@ -34,6 +34,17 @@
   --sk-num: var(--syn-number, #5b3fa8);
   --sk-blob: var(--syn-function, #1f5f8b);
   --sk-key: var(--warning, #8a5a12);
+  --sk-tk-keyword: var(--syn-keyword, #003399);
+  --sk-tk-function: var(--syn-function, #1f5f8b);
+  --sk-tk-string: var(--syn-string, #a33a12);
+  --sk-tk-number: var(--syn-number, #5b3fa8);
+  --sk-tk-comment: var(--syn-comment, #5c6375);
+  --sk-tk-punct: var(--syn-punct, #3f4656);
+  --sk-tk-param: var(--accent, #a33a12);
+  --sk-tk-ident: var(--text-2, #3f4656);
+  --sk-tk-object: var(--product-ui-text, #0b6a91);
+  --sk-danger: var(--danger, #a3195b);
+  --sk-shadow: 0 8px 24px rgba(21, 25, 34, 0.14);
   /* Series colours: the Smalt report theme's palette until smalt-brand defines a chart palette. */
   --sk-c0: var(--smalt-500, #2F5BB7);
   --sk-c1: #E5622F;
@@ -179,5 +190,41 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-grid-table tr.sk-grid-loading td:not(.sk-grid-rownum) { background: repeating-linear-gradient(90deg, var(--sk-row-alt) 0 40%, var(--sk-surface) 40% 100%); opacity: 0.6; }
 .sk-grid-edit { width: 100%; height: 22px; border: 1px solid var(--sk-accent); border-radius: 3px; padding: 0 4px; font: 12px var(--sk-font-mono); background: var(--sk-surface); color: var(--sk-text); }
 .sk-grid-empty { position: absolute; top: 60px; left: 0; right: 0; text-align: center; color: var(--sk-muted); pointer-events: none; }
+
+/* ------------------------------------------------------------ editor (smaltkit/editor) */
+.sk-editor { position: relative; display: grid; grid-template-columns: auto 1fr; min-height: 0; background: var(--sk-surface); overflow: hidden; }
+.sk-ed-gutter { overflow: hidden; background: var(--sk-panel); border-right: 1px solid var(--sk-border); color: var(--sk-muted); font: 13px/20px var(--sk-font-mono); text-align: right; user-select: none; min-width: 42px; }
+.sk-ed-lines { padding: 8px 8px 8px 10px; white-space: pre; }
+.sk-ed-body { position: relative; min-width: 0; overflow: hidden; }
+.sk-ed-hl, .sk-ed-input { margin: 0; padding: 8px 12px; font: 13px/20px var(--sk-font-mono); tab-size: 2; white-space: pre; letter-spacing: 0; border: none; }
+.sk-ed-hl { position: absolute; inset: 0; pointer-events: none; color: var(--sk-text); overflow: visible; transform-origin: 0 0; }
+.sk-ed-input { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; background: transparent; color: transparent; caret-color: var(--sk-text); outline: none; overflow: auto; z-index: 1; }
+.sk-ed-input:focus-visible { outline: none; }
+.sk-editor:focus-within { box-shadow: inset 0 0 0 2px var(--sk-focus); }
+.sk-ed-input::selection { background: color-mix(in oklab, var(--sk-accent) 30%, transparent); color: transparent; }
+.sk-ed-stmt { position: absolute; left: 0; right: 0; background: color-mix(in oklab, var(--sk-accent) 6%, transparent); border-left: 2px solid color-mix(in oklab, var(--sk-accent) 50%, transparent); pointer-events: none; display: none; }
+.sk-ed-hl mark.sk-ed-err { background: color-mix(in oklab, var(--sk-danger) 16%, transparent); color: inherit; border-bottom: 2px wavy var(--sk-danger); }
+.sk-tk-k { color: var(--sk-tk-keyword); font-weight: 600; }
+.sk-tk-f { color: var(--sk-tk-function); }
+.sk-tk-s { color: var(--sk-tk-string); }
+.sk-tk-n { color: var(--sk-tk-number); }
+.sk-tk-c { color: var(--sk-tk-comment); font-style: italic; }
+.sk-tk-p { color: var(--sk-tk-param); font-weight: 600; }
+.sk-tk-i { color: var(--sk-tk-ident); }
+.sk-tk-t { color: var(--sk-tk-function); }
+.sk-tk-o { color: var(--sk-tk-punct); }
+.sk-tk-obj { color: var(--sk-tk-object); }
+.sk-tk-tpl-sql { color: var(--sk-tk-string); }
+.sk-tk-interp { background: color-mix(in oklab, var(--sk-accent) 9%, transparent); border-radius: 3px; }
+.sk-ed-complete { position: absolute; z-index: 20; width: 300px; max-height: 220px; overflow: auto; background: var(--sk-surface); border: 1px solid var(--sk-border); border-radius: 8px; box-shadow: var(--sk-shadow); padding: 3px; font-size: 12px; color: var(--sk-text); }
+.sk-ac-item { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
+.sk-ac-item.sk-active { background: color-mix(in oklab, var(--sk-accent) 12%, transparent); }
+.sk-ac-kind { font: 10px var(--sk-font-mono); width: 34px; text-align: center; border-radius: 3px; padding: 1px 0; color: var(--sk-muted); background: var(--sk-panel); flex: none; }
+.sk-ac-col { color: var(--sk-tk-function); }
+.sk-ac-table, .sk-ac-view, .sk-ac-external, .sk-ac-matview { color: var(--sk-tk-object); }
+.sk-ac-fn { color: var(--sk-tk-function); }
+.sk-ac-kw { color: var(--sk-tk-keyword); }
+.sk-ac-label { font-family: var(--sk-font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-ac-detail { margin-left: auto; color: var(--sk-muted); font: 11px var(--sk-font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
 
 @media (prefers-reduced-motion: reduce) { .sk-mark { transition: none; } .sk-grid-table td.sk-grid-copied { animation: none; } }

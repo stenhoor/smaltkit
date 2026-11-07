@@ -7,4 +7,6 @@ export * from './svg.js';
 export * from './charts.js';
 export * from './table.js';
 export * from './grid.js';
+export * from './sql.js';
+export * from './editor.js';
 export * from './dom.js';
