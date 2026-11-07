@@ -8,7 +8,7 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 
 | Import | What it does |
 | --- | --- |
-| `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy, npm (jsDelivr) or a URL, starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. |
+| `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy, npm (jsDelivr) or a URL, starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. `npm: false` turns npm engines off, for an app whose engine has smaltql and plugins built in. |
 | `smaltkit/urls` | Rewrites pasted data URLs (GitHub, Hugging Face file pages) to raw-file URLs a page can fetch, and explains CORS errors. |
 | `smaltkit/format` | Number and date formatting: presets (`currency0`, `percent`, `month`, …), format objects and patterns, compact axis labels. Dates never shift time zones. |
 | `smaltkit/svg` | SVG helpers for charts: nice ticks, linear and band scales, arcs, line paths, text measuring, colour ramps. |
@@ -18,10 +18,11 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | `smaltkit/sql` | SQL text utilities: a tokenizer and highlighter, statement splitting, parameter scanning, identifier and literal quoting, completion helpers and a light formatter. Text only: nothing here runs SQL. |
 | `smaltkit/editor` | A small code editor (a textarea over a highlighted layer, no dependencies) with line numbers, auto-indent, comment toggling, bracket pairing and a completion popup. Languages: `sqlLanguage` (statement shading, completion from the schema) and `typescriptLanguage`, which highlights SQL inside `` sql`…` `` and `` exec`…` `` templates as SQL. |
 | `smaltkit/dom` | A small DOM toolkit: the `h()` element builder, menus, dialogs, toasts, downloads and file pickers. |
-| `smaltkit/ui.css` | Styles for the charts, tables, grid, editor, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
+| `smaltkit/manifest` | The environment manifest's data steps, one format for every app: `applySteps()` runs SQL, imports (CSV, TSV, JSON, Parquet), inline rows, linked files (external tables) and connections, with files from URLs or kept in the browser (`local:`); plus `externalTableSql` and `referencedFiles` (for publishing). The engine's plugin helpers are passed in. |
+| `smaltkit/controls` | Controls for picking values: a list (checkboxes or radios), a dropdown, buttons, a range and a search box, each reporting its selection through `onChange`. |
+| `smaltkit/ui.css` | Styles for the charts, tables, grid, editor, controls, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
 
-Everything except the CSS is also exported from `smaltkit`. Planned next: the environment manifest format,
-and the dev server and vendor scripts
+Everything except the CSS is also exported from `smaltkit`. Planned next: the dev server and vendor scripts
 ([smaltbi ADR 0005](https://github.com/stenhoor/smaltbi/blob/main/docs/adr/0005-smaltkit-and-smalt-brand.md)).
 
 ## Use it

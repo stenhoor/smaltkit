@@ -60,6 +60,12 @@ export interface LoadEngineOptions {
   workerFile?: string;
   /** The app's name, used in console messages. */
   appName?: string;
+  /**
+   * Whether npm engines are offered: `?engine=npm`, and loading from jsDelivr when the vendor copy is missing.
+   * Default true. Set false when the app's engine is built from packages npm does not have (smaltdb 0.9 with smaltql
+   * and plugins): an npm spec is then refused, and a missing vendor copy is an error naming the fix.
+   */
+  npm?: boolean;
 }
 
 const CDN = 'https://cdn.jsdelivr.net/npm/smaltdb@';
@@ -112,12 +118,15 @@ export function setEngineSpec(storageKey: string, spec: string): void {
 export async function loadEngine(spec: string, options: LoadEngineOptions): Promise<Engine> {
   const baseUrl = options.baseUrl ?? pageUrl();
   const workerFile = options.workerFile ?? 'smaltdb-worker.js';
+  const npmAllowed = options.npm ?? true;
+  if (!npmAllowed && spec.startsWith('npm')) throw new Error(`the engine "${spec}" is not available: npm does not have this app's engine (smaltdb with its language and plugins)`);
   let { base, label } = resolveEngine(spec, options.vendorUrl, baseUrl);
   let mod: SmaltdbModule;
   try {
     mod = await import(/* @vite-ignore */ base + 'smaltdb.js');
   } catch (e) {
     if (spec && spec !== 'vendor') throw e;
+    if (!npmAllowed) throw new Error(`the vendor copy of the engine is missing at ${base} (build it with \`npm install\`)`, { cause: e });
     console.warn(`${options.appName ?? 'smaltdb'}: the vendor copy of smaltdb is missing (run \`npm install\`); loading smaltdb@latest from jsDelivr.`, e);
     spec = 'npm';
     ({ base, label } = resolveEngine(spec, options.vendorUrl, baseUrl));

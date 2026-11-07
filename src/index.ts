@@ -10,3 +10,5 @@ export * from './grid.js';
 export * from './sql.js';
 export * from './editor.js';
 export * from './dom.js';
+export * from './manifest.js';
+export * from './controls.js';

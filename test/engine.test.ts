@@ -159,3 +159,7 @@ test('deleteOpfsDatabase removes the database and its side files only', async ()
   await deleteOpfsDatabase('sales');
   assert.deepEqual([...names.keys()], ['sales2.db']);
 });
+
+test('npm: false refuses npm engines before loading anything', async () => {
+  await assert.rejects(loadEngine('npm@0.8.3', { vendorUrl: 'https://example.com/vendor/smaltdb/', baseUrl: 'https://example.com/', npm: false }), /the engine "npm@0\.8\.3" is not available/);
+});

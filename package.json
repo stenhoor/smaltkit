@@ -1,6 +1,6 @@
 {
   "name": "smaltkit",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
@@ -52,6 +52,14 @@
     "./dom": {
       "types": "./dist/dom.d.ts",
       "default": "./dist/dom.js"
+    },
+    "./manifest": {
+      "types": "./dist/manifest.d.ts",
+      "default": "./dist/manifest.js"
+    },
+    "./controls": {
+      "types": "./dist/controls.d.ts",
+      "default": "./dist/controls.js"
     },
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
