@@ -14,13 +14,15 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | `smaltkit/svg` | SVG helpers for charts: nice ticks, linear and band scales, arcs, line paths, text measuring, colour ramps. |
 | `smaltkit/charts` | Charts drawn as SVG/HTML strings: bar, column, line, area, combo, pie, donut, funnel, treemap, waterfall, gauge, KPI card, scatter, heatmap. |
 | `smaltkit/table` | A flat table (sortable headers, totals, data bars, heat colours) and a pivot matrix with row, column and grand totals. |
+| `smaltkit/grid` | A virtualized data grid: draws only the visible rows; resizable, sortable columns; keyboard selection, copy and in-place editing. Rows come from an array or from a source that fetches blocks as they scroll into view, so a page never holds a whole result. `exportRows` writes CSV, TSV, JSON, NDJSON or SQL. |
+| `smaltkit/sql` | SQL text utilities: a tokenizer and highlighter, statement splitting, parameter scanning, identifier and literal quoting, completion helpers and a light formatter. Text only: nothing here runs SQL. |
+| `smaltkit/editor` | A small code editor (a textarea over a highlighted layer, no dependencies) with line numbers, auto-indent, comment toggling, bracket pairing and a completion popup. Languages: `sqlLanguage` (statement shading, completion from the schema) and `typescriptLanguage`, which highlights SQL inside `` sql`…` `` and `` exec`…` `` templates as SQL. |
 | `smaltkit/dom` | A small DOM toolkit: the `h()` element builder, menus, dialogs, toasts, downloads and file pickers. |
-| `smaltkit/manifest` | The environment manifest's data steps, one format for every app: `applySteps()` runs SQL, imports (CSV, TSV, JSON, Parquet), inline rows, linked files (external tables) and connections, with files from URLs or kept in the browser (`local:`); plus `externalTableSql`, `referencedFiles` (for publishing) and SQL quoting. The engine's plugin helpers are passed in. |
+| `smaltkit/manifest` | The environment manifest's data steps, one format for every app: `applySteps()` runs SQL, imports (CSV, TSV, JSON, Parquet), inline rows, linked files (external tables) and connections, with files from URLs or kept in the browser (`local:`); plus `externalTableSql` and `referencedFiles` (for publishing). The engine's plugin helpers are passed in. |
 | `smaltkit/controls` | Controls for picking values: a list (checkboxes or radios), a dropdown, buttons, a range and a search box, each reporting its selection through `onChange`. |
-| `smaltkit/ui.css` | Styles for the charts, tables, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
+| `smaltkit/ui.css` | Styles for the charts, tables, grid, editor, controls, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
 
-Everything except the CSS is also exported from `smaltkit`. Planned next: the dev server and vendor scripts, then the
-SQL editor and the virtualized grid
+Everything except the CSS is also exported from `smaltkit`. Planned next: the dev server and vendor scripts
 ([smaltbi ADR 0005](https://github.com/stenhoor/smaltbi/blob/main/docs/adr/0005-smaltkit-and-smalt-brand.md)).
 
 ## Use it

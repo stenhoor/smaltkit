@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { applySteps, externalTableSql, formatFromName, localFiles, quoteIdent, quoteLiteral, referencedFiles, type ManifestStep, type StepIO } from 'smaltkit/manifest';
+import { applySteps, externalTableSql, formatFromName, localFiles, referencedFiles, type ManifestStep, type StepIO } from 'smaltkit/manifest';
 
 /** A database that records the SQL it is sent; information_schema reports two Parquet columns. */
 function fakeDb() {
@@ -66,9 +66,9 @@ test('steps run in order: SQL, files, imports, inline rows, links and connection
   assert.deepEqual(db.sql, [
     'CREATE TABLE t (id INTEGER)',
     'CREATE VIEW v AS SELECT 1',
-    `CREATE EXTERNAL TABLE IF NOT EXISTS "rates" ("rate" REAL) WITH (location = 'https://example.com/m/data/rates.csv', format = 'csv')`,
-    `CREATE EXTERNAL TABLE IF NOT EXISTS "x" WITH (location = 's3://bucket/x.parquet', connection = 'lake')`,
-    `CREATE CONNECTION IF NOT EXISTS "api" WITH (url = 'https://example.com/m/api/')`,
+    `CREATE EXTERNAL TABLE IF NOT EXISTS rates (rate REAL) WITH (location = 'https://example.com/m/data/rates.csv', format = 'csv')`,
+    `CREATE EXTERNAL TABLE IF NOT EXISTS x WITH (location = 's3://bucket/x.parquet', connection = 'lake')`,
+    `CREATE CONNECTION IF NOT EXISTS api WITH (url = 'https://example.com/m/api/')`,
   ]);
   assert.deepEqual(calls, [
     'csv a id,name\n1,x\n {"create":true,"header":true}',
@@ -85,12 +85,12 @@ test('Parquet goes through a temporary external table; local files come from the
   const { io, calls } = fakeIo();
   const files = { get: async (name: string) => (name === 'sales.parquet' ? new Blob(['PAR1']) : null) };
   await applySteps(db, [{ import: 'local:sales.parquet', table: 'sales' }, { link: 'local:sales.parquet', table: 'linked', format: 'parquet' }], { base: 'https://example.com/', io, files });
-  const tmp = /"(__import_\w+)"/.exec(db.sql[0]!)![1];
-  assert.match(db.sql[0]!, /^CREATE EXTERNAL TABLE "__import_\w+" WITH \(location = 'file:__import_\w+', format = 'parquet'\)$/);
-  assert.equal(db.sql[2], 'CREATE TABLE IF NOT EXISTS "sales" ("id" INTEGER, "name" ANY)');
-  assert.equal(db.sql[3], `INSERT INTO "sales" ("id", "name") SELECT "id", "name" FROM "${tmp}"`);
-  assert.equal(db.sql[4], `DROP EXTERNAL TABLE IF EXISTS "${tmp}"`);
-  assert.equal(db.sql[5], `CREATE EXTERNAL TABLE IF NOT EXISTS "linked" WITH (location = 'file:sales.parquet', format = 'parquet')`);
+  const tmp = /TABLE (__import_\w+) /.exec(db.sql[0]!)![1];
+  assert.match(db.sql[0]!, /^CREATE EXTERNAL TABLE __import_\w+ WITH \(location = 'file:__import_\w+', format = 'parquet'\)$/);
+  assert.equal(db.sql[2], 'CREATE TABLE IF NOT EXISTS sales (id INTEGER, name ANY)');
+  assert.equal(db.sql[3], `INSERT INTO sales (id, name) SELECT id, name FROM ${tmp}`);
+  assert.equal(db.sql[4], `DROP EXTERNAL TABLE IF EXISTS ${tmp}`);
+  assert.equal(db.sql[5], `CREATE EXTERNAL TABLE IF NOT EXISTS linked WITH (location = 'file:sales.parquet', format = 'parquet')`);
   assert.deepEqual(calls, [`file ${tmp} set`, `file ${tmp} cleared`, 'file sales.parquet set']);
 });
 
@@ -105,12 +105,7 @@ test('helpers', () => {
   assert.equal(formatFromName('a.jsonl'), 'ndjson');
   assert.equal(formatFromName('a.txt'), 'csv');
   assert.equal(formatFromName('noext'), 'csv');
-  assert.equal(quoteIdent('a"b'), '"a""b"');
-  assert.equal(quoteLiteral("it's"), "'it''s'");
-  assert.equal(quoteLiteral(true), '1');
-  assert.equal(quoteLiteral(Number.NaN), 'NULL');
-  assert.equal(quoteLiteral(new Uint8Array([1, 255])), "X'01ff'");
-  assert.equal(externalTableSql({ table: 't', location: 'u', options: { header: true, skip: 1, null: '', delimiter: ';' } }), `CREATE EXTERNAL TABLE "t" WITH (location = 'u', header = true, skip = 1, delimiter = ';')`);
+  assert.equal(externalTableSql({ table: 'my table', location: 'u', options: { header: true, skip: 1, null: '', delimiter: ';' } }), `CREATE EXTERNAL TABLE "my table" WITH (location = 'u', header = true, skip = 1, delimiter = ';')`);
   const steps: ManifestStep[] = [{ sqlFile: 'a.sql' }, { import: 'data/b.csv', table: 'b' }, { link: 'https://x/c.csv', table: 'c' }, { import: 'local:d.csv', table: 'd' }, { link: 'local:e.parquet', table: 'e' }];
   assert.deepEqual(referencedFiles(steps), ['a.sql', 'data/b.csv']);
   assert.deepEqual(localFiles(steps), ['d.csv', 'e.parquet']);

@@ -20,6 +20,7 @@
 // Steps run through the engine's SQL (CREATE EXTERNAL TABLE, CREATE CONNECTION) and its io and external plugins, whose
 // client helpers the app passes in (`StepIO`): this module has no dependency on smaltdb.
 import { normalizeDataUrl } from './urls.js';
+import { quoteIdent, quoteLiteral } from './sql.js';
 
 export type DataFormat = 'csv' | 'tsv' | 'json' | 'ndjson' | 'parquet';
 
@@ -220,19 +221,4 @@ export function localFiles(steps: readonly ManifestStep[]): string[] {
     if (p?.startsWith('local:')) out.add(p.slice(6));
   }
   return [...out];
-}
-
-/** A SQL identifier, quoted (SQLite rules, as smaltql reads them). */
-export function quoteIdent(name: string): string {
-  return '"' + String(name).replace(/"/g, '""') + '"';
-}
-
-/** A SQL literal: NULL, numbers, booleans as 1 / 0, blobs as X'…', strings quoted. */
-export function quoteLiteral(v: string | number | bigint | boolean | Uint8Array | null | undefined): string {
-  if (v === null || v === undefined) return 'NULL';
-  if (typeof v === 'boolean') return v ? '1' : '0';
-  if (typeof v === 'number') return Number.isFinite(v) ? String(v) : 'NULL';
-  if (typeof v === 'bigint') return v.toString();
-  if (v instanceof Uint8Array) return "X'" + Array.from(v, (b) => b.toString(16).padStart(2, '0')).join('') + "'";
-  return "'" + String(v).replace(/'/g, "''") + "'";
 }
