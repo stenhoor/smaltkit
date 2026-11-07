@@ -6,4 +6,5 @@ export * from './format.js';
 export * from './svg.js';
 export * from './charts.js';
 export * from './table.js';
+export * from './grid.js';
 export * from './dom.js';

@@ -14,11 +14,12 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | `smaltkit/svg` | SVG helpers for charts: nice ticks, linear and band scales, arcs, line paths, text measuring, colour ramps. |
 | `smaltkit/charts` | Charts drawn as SVG/HTML strings: bar, column, line, area, combo, pie, donut, funnel, treemap, waterfall, gauge, KPI card, scatter, heatmap. |
 | `smaltkit/table` | A flat table (sortable headers, totals, data bars, heat colours) and a pivot matrix with row, column and grand totals. |
+| `smaltkit/grid` | A virtualized data grid: draws only the visible rows; resizable, sortable columns; keyboard selection, copy and in-place editing. Rows come from an array or from a source that fetches blocks as they scroll into view, so a page never holds a whole result. `exportRows` writes CSV, TSV, JSON, NDJSON or SQL. |
 | `smaltkit/dom` | A small DOM toolkit: the `h()` element builder, menus, dialogs, toasts, downloads and file pickers. |
-| `smaltkit/ui.css` | Styles for the charts, tables, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
+| `smaltkit/ui.css` | Styles for the charts, tables, grid, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
 
 Everything except the CSS is also exported from `smaltkit`. Planned next: the environment manifest format,
-the dev server and vendor scripts, then the SQL editor and the virtualized grid
+the dev server and vendor scripts, then the SQL editor
 ([smaltbi ADR 0005](https://github.com/stenhoor/smaltbi/blob/main/docs/adr/0005-smaltkit-and-smalt-brand.md)).
 
 ## Use it

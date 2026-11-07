@@ -37,6 +37,10 @@
       "types": "./dist/table.d.ts",
       "default": "./dist/table.js"
     },
+    "./grid": {
+      "types": "./dist/grid.d.ts",
+      "default": "./dist/grid.js"
+    },
     "./dom": {
       "types": "./dist/dom.d.ts",
       "default": "./dist/dom.js"
