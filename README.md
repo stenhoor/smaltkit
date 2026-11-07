@@ -1,5 +1,9 @@
 # smaltkit
 
+<a href="https://smaltworks.dev/stability"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress-on-dark.svg"><img alt="Work in progress. Come build with us." src="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress.svg" height="56"></picture></a>
+
+[smaltworks.dev](https://smaltworks.dev/products/kits)
+
 Shared browser code for the smalt apps: [smaltui](https://github.com/stenhoor/smaltui) (the SQL workbench) and
 [smaltbi](https://github.com/stenhoor/smaltbi). Both run [smaltdb](https://github.com/stenhoor/smaltdb) in the browser
 and need the same pieces around it; smaltkit holds those pieces once, in strict TypeScript, with type definitions.
@@ -98,4 +102,6 @@ they check what the apps get. Node 22.18 or later runs the `.ts` tests directly.
 
 ## License
 
-MIT
+<a href="https://smaltworks.dev"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/a-smaltworks-project-on-dark.svg"><img alt="A smaltworks project" src="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/a-smaltworks-project.svg" height="28"></picture></a>
+
+MIT License.
