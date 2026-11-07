@@ -1,4 +1,4 @@
-/* smaltkit ui.css: styles for smaltkit/charts, smaltkit/table and smaltkit/dom.
+/* smaltkit ui.css: styles for smaltkit/charts, smaltkit/table, smaltkit/controls and smaltkit/dom.
    Everything reads --sk-* custom properties. The defaults below come from the smalt brand tokens
    (stenhoor/smalt-brand tokens.css: --text, --surface, --primary, ...), with fallbacks when those are absent.
    An app restyles the kit by setting --sk-* on any ancestor of the rendered markup. */
@@ -118,6 +118,25 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-matrix th.sk-colhead { text-align: right; }
 .sk-matrix .sk-total { font-weight: 650; background: color-mix(in oklab, var(--sk-text) 3%, var(--sk-surface)); }
 .sk-matrix tbody .sk-mark { cursor: pointer; }
+
+/* ---------------------------------------------------------------- controls (list, dropdown, buttons, range, search) */
+.sk-control { font-size: var(--sk-fs-sub); }
+.sk-list { display: flex; flex-direction: column; gap: 2px; height: 100%; overflow: auto; }
+.sk-list label, .sk-dropdown-list label { display: flex; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 5px; cursor: pointer; }
+.sk-list label:hover, .sk-dropdown-list label:hover { background: color-mix(in oklab, var(--sk-text) 5%, transparent); }
+.sk-control input[type='checkbox'], .sk-control input[type='radio'] { accent-color: var(--sk-accent); margin: 0; }
+.sk-chips { display: flex; flex-wrap: wrap; gap: 6px; align-content: center; height: 100%; }
+.sk-chip { font: inherit; font-size: var(--sk-fs-sub); border: 1px solid var(--sk-border); background: var(--sk-surface); color: var(--sk-text); padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
+.sk-chip:hover { border-color: var(--sk-accent); }
+.sk-chip.sk-on { background: var(--sk-accent); border-color: var(--sk-accent); color: var(--sk-on-accent); }
+.sk-input { font: inherit; font-size: var(--sk-fs-sub); color: var(--sk-text); background: var(--sk-surface); border: 1px solid var(--sk-border); border-radius: 6px; padding: 6px 9px; width: 100%; }
+.sk-input:focus { outline: 2px solid color-mix(in oklab, var(--sk-accent) 40%, transparent); border-color: var(--sk-accent); }
+.sk-range { display: flex; align-items: center; gap: 6px; }
+.sk-dropdown { position: relative; }
+.sk-dropdown summary { list-style: none; cursor: pointer; }
+.sk-dropdown summary::after { content: '▾'; float: right; color: var(--sk-muted); }
+.sk-dropdown-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); max-height: 260px; overflow: auto; background: var(--sk-surface); border: 1px solid var(--sk-border); border-radius: 8px; padding: 4px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
+.sk-clear { position: absolute; right: 0; bottom: 0; font: inherit; font-size: var(--sk-fs-small); color: var(--sk-accent); background: none; border: 0; cursor: pointer; padding: 2px; }
 
 /* ---------------------------------------------------------------- menus, dialogs, toasts */
 .sk-menu { position: fixed; z-index: 1000; min-width: 180px; background: var(--sk-surface); color: var(--sk-text); border: 1px solid var(--sk-border); border-radius: 9px; padding: 4px; box-shadow: 0 12px 32px rgba(16, 24, 40, 0.16); font: 13px var(--sk-font); }

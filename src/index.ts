@@ -7,3 +7,5 @@ export * from './svg.js';
 export * from './charts.js';
 export * from './table.js';
 export * from './dom.js';
+export * from './manifest.js';
+export * from './controls.js';
