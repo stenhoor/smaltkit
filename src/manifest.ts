@@ -49,10 +49,13 @@ export interface DataManifest {
   steps?: ManifestStep[];
 }
 
+/** SQL parameters, by position. */
+export type StepParams = readonly (string | number | bigint | Uint8Array | null)[];
+
 /** What the steps need of a database: smaltdb's client `Database` has these. */
 export interface StepDatabase {
   exec(sql: string): Promise<{ changes: number }>;
-  query(sql: string, params?: unknown[]): Promise<unknown>;
+  query(sql: string, params?: StepParams): Promise<unknown>;
 }
 
 /** The engine plugins' client helpers (`@smaltdb/io/client`, `@smaltdb/external/client`), as the app loaded them. */

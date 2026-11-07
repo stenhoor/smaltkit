@@ -11,7 +11,7 @@ function fakeDb() {
       sql.push(s);
       return { changes: s.startsWith('INSERT') ? 7 : 0 };
     },
-    async query(s: string, params?: unknown[]) {
+    async query(s: string, params?: readonly unknown[]) {
       sql.push(`${s} ${JSON.stringify(params ?? [])}`);
       return [
         { column_name: 'id', data_type: 'INTEGER' },
