@@ -4,7 +4,7 @@
 
 [smaltworks.dev](https://smaltworks.dev/products/kits)
 
-Shared browser code for the smalt apps: [smaltui](https://github.com/stenhoor/smaltui) (the SQL workbench) and
+Shared browser code for the smalt apps: [smaltui](https://github.com/stenhoor/smaltui) (the query workbench) and
 [smaltbi](https://github.com/stenhoor/smaltbi). Both run [smaltdb](https://github.com/stenhoor/smaltdb) in the browser
 and need the same pieces around it; smaltkit holds those pieces once, in strict TypeScript, with type definitions.
 
