@@ -13,3 +13,4 @@ export * from './dom.js';
 export * from './manifest.js';
 export * from './controls.js';
 export * from './markdown.js';
+export * from './pretty.js';
