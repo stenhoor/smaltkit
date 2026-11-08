@@ -61,6 +61,10 @@
       "types": "./dist/controls.d.ts",
       "default": "./dist/controls.js"
     },
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "default": "./dist/markdown.js"
+    },
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
   },
