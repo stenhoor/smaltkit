@@ -6,9 +6,16 @@
 //
 // smaltty is ours and has no dependencies. The build copies it into dist/smaltty/, so this module loads it with a
 // relative import, in a page, without a bundler.
-import smaltty, { ParseError, strip, type Transpiler, type TranspileOptions } from 'smaltty';
+import smalttyTranspiler, { ParseError, strip, type Transpiler, type TranspileOptions } from 'smaltty';
 
 export type { Transpiler, TranspileOptions };
+
+/**
+ * All of smaltty, for code that works on TypeScript's structure: `smaltty.parse` (TypeScript's syntax tree, stored
+ * flat), `smaltty.bind` (which declaration each name means), `smaltty.strip`, and the node kinds and flags (`K`, `F`).
+ * A namespace, so its names don't meet smaltkit's own.
+ */
+export * as smaltty from 'smaltty';
 
 /** A SyntaxError in TypeScript, or code that can't be stripped: `line` and `column` (1-based) say where. */
 export const TypeScriptSyntaxError = ParseError;
@@ -19,4 +26,4 @@ export function stripTypes(code: string, options: { filename?: string } = {}): s
 }
 
 /** The same, as a Transpiler (`{ name, version, transpile }`), the shape an app takes when it offers more than one. */
-export const typescriptTranspiler: Transpiler = smaltty;
+export const typescriptTranspiler: Transpiler = smalttyTranspiler;

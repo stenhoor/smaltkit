@@ -1,6 +1,6 @@
 {
   "name": "smaltkit",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
@@ -93,7 +93,7 @@
     "test": "npm run build && node --test test/*.test.ts"
   },
   "dependencies": {
-    "smaltty": "github:stenhoor/smaltty#8b19adc6f9df7f40befd4e75b708115334eba25a"
+    "smaltty": "github:stenhoor/smaltty#cae5394b98af836483425a227c5a5dc22005cdfc"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
