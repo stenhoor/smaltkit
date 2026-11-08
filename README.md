@@ -25,6 +25,7 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | `smaltkit/manifest` | The environment manifest's data steps, one format for every app: `applySteps()` runs SQL, imports (CSV, TSV, JSON, Parquet), inline rows, linked files (external tables) and connections, with files from URLs or kept in the browser (`local:`); plus `externalTableSql` and `referencedFiles` (for publishing). The engine's plugin helpers are passed in. |
 | `smaltkit/controls` | Controls for picking values: a list (checkboxes or radios), a dropdown, buttons, a range and a search box, each reporting its selection through `onChange`. |
 | `smaltkit/markdown` | Markdown to HTML, small and safe: headings, paragraphs, bold, italic, code, links (http(s) only), lists, quotes, rules, fenced code and pipe tables. Everything is escaped; raw HTML shows as text. |
+| `smaltkit/pretty` | Pretty printing for people to read: `formatJson` lays out JSON (plans, results) on one line when it fits and one item per line when it doesn't; `formatTypeScript` re-indents TypeScript by bracket depth, changing only whitespace at line starts and ends. |
 | `smaltkit/ui.css` | Styles for the charts, tables, grid, editor, controls, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
 
 Everything except the CSS is also exported from `smaltkit`. Planned next: the dev server and vendor scripts

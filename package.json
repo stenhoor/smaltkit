@@ -65,6 +65,10 @@
       "types": "./dist/markdown.d.ts",
       "default": "./dist/markdown.js"
     },
+    "./pretty": {
+      "types": "./dist/pretty.d.ts",
+      "default": "./dist/pretty.js"
+    },
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
   },
