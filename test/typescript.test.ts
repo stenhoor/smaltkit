@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { stripTypes, typescriptTranspiler, TypeScriptSyntaxError } from 'smaltkit/typescript';
+import { smaltty, stripTypes, typescriptTranspiler, TypeScriptSyntaxError } from 'smaltkit/typescript';
 
 test('types become spaces: every line and column stays where it was', () => {
   const code = "const n: number = 2;\ntable('orders').head(n as number)";
@@ -46,4 +46,14 @@ test('dist/ loads without a bundler: no bare imports, smaltty included', () => {
   // engine.js imports smaltdb's types only; at run time it loads the engine by URL.
   assert.deepEqual(bare, []);
   assert.ok(readdirSync(join(dist, 'smaltty')).includes('index.js'));
+});
+
+test('all of smaltty: the tree and the binder', () => {
+  const tree = smaltty.parse('const total = 1;\ntotal + 1');
+  const b = smaltty.bind(tree);
+  const ids: number[] = [];
+  for (let n = 1; n < tree.count; n++) if (tree.kind[n] === smaltty.K.Identifier) ids.push(n);
+  assert.equal(ids.length, 2);
+  assert.equal(b.declaration(ids[1]!), ids[0], 'the read names the declaration');
+  assert.equal(tree.kindName(tree.first[tree.root]!), 'VariableStatement');
 });
