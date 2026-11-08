@@ -1,6 +1,6 @@
 {
   "name": "smaltkit",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
@@ -69,6 +69,10 @@
       "types": "./dist/pretty.d.ts",
       "default": "./dist/pretty.js"
     },
+    "./typescript": {
+      "types": "./dist/typescript.d.ts",
+      "default": "./dist/typescript.js"
+    },
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
   },
@@ -83,10 +87,13 @@
     "node": ">=22.18"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/ui.css dist/ui.css",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/ui.css dist/ui.css && node scripts/copy-smaltty.mjs",
     "prepare": "npm run build",
     "typecheck": "tsc -p .",
     "test": "npm run build && node --test test/*.test.ts"
+  },
+  "dependencies": {
+    "smaltty": "github:stenhoor/smaltty#8b19adc6f9df7f40befd4e75b708115334eba25a"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
