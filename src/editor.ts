@@ -93,6 +93,8 @@ export class Editor {
     this.ta.value = opts.value ?? '';
     this.ta.addEventListener('input', () => this.changed());
     this.ta.addEventListener('scroll', () => this.syncScroll());
+    // The width decides whether the text overflows sideways, so a resize can add or remove the scrollbar.
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => this.fitScrollbar()).observe(this.ta);
     this.ta.addEventListener('keydown', (e) => this.onKey(e));
     this.ta.addEventListener('click', () => {
       this.hideComplete();
@@ -184,7 +186,19 @@ export class Editor {
       for (let i = 1; i <= n; i++) s += i + '\n';
       this.lines.textContent = s;
     }
+    this.fitScrollbar();
     this.syncScroll();
+  }
+
+  /**
+   * Room below the last line for the textarea's horizontal scrollbar. The gutter's lines set the editor's height when
+   * nothing else does (an editor sized to its text), and a scrollbar that takes space would otherwise cover the last
+   * line and add a vertical scrollbar. Overlay scrollbars take no space, so this adds nothing for them.
+   */
+  fitScrollbar(): void {
+    const bar = Math.max(0, this.ta.offsetHeight - this.ta.clientHeight);
+    const pad = bar ? `${8 + bar}px` : '';
+    if (this.lines.style.paddingBottom !== pad) this.lines.style.paddingBottom = pad;
   }
 
   syncScroll(): void {
