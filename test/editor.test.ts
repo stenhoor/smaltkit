@@ -6,7 +6,7 @@ import {
   aliasesIn, formatSql, highlight, quoteIdent, quoteLiteral, returnsRows, scanParams, splitStatements, statementAt,
   tableNameFrom, tokenize, wordBefore,
 } from 'smaltkit/sql';
-import { completeSql, Editor, highlightTypeScript, sqlLanguage, typescriptLanguage, type EditorSchema } from 'smaltkit/editor';
+import { completeSql, Editor, gutterHtml, highlightTypeScript, markedHtml, sqlLanguage, typescriptLanguage, type EditorSchema } from 'smaltkit/editor';
 import * as kit from 'smaltkit';
 
 /** The text a highlight layer shows: tags removed, entities decoded. */
@@ -103,4 +103,28 @@ test('the modules load without a DOM, and the root re-exports them', () => {
   assert.equal(typeof Editor, 'function');
   assert.equal(kit.highlightTypeScript, highlightTypeScript);
   assert.equal(kit.splitStatements, splitStatements);
+});
+
+test('warnings: marked in the highlight layer with their messages, the text unchanged', () => {
+  const text = "table('t').hed(1);\nconst n: number = 'a';\n";
+  const marks = [
+    { start: 11, end: 14, cls: 'sk-ed-warn', title: "Property 'hed' does not exist. Did you mean 'head'?" },
+    { start: 25, end: 26, cls: 'sk-ed-warn', title: 'Type <string> & "number"' },
+    { start: 12, end: 13, cls: 'sk-ed-warn', title: 'overlaps the first: left out' },
+  ];
+  const html = markedHtml(text, marks, highlightTypeScript);
+  assert.equal(shown(html), text + '\n');
+  assert.equal(html.match(/<mark /g)?.length, 2);
+  assert.match(html, /<mark class="sk-ed-warn" title="Property &#39;hed&#39; does not exist. Did you mean &#39;head&#39;\?">hed<\/mark>/);
+  assert.match(html, /title="Type &lt;string&gt; &amp; &quot;number&quot;"/);
+  assert.equal(markedHtml(text, [{ start: 5, end: 99, cls: 'x' }], highlightTypeScript), markedHtml(text, [], highlightTypeScript), 'a range past the end is left out');
+});
+
+test("warnings: the gutter numbers every line, the warnings' lines marked with their messages", () => {
+  const text = 'a.b;\nc.d;\ne.f;';
+  const html = gutterHtml(text, 3, [{ start: 2, end: 3, message: 'one' }, { start: 12, end: 13, message: 'two' }, { start: 11, end: 12, message: 'three' }]);
+  assert.equal(shown(html), '1\n2\n3\n');
+  assert.match(html, /<span class="sk-ed-warnline" title="one">1<\/span>/);
+  assert.match(html, /<span class="sk-ed-warnline" title="two\nthree">3<\/span>/);
+  assert.equal(gutterHtml(text, 3, []), '1\n2\n3\n');
 });

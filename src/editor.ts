@@ -59,6 +59,53 @@ export interface EditorOptions {
   label?: string;
 }
 
+/** A warning the editor marks: a range of the text, and what is wrong there (a type checker's error, say). */
+export interface EditorWarning {
+  start: number;
+  end: number;
+  message: string;
+}
+
+/** A range the highlight layer wraps in a `<mark>`: its class, and a title shown on hover. */
+interface Mark {
+  start: number;
+  end: number;
+  cls: string;
+  title?: string;
+}
+
+/**
+ * The highlight layer's HTML for `text` with `marks` wrapped in `<mark>`s, each part highlighted by `hl` (which ends
+ * its HTML with a newline, as the languages' do). Marks are taken in order; one that overlaps an earlier one is left out.
+ */
+export function markedHtml(text: string, marks: readonly Mark[], hl: (s: string) => string): string {
+  const sorted = [...marks].filter((m) => m.end > m.start && m.start >= 0 && m.end <= text.length).sort((a, b) => a.start - b.start);
+  let html = '';
+  let at = 0;
+  for (const m of sorted) {
+    if (m.start < at) continue;
+    const title = m.title === undefined ? '' : ` title="${esc(m.title)}"`;
+    html += hl(text.slice(at, m.start)).slice(0, -1) + `<mark class="${esc(m.cls)}"${title}>` + hl(text.slice(m.start, m.end)).slice(0, -1) + '</mark>';
+    at = m.end;
+  }
+  return html + hl(text.slice(at));
+}
+
+/** The gutter's HTML for `lines` lines, the lines with warnings marked and titled with their messages. */
+export function gutterHtml(text: string, lines: number, warnings: readonly EditorWarning[]): string {
+  const byLine = new Map<number, string[]>();
+  for (const w of warnings) {
+    const line = text.slice(0, w.start).split('\n').length;
+    byLine.set(line, [...(byLine.get(line) ?? []), w.message]);
+  }
+  let html = '';
+  for (let i = 1; i <= lines; i++) {
+    const messages = byLine.get(i);
+    html += messages ? `<span class="sk-ed-warnline" title="${esc(messages.join('\n'))}">${i}</span>\n` : `${i}\n`;
+  }
+  return html;
+}
+
 export class Editor {
   opts: EditorOptions;
   language: EditorLanguage;
@@ -70,7 +117,10 @@ export class Editor {
   stmtMark: HTMLDivElement;
   popup: HTMLDivElement;
   errorRange: { start: number; end: number; cls: string } | null = null;
+  /** The warnings marked in the text and the gutter, until the next edit (`setWarnings`). */
+  warnings: EditorWarning[] = [];
   lineCount = 0;
+  private gutterKey = '';
   compItems: CompletionItem[] = [];
   compStart = 0;
   compIndex = 0;
@@ -162,8 +212,18 @@ export class Editor {
     this.render();
   }
 
+  /**
+   * Marks warnings: their text is underlined, and their lines numbered in the gutter with the messages on hover. They
+   * stay until the next edit or the next call; an empty list clears them. The code isn't changed or stopped by them.
+   */
+  setWarnings(warnings: readonly EditorWarning[]): void {
+    this.warnings = [...warnings];
+    this.render();
+  }
+
   changed(): void {
     this.errorRange = null;
+    this.warnings = [];
     this.render();
     this.opts.onChange?.(this.ta.value);
     this.markStatement();
@@ -173,18 +233,16 @@ export class Editor {
     const text = this.ta.value;
     const names = this.opts.schema?.().names;
     const hl = (s: string) => this.language.highlight(s, names);
-    let html = hl(text);
-    if (this.errorRange) {
-      const { start, end, cls } = this.errorRange;
-      html = hl(text.slice(0, start)).slice(0, -1) + `<mark class="${esc(cls)}">` + hl(text.slice(start, end)).slice(0, -1) + '</mark>' + hl(text.slice(end));
-    }
-    this.hl.innerHTML = html;
+    // An error (highlightRange) is marked over any warning it overlaps.
+    const marks: Mark[] = this.errorRange ? [this.errorRange] : [];
+    for (const w of this.warnings) marks.push({ start: w.start, end: w.end, cls: 'sk-ed-warn', title: w.message });
+    this.hl.innerHTML = marks.length ? markedHtml(text, marks, hl) : hl(text);
     const n = text.split('\n').length;
-    if (n !== this.lineCount) {
+    const key = `${n}:${this.warnings.map((w) => `${w.start}:${w.message}`).join('|')}`;
+    if (key !== this.gutterKey) {
+      this.gutterKey = key;
       this.lineCount = n;
-      let s = '';
-      for (let i = 1; i <= n; i++) s += i + '\n';
-      this.lines.textContent = s;
+      this.lines.innerHTML = gutterHtml(text, n, this.warnings);
     }
     this.fitScrollbar();
     this.syncScroll();
