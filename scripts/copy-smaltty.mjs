@@ -1,5 +1,5 @@
-// After tsc: copies smaltty's built modules into dist/smaltty/ and points dist/typescript.js (and its .d.ts) at them,
-// so smaltkit/typescript loads in a page without a bundler, the way the apps load smaltkit (a copy of dist/).
+// After tsc: copies smaltty's built modules into dist/smaltty/ and points dist/typescript.js and dist/typecheck.js (and
+// their .d.ts) at them, so they load in a page without a bundler, the way the apps load smaltkit (a copy of dist/).
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
@@ -12,12 +12,12 @@ const smalttyDist = dirname(createRequire(join(root, 'package.json')).resolve('s
 const out = join(dist, 'smaltty');
 rmSync(out, { recursive: true, force: true });
 cpSync(smalttyDist, out, { recursive: true, filter: (p) => !p.endsWith('.map') });
-for (const file of ['typescript.js', 'typescript.d.ts']) {
+for (const file of ['typescript.js', 'typescript.d.ts', 'typecheck.js', 'typecheck.d.ts']) {
   const path = join(dist, file);
   if (!existsSync(path)) continue;
   const text = readFileSync(path, 'utf8');
   const rewritten = text.replace(/from 'smaltty'/g, "from './smaltty/index.js'");
-  if (rewritten === text) throw new Error(`dist/${file} doesn't import 'smaltty': update scripts/copy-smaltty.mjs.`);
+  if (rewritten === text && file.endsWith('.js')) throw new Error(`dist/${file} doesn't import 'smaltty': update scripts/copy-smaltty.mjs.`);
   writeFileSync(path, rewritten);
 }
 const version = JSON.parse(readFileSync(join(smalttyDist, '..', 'package.json'), 'utf8')).version;
