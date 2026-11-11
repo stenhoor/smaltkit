@@ -44,6 +44,7 @@
   --sk-tk-ident: var(--text-2, #3f4656);
   --sk-tk-object: var(--product-ui-text, #0b6a91);
   --sk-danger: var(--danger, #a3195b);
+  --sk-warning: var(--warning, #8a5a12);
   --sk-shadow: 0 8px 24px rgba(21, 25, 34, 0.14);
   /* Series colours: the Smalt report theme's palette until smalt-brand defines a chart palette. */
   --sk-c0: var(--smalt-500, #2F5BB7);
@@ -222,6 +223,8 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-editor:focus-within { box-shadow: inset 0 0 0 2px var(--sk-focus); }
 .sk-ed-input::selection { background: color-mix(in oklab, var(--sk-accent) 30%, transparent); color: transparent; }
 .sk-ed-stmt { position: absolute; left: 0; right: 0; background: color-mix(in oklab, var(--sk-accent) 6%, transparent); border-left: 2px solid color-mix(in oklab, var(--sk-accent) 50%, transparent); pointer-events: none; display: none; }
+.sk-ed-hl mark.sk-ed-warn { background: none; color: inherit; text-decoration: underline wavy var(--sk-warning); text-decoration-skip-ink: none; text-underline-offset: 3px; }
+.sk-ed-warnline { color: var(--sk-warning); font-weight: 600; cursor: help; }
 .sk-ed-hl mark.sk-ed-err { background: color-mix(in oklab, var(--sk-danger) 16%, transparent); color: inherit; border-bottom: 2px wavy var(--sk-danger); }
 .sk-tk-k { color: var(--sk-tk-keyword); font-weight: 600; }
 .sk-tk-f { color: var(--sk-tk-function); }
