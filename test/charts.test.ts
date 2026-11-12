@@ -117,6 +117,13 @@ test('stepped matrix: parents with subtotals, collapse, tabular layout', () => {
   assert.match(parents[0]!, /aria-expanded="true"[^>]*>▾<\/button>EU<\/th><td class="sk-num sk-subtotal">4<\/td><td class="sk-num sk-subtotal">2<\/td><td class="sk-num sk-subtotal sk-total">6<\/td>/);
   assert.match(html, /sk-level-1" style="--level:1">FR</);
   assert.equal((html.match(/data-row=/g) ?? []).length, 4, 'only leaves are marks');
+  // Sorted by value, a parent's rows still come together under it.
+  const order = [3, 0, 2, 1];
+  const pick = (c: ChartColumn) => ({ ...c, values: order.map((i) => c.values[i]!) });
+  const v2 = { ...ctx([region, country, product, value].map(pick)), extra: { 'sub:1': sub } };
+  matrixView(v2);
+  assert.equal((v2.el.innerHTML.match(/sk-parent/g) ?? []).length, 2);
+  assert.deepEqual([...v2.el.innerHTML.matchAll(/sk-level-\d"[^>]*>(?:<button[^>]*>.<\/button>)?(\w+)</g)].map((m) => m[1]), ['US', 'NY', 'EU', 'DE', 'FR']);
   // Start collapsed: only the parents show.
   const c = { ...ctx([region, country, product, value], { collapsed: true }), extra: { 'sub:1': sub } };
   matrixView(c);

@@ -241,8 +241,23 @@ export function matrixView(ctx: ChartContext): void {
       collapseState.set(ctx.el, state);
     }
     const isCollapsed = (key: string) => (state!.all ? !state!.collapsed.has(key) : state!.collapsed.has(key));
+    // Keep each parent's rows together (the result may be sorted by a value): order by each level's first appearance.
+    const seen = new Map<string, number>();
+    const order = rowFirst.map((fr, ri) => {
+      const v = vals(rows, fr);
+      const path = v.slice(0, -1).map((_, k) => {
+        const key = JSON.stringify(v.slice(0, k + 1));
+        if (!seen.has(key)) seen.set(key, seen.size);
+        return seen.get(key)!;
+      });
+      return { fr, ri, path };
+    });
+    order.sort((a, b) => {
+      for (let k = 0; k < a.path.length; k++) if (a.path[k] !== b.path[k]) return a.path[k]! - b.path[k]!;
+      return a.ri - b.ri;
+    });
     let prev: unknown[] | null = null;
-    rowFirst.forEach((fr, ri) => {
+    order.forEach(({ fr, ri }) => {
       const v = vals(rows, fr);
       // The first level where this row differs from the one above: parents from there down start here.
       let from = 0;
