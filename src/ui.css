@@ -138,6 +138,11 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-matrix th.sk-colhead { text-align: right; }
 .sk-matrix .sk-total { font-weight: 650; background: color-mix(in oklab, var(--sk-text) 3%, var(--sk-surface)); }
 .sk-matrix tbody .sk-mark { cursor: pointer; }
+.sk-stepped th.sk-rowhead { padding-left: calc(1.6em + var(--level, 0) * 1.1em); white-space: nowrap; }
+.sk-stepped tr.sk-parent th.sk-rowhead, .sk-stepped .sk-subtotal { font-weight: 650; }
+.sk-stepped tr.sk-parent, .sk-stepped tr.sk-parent > th { background: color-mix(in oklab, var(--sk-text) 2%, var(--sk-surface)); }
+.sk-caret { all: unset; cursor: pointer; display: inline-block; width: 1.1em; margin-left: -1.1em; color: var(--sk-muted); text-align: center; }
+.sk-caret:focus-visible { outline: 2px solid var(--sk-focus); outline-offset: 1px; border-radius: 2px; }
 
 /* ---------------------------------------------------------------- conditional formatting (ChartContext.cellFormat) */
 .sk-tone-good { color: var(--sk-pos); } .sk-tone-bad { color: var(--sk-neg); }
