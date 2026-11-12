@@ -99,6 +99,39 @@ test('table and matrix', () => {
   assert.match(m.el.innerHTML, /sk-rowhead[^>]*>EU</);
 });
 
+test('stepped matrix: parents with subtotals, collapse, tabular layout', () => {
+  const region = col('r', 'rows', 'dimension', ['EU', 'EU', 'EU', 'US']);
+  const country = col('c', 'rows', 'dimension', ['DE', 'DE', 'FR', 'NY']);
+  const product = col('k', 'columns', 'dimension', ['Tea', 'Coffee', 'Tea', 'Tea']);
+  const value = col('v', 'values', 'measure', [1, 2, 3, 4]);
+  const sub = chartData([col('r', 'rows', 'dimension', ['EU', 'EU', 'US']), col('k', 'columns', 'dimension', ['Tea', 'Coffee', 'Tea']), col('v', 'values', 'measure', [4, 2, 4])], 3);
+  const subRt = chartData([col('r', 'rows', 'dimension', ['EU', 'US']), col('v', 'values', 'measure', [6, 4])], 2);
+  const rowTotals = chartData([col('r', 'rows', 'dimension', ['EU', 'EU', 'US']), col('c', 'rows', 'dimension', ['DE', 'FR', 'NY']), col('v', 'values', 'measure', [3, 3, 4])], 3);
+  const m = { ...ctx([region, country, product, value]), extra: { 'sub:1': sub, 'sub:1:rt': subRt, rowTotals } };
+  matrixView(m);
+  const html = m.el.innerHTML;
+  assert.match(html, /sk-stepped/);
+  assert.match(html, /<th>r › c<\/th>/, 'one header column, labels joined');
+  const parents = html.match(/<tr class="sk-parent">.*?<\/tr>/g)!;
+  assert.equal(parents.length, 2, 'EU and US');
+  assert.match(parents[0]!, /aria-expanded="true"[^>]*>▾<\/button>EU<\/th><td class="sk-num sk-subtotal">4<\/td><td class="sk-num sk-subtotal">2<\/td><td class="sk-num sk-subtotal sk-total">6<\/td>/);
+  assert.match(html, /sk-level-1" style="--level:1">FR</);
+  assert.equal((html.match(/data-row=/g) ?? []).length, 4, 'only leaves are marks');
+  // Start collapsed: only the parents show.
+  const c = { ...ctx([region, country, product, value], { collapsed: true }), extra: { 'sub:1': sub } };
+  matrixView(c);
+  assert.equal((c.el.innerHTML.match(/<tr/g) ?? []).length - 2, 2, 'two parent rows under the two header rows');
+  assert.doesNotMatch(c.el.innerHTML, /data-row=/);
+  // Without subtotals the parent cells are empty; tabular keeps a column per level.
+  const n = { ...ctx([region, country, product, value], { subtotals: false }), extra: { 'sub:1': sub } };
+  matrixView(n);
+  assert.match(n.el.innerHTML, /EU<\/th><td class="sk-num sk-subtotal"><\/td>/);
+  const t = ctx([region, country, product, value], { layout: 'tabular' });
+  matrixView(t);
+  assert.doesNotMatch(t.el.innerHTML, /sk-parent|sk-stepped/);
+  assert.match(t.el.innerHTML, /<th>r<\/th><th>c<\/th>/);
+});
+
 test('conditional formatting: tone, fill and icon in tables, matrices and KPI cards', () => {
   const values = col('v', 'values', 'measure', revenue);
   // Above 100 is good (filled), below 100 bad with a down arrow.
