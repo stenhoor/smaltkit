@@ -145,6 +145,31 @@ test('small multiples: a panel per value, one scale, rows kept', () => {
   assert.match(eu, /class="sk-tick"[^>]*>400</);
 });
 
+test('table depth: pages, column widths, frozen columns', () => {
+  const names = Array.from({ length: 23 }, (_, i) => `P${String(i + 1).padStart(2, '0')}`);
+  const name = col('n', 'columns', 'dimension', names);
+  name.ref = 'products.name';
+  const qty = col('q', 'values', 'measure', names.map((_, i) => i + 1));
+  const t = ctx([name, qty], { pageSize: 10, widths: { 'products.name': 180 }, freeze: 1 });
+  tableView(t);
+  const html = t.el.innerHTML;
+  assert.equal((html.match(/<tr class="sk-mark/g) ?? []).length, 10, 'one page of rows');
+  assert.match(html, />P01</);
+  assert.doesNotMatch(html, />P11</);
+  assert.match(html, /class="sk-pager-info">1–10 of 23</);
+  assert.match(html, /data-page="0" disabled aria-label="First page"/);
+  assert.match(html, /<span class="sk-pager-page">1 \/ 3<\/span>/);
+  assert.match(html, /<colgroup><col style="width:180px"><col><\/colgroup>/, 'the saved width');
+  assert.match(html, /table-layout:fixed;width:max\(100%, 260px\)/, 'fixed layout: 180 + 80 for the unsized column');
+  assert.match(html, /<th data-col="0" class=" sk-frozen sk-frozen-last" data-freeze="0">/);
+  assert.match(html, /<td class=" sk-frozen sk-frozen-last" data-freeze="0">P01<\/td>/);
+  // No page size: every row, no pager; no widths: no fixed layout.
+  const all = ctx([name, qty]);
+  tableView(all);
+  assert.equal((all.el.innerHTML.match(/<tr class="sk-mark/g) ?? []).length, 23);
+  assert.doesNotMatch(all.el.innerHTML, /sk-pager|table-layout|sk-frozen/);
+});
+
 test('stepped matrix: parents with subtotals, collapse, tabular layout', () => {
   const region = col('r', 'rows', 'dimension', ['EU', 'EU', 'EU', 'US']);
   const country = col('c', 'rows', 'dimension', ['DE', 'DE', 'FR', 'NY']);
