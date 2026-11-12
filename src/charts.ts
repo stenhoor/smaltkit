@@ -5,8 +5,8 @@
 //
 // Marks carry data-row="<row index>" so the page can add selection, tooltips and drill on top, and
 // get `sk-dim` / `sk-on` when `ctx.selected(row)` says so.
-import { axisFormatter, type ColumnType, type Format, type Value } from './format.js';
-import { arc, band, esc, linear, linePath, r2, seqColor, textWidth, toNum, truncate } from './svg.js';
+import { axisFormatter, formatDate, type ColumnType, type Format, type Value } from './format.js';
+import { arc, band, esc, linear, linePath, niceTicks, r2, rescale, seqColor, textWidth, timeTicks, timeValue, toNum, truncate, valueScale } from './svg.js';
 
 /** One column of a result, tagged with the role it plays in a chart (category, series, values, …). */
 export interface ChartColumn {
@@ -105,6 +105,8 @@ export function legendHtml(names: string[], palette: number, offset = 0): string
 type Kind = 'bar' | 'line' | 'area';
 
 interface Series {
+  /** What the series is (a series value, or a measure's key): matches series across small multiples. */
+  key: unknown;
   name: string;
   kind: Kind;
   axis: 0 | 1;
@@ -122,16 +124,22 @@ interface Prepared {
   series: Series[];
 }
 
-function prepare(ctx: ChartContext, kindFor: (role: string, i: number) => Kind, axisFor: (role: string) => 0 | 1): Prepared {
+function prepare(ctx: ChartContext, kindFor: (role: string, i: number) => Kind, axisFor: (role: string) => 0 | 1, rowList?: number[], seed?: Prepared): Prepared {
   const { data } = ctx;
   const cat = data.role('category')[0];
   const ser = data.role('series')[0];
-  const measures = data.measures;
+  const measures = data.measures.filter((m) => m.role !== 'multiples');
   const catIndex = new Map<unknown, number>();
   const cats: Prepared['cats'] = [];
+  const norm = (v: Value | undefined) => (typeof v === 'bigint' ? Number(v) : v);
+  // Small multiples: every panel has the same categories and series, in the same places (colours match).
+  for (const c of seed?.cats ?? []) {
+    catIndex.set(norm(c.value), cats.length);
+    cats.push({ ...c });
+  }
   const catOf = (r: number) => {
     const v = cat ? cat.values[r]! : null;
-    const k = typeof v === 'bigint' ? Number(v) : v;
+    const k = norm(v);
     let i = catIndex.get(k);
     if (i === undefined) {
       i = cats.length;
@@ -140,25 +148,30 @@ function prepare(ctx: ChartContext, kindFor: (role: string, i: number) => Kind, 
     }
     return i;
   };
+  const rowsOf = rowList ?? Array.from({ length: data.rows }, (_, r) => r);
   const series: Series[] = [];
   if (ser && measures.length) {
     const m = measures[0]!;
     const sIndex = new Map<unknown, number>();
-    for (let r = 0; r < data.rows; r++) {
+    for (const s of seed?.series ?? []) {
+      sIndex.set(s.key, series.length);
+      series.push({ ...s, values: [], rows: [], y0: undefined, y1: undefined });
+    }
+    for (const r of rowsOf) {
       const ci = catOf(r);
-      const sv = ser.values[r];
+      const sv = norm(ser.values[r]);
       let si = sIndex.get(sv);
       if (si === undefined) {
         si = series.length;
         sIndex.set(sv, si);
-        series.push({ name: ser.fmt(sv ?? null), kind: kindFor(m.role, 0), axis: axisFor(m.role), color: si % ctx.palette, values: [], rows: [], col: m });
+        series.push({ key: sv, name: ser.fmt(ser.values[r] ?? null), kind: kindFor(m.role, 0), axis: axisFor(m.role), color: si % ctx.palette, values: [], rows: [], col: m });
       }
       series[si]!.values[ci] = toNum(m.values[r]);
       series[si]!.rows[ci] = r;
     }
   } else {
-    measures.forEach((m, i) => series.push({ name: m.label, kind: kindFor(m.role, i), axis: axisFor(m.role), color: i % ctx.palette, values: [], rows: [], col: m }));
-    for (let r = 0; r < data.rows; r++) {
+    measures.forEach((m, i) => series.push({ key: m.key, name: m.label, kind: kindFor(m.role, i), axis: axisFor(m.role), color: i % ctx.palette, values: [], rows: [], col: m }));
+    for (const r of rowsOf) {
       const ci = catOf(r);
       measures.forEach((m, i) => {
         series[i]!.values[ci] = toNum(m.values[r]);
@@ -190,6 +203,14 @@ function stackSeries(p: Prepared, mode: string, kinds: Kind[]): void {
   }
 }
 
+/** A reference line across the plot: a fixed value, or a statistic of the first series. */
+export interface RefLine {
+  value?: number;
+  stat?: 'avg' | 'median' | 'min' | 'max';
+  label?: string;
+  tone?: CellTone;
+}
+
 interface ChartOpts {
   horizontal: boolean;
   stack: string;
@@ -198,82 +219,168 @@ interface ChartOpts {
   labels: boolean;
   legend: string;
   secondary: boolean;
+  /** Category axis: bands (default) or continuous, by date or number. */
+  continuous: boolean;
+  log: boolean;
+  min?: number;
+  max?: number;
+  xTitle: string;
+  yTitle: string;
+  y2Title: string;
+  refLines: RefLine[];
+  /** Fixed value extents (small multiples share one scale). */
+  ext?: [number, number][];
 }
 
-function render(ctx: ChartContext, p: Prepared, o: ChartOpts): void {
-  const { width, height } = ctx;
-  const fs = 11;
-  const { cats, series } = p;
-  if (!cats.length || !series.length) {
-    ctx.el.innerHTML = '<div class="sk-empty">No data</div>';
-    return;
-  }
-  stackSeries(p, o.stack, o.horizontal ? ['bar'] : ['bar', 'area']);
-  const showLegend = o.legend !== 'none' && (series.length > 1 || o.legend !== 'auto');
-  const legend = showLegend ? legendHtml(series.map((s) => s.name), ctx.palette) : '';
-  const legendH = showLegend ? 24 : 0;
-  const H = Math.max(40, height - legendH);
-  const W = Math.max(60, width);
+let clipSeq = 0;
 
-  // Value extents per axis.
+/** Value extents per axis (stacks included), widened by reference lines. */
+function extents(p: Prepared, o: ChartOpts): [number, number][] {
   const ext = [
     [Infinity, -Infinity],
     [Infinity, -Infinity],
   ] as [number, number][];
-  for (const s of series) {
+  for (const s of p.series) {
     const e = ext[s.axis]!;
-    for (let i = 0; i < cats.length; i++) {
+    for (let i = 0; i < p.cats.length; i++) {
       const lo = s.y0 ? Math.min(s.y0[i]!, s.y1![i]!) : s.values[i]!;
       const hi = s.y0 ? Math.max(s.y0[i]!, s.y1![i]!) : s.values[i]!;
       if (Number.isFinite(lo)) e[0] = Math.min(e[0], lo);
       if (Number.isFinite(hi)) e[1] = Math.max(e[1], hi);
     }
   }
+  for (const r of refValues(p, o)) {
+    ext[0][0] = Math.min(ext[0][0], r.v);
+    ext[0][1] = Math.max(ext[0][1], r.v);
+  }
+  return ext;
+}
+
+function refValues(p: Prepared, o: ChartOpts): { v: number; label: string; tone?: CellTone }[] {
+  const first = p.series.find((s) => s.axis === 0);
+  const vals = first ? first.values.filter(Number.isFinite).sort((a, b) => a - b) : [];
+  const out: { v: number; label: string; tone?: CellTone }[] = [];
+  for (const r of o.refLines) {
+    let v = r.value;
+    if (r.stat && vals.length) {
+      v = r.stat === 'min' ? vals[0]! : r.stat === 'max' ? vals.at(-1)! : r.stat === 'avg' ? vals.reduce((a, b) => a + b, 0) / vals.length : vals.length % 2 ? vals[(vals.length - 1) / 2]! : (vals[vals.length / 2 - 1]! + vals[vals.length / 2]!) / 2;
+    }
+    if (v === undefined || !Number.isFinite(v)) continue;
+    const name = r.label ?? (r.stat ? { avg: 'Average', median: 'Median', min: 'Min', max: 'Max' }[r.stat] : '');
+    out.push({ v, label: name ? `${name}: ${first ? first.col.fmt(v) : v}` : first ? first.col.fmt(v) : String(v), tone: r.tone });
+  }
+  return out;
+}
+
+/** The categories as numbers (dates as ms) when every one is a date or a number; else null. */
+function continuousCats(p: Prepared, ctx: ChartContext): { xs: number[]; time: boolean } | null {
+  const cat = ctx.data.role('category')[0];
+  if (!cat || !p.cats.length) return null;
+  const time = cat.type === 'date' || cat.type === 'datetime' || p.cats.some((c) => typeof c.value === 'string');
+  const xs = p.cats.map((c) => (time ? timeValue(c.value) : toNum(c.value)));
+  return xs.every(Number.isFinite) ? { xs, time } : null;
+}
+
+/** Sort categories (and every series with them) by their position on a continuous axis. */
+function sortCats(p: Prepared, xs: number[]): number[] {
+  const order = xs.map((_, i) => i).sort((a, b) => xs[a]! - xs[b]!);
+  p.cats = order.map((i) => p.cats[i]!);
+  for (const s of p.series) {
+    s.values = order.map((i) => s.values[i]!);
+    s.rows = order.map((i) => s.rows[i]!);
+  }
+  return order.map((i) => xs[i]!);
+}
+
+interface Frame {
+  width: number;
+  height: number;
+  palette: number;
+  selected(row: number): boolean | null;
+}
+
+function cartesianHtml(ctx: ChartContext, f: Frame, p: Prepared, o: ChartOpts, legend: string): string {
+  const { width, height } = f;
+  const fs = 11;
+  const { series } = p;
+  if (!p.cats.length || !series.length) return '<div class="sk-empty">No data</div>';
+  // Continuous: positions from the category values (gaps and uneven dates show as such), sorted.
+  const cont = !o.horizontal && o.continuous ? continuousCats(p, ctx) : null;
+  const xsSorted = cont ? sortCats(p, cont.xs) : null;
+  const cats = p.cats;
+  if (!o.ext) stackSeries(p, o.stack, o.horizontal ? ['bar'] : ['bar', 'area']);
+  const legendH = legend ? 24 : 0;
+  const H = Math.max(40, height - legendH);
+  const W = Math.max(60, width);
+  const ext = o.ext ?? extents(p, o);
   for (const e of ext) if (!Number.isFinite(e[0])) [e[0], e[1]] = [0, 1];
+  const log = o.log && o.stack === 'none';
   const fmtAxis = o.stack === 'percent' ? axisFormatter('percent') : axisFormatter(series[0]!.col.format);
   const fmtAxis2 = axisFormatter(series.find((s) => s.axis === 1)?.col.format);
   const hasY2 = series.some((s) => s.axis === 1);
+  const refs = refValues(p, o);
+  const clip = `sk-clip-${++clipSeq}`;
+  const sel = (row: number | undefined) => {
+    if (row === undefined) return '';
+    const s = f.selected(row);
+    return s === false ? ' sk-dim' : s ? ' sk-on' : '';
+  };
+  const titleH = (t: string) => (t ? 16 : 0);
 
   let svg = '';
+  let plot = '';
   const catLabels = cats.map((c) => c.label);
   if (o.horizontal) {
     // Categories down the left, values along the bottom.
-    const left = Math.ceil(Math.min(W * 0.4, Math.max(...catLabels.map((l) => textWidth(l, fs))) + 10));
+    const yT = titleH(o.yTitle);
+    const left = Math.ceil(Math.min(W * 0.4, Math.max(...catLabels.map((l) => textWidth(l, fs))) + 10)) + yT;
     const top = 4;
-    const bottom = 20;
+    const bottom = 20 + titleH(o.xTitle);
     const count = Math.max(2, Math.floor((W - left) / 90));
-    const lastTick = linear(ext[0][0], ext[0][1], 0, 1, { count }).ticks.at(-1) ?? 0;
-    const right = Math.max(12 + (o.labels ? 40 : 0), textWidth(fmtAxis(lastTick), fs) / 2 + 4);
-    const x = linear(ext[0][0], ext[0][1], left, W - right, { count });
+    const probe = valueScale(ext[0][0], ext[0][1], 0, 1, { count, log, min: o.min, max: o.max });
+    const right = Math.max(12 + (o.labels ? 40 : 0), textWidth(fmtAxis(probe.ticks.at(-1) ?? 0), fs) / 2 + 4);
+    const x = rescale(probe, left, W - right);
     const y = band(cats.length, top, H - bottom, 0.25);
-    for (const t of x.ticks) svg += `<line class="sk-gridline" x1="${r2(x(t))}" x2="${r2(x(t))}" y1="${top}" y2="${H - bottom}"/><text class="sk-tick" x="${r2(x(t))}" y="${H - 6}" text-anchor="middle">${esc(fmtAxis(t))}</text>`;
+    for (const t of x.ticks) svg += `<line class="sk-gridline" x1="${r2(x(t))}" x2="${r2(x(t))}" y1="${top}" y2="${H - bottom}"/><text class="sk-tick" x="${r2(x(t))}" y="${H - bottom + 14}" text-anchor="middle">${esc(fmtAxis(t))}</text>`;
     const bars = series.filter((s) => s.kind === 'bar');
     const grouped = o.stack === 'none' && bars.length > 1;
     const sub = grouped ? band(bars.length, 0, y.bandwidth, 0.08, 0) : null;
     cats.forEach((c, i) => {
       if (y.step >= fs * 0.9 || i % Math.ceil((fs * 1.1) / y.step) === 0)
-        svg += `<text class="sk-tick sk-cat" x="${r2(left - 6)}" y="${r2(y(i) + y.bandwidth / 2 + 4)}" text-anchor="end">${esc(truncate(c.label, left - 10, fs))}</text>`;
+        svg += `<text class="sk-tick sk-cat" x="${r2(left - 6)}" y="${r2(y(i) + y.bandwidth / 2 + 4)}" text-anchor="end">${esc(truncate(c.label, left - yT - 10, fs))}</text>`;
     });
+    const base = x.log ? x.domain[0] : 0;
     bars.forEach((s, si) => {
       for (let i = 0; i < cats.length; i++) {
         const v = s.values[i]!;
         if (!Number.isFinite(v)) continue;
-        const a = s.y0 ? s.y0[i]! : 0;
+        const a = s.y0 ? s.y0[i]! : base;
         const b = s.y1 ? s.y1[i]! : v;
         const x0 = x(Math.min(a, b));
         const w = Math.max(1, Math.abs(x(b) - x(a)));
         const yy = y(i) + (sub ? sub(si) : 0);
         const hh = sub ? sub.bandwidth : y.bandwidth;
-        svg += `<rect class="sk-mark sk-bar sk-c${s.color}${dim(ctx, s.rows[i])}" data-row="${s.rows[i]}" x="${r2(x0)}" y="${r2(yy)}" width="${r2(w)}" height="${r2(hh)}"/>`;
+        plot += `<rect class="sk-mark sk-bar sk-c${s.color}${sel(s.rows[i])}" data-row="${s.rows[i]}" x="${r2(x0)}" y="${r2(yy)}" width="${r2(w)}" height="${r2(hh)}"/>`;
         if (o.labels && (!s.y0 || si === bars.length - 1)) svg += `<text class="sk-label" x="${r2(x(b) + 4)}" y="${r2(yy + hh / 2 + 4)}">${esc(s.col.fmt(s.y0 ? s.y1![i]! : v))}</text>`;
       }
     });
-    svg += `<line class="sk-axis" x1="${r2(x(0))}" x2="${r2(x(0))}" y1="${top}" y2="${H - bottom}"/>`;
+    const zero = x.log ? left : x(Math.min(Math.max(0, x.domain[0]), x.domain[1]));
+    svg += `<line class="sk-axis" x1="${r2(zero)}" x2="${r2(zero)}" y1="${top}" y2="${H - bottom}"/>`;
+    for (const r of refs) {
+      const xx = r2(x(r.v));
+      if (xx < left - 0.5 || xx > W - right + 0.5) continue;
+      svg += `<line class="sk-ref${r.tone ? ` sk-tone-${r.tone}` : ''}" x1="${xx}" x2="${xx}" y1="${top}" y2="${H - bottom}"/><text class="sk-ref-label${r.tone ? ` sk-tone-${r.tone}` : ''}" x="${r2(xx + 3)}" y="${top + 10}">${esc(r.label)}</text>`;
+    }
+    if (o.yTitle) svg += `<text class="sk-axis-title" transform="translate(${fs + 1},${r2((top + H - bottom) / 2)}) rotate(-90)" text-anchor="middle">${esc(o.yTitle)}</text>`;
+    if (o.xTitle) svg += `<text class="sk-axis-title" x="${r2((left + W - right) / 2)}" y="${H - 3}" text-anchor="middle">${esc(o.xTitle)}</text>`;
+    svg = `<defs><clipPath id="${clip}"><rect x="${left}" y="${top - 1}" width="${r2(W - right - left)}" height="${r2(H - bottom - top + 2)}"/></clipPath></defs>` + svg;
   } else {
-    const yA = linear(ext[0][0], ext[0][1], 0, 1, { count: Math.max(2, Math.floor(H / 50)) });
-    const yB = hasY2 && o.secondary ? linear(ext[1][0], ext[1][1], 0, 1, { count: Math.max(2, Math.floor(H / 50)) }) : null;
-    const left = Math.ceil(Math.max(...yA.ticks.map((t) => textWidth(fmtAxis(t), fs))) + 12);
-    const right = yB ? Math.max(...yB.ticks.map((t) => textWidth(fmtAxis2(t), fs))) + 12 : 10;
+    const count = Math.max(2, Math.floor(H / 50));
+    const yA = valueScale(ext[0][0], ext[0][1], 0, 1, { count, log, min: o.min, max: o.max });
+    const yB = hasY2 && o.secondary ? valueScale(ext[1][0], ext[1][1], 0, 1, { count, log }) : null;
+    const yT = titleH(o.yTitle);
+    const left = Math.ceil(Math.max(...yA.ticks.map((t) => textWidth(fmtAxis(t), fs))) + 12) + yT;
+    const right = (yB ? Math.max(...yB.ticks.map((t) => textWidth(fmtAxis2(t), fs))) + 12 : 10) + (yB ? titleH(o.y2Title) : 0);
     const top = 8;
     const maxLabel = Math.max(...catLabels.map((l) => textWidth(l, fs)));
     const hasBars = series.some((s) => s.kind === 'bar');
@@ -288,38 +395,68 @@ function render(ctx: ChartContext, p: Prepared, o: ChartOpts): void {
       nb.bandwidth = maxBar;
       xb = nb;
     }
-    const rotate = maxLabel > xb.step * 0.95 && cats.length > 1;
-    const bottom = rotate ? Math.min(H * 0.35, Math.min(maxLabel, 90) * 0.7 + 14) : 20;
-    const y = linear(yA.domain[0], yA.domain[1], H - bottom, top, { nice: false, zero: false });
-    y.ticks = yA.ticks;
-    const y2 = yB ? linear(yB.domain[0], yB.domain[1], H - bottom, top, { nice: false, zero: false }) : null;
-    if (y2) y2.ticks = yB!.ticks;
+    // Where each category sits (its centre), and how wide its bars may be.
+    let cx = (i: number) => xb(i) + xb.bandwidth / 2;
+    let barW = xb.bandwidth;
+    let xTicks: { x: number; label: string }[] | null = null;
+    if (xsSorted) {
+      const lo = xsSorted[0]!;
+      const hi = xsSorted.at(-1)!;
+      let gap = Infinity;
+      for (let i = 1; i < xsSorted.length; i++) if (xsSorted[i]! > xsSorted[i - 1]!) gap = Math.min(gap, xsSorted[i]! - xsSorted[i - 1]!);
+      const span = hi - lo || 1;
+      // Bars need half a bar of room at each end.
+      const n = Number.isFinite(gap) ? span / gap + 1 : 1;
+      const pad = hasBars ? (W - right - left) / n / 2 : 6;
+      const sx = (v: number) => left + pad + ((v - lo) / span) * (W - right - left - 2 * pad);
+      cx = (i: number) => sx(xsSorted[i]!);
+      barW = hasBars ? Math.min(maxBar, Math.max(1, ((W - right - left - 2 * pad) / span) * (Number.isFinite(gap) ? gap : span) * 0.75)) : 0;
+      const tickCount = Math.max(2, Math.floor((W - left - right) / 80));
+      if (cont!.time) {
+        const tt = timeTicks(lo, hi, tickCount);
+        xTicks = tt.ticks.map((t) => ({ x: sx(t), label: formatDate(new Date(t).toISOString().slice(0, 19), tt.pattern) }));
+      } else {
+        const nt = niceTicks(lo, hi, tickCount);
+        const catCol = ctx.data.role('category')[0];
+        xTicks = nt.ticks.filter((t) => t >= lo - span * 1e-9 && t <= hi + span * 1e-9).map((t) => ({ x: sx(t), label: catCol ? catCol.fmt(t) : String(t) }));
+      }
+    }
+    const rotate = !xTicks && maxLabel > xb.step * 0.95 && cats.length > 1;
+    const xT = titleH(o.xTitle);
+    const bottom = (rotate ? Math.min(H * 0.35, Math.min(maxLabel, 90) * 0.7 + 14) : 20) + xT;
+    const y = rescale(yA, H - bottom, top);
+    const y2 = yB ? rescale(yB, H - bottom, top) : null;
     const yOf = (s: Series) => (s.axis === 1 && y2 ? y2 : y);
     for (const t of y.ticks) svg += `<line class="sk-gridline" x1="${left}" x2="${W - right}" y1="${r2(y(t))}" y2="${r2(y(t))}"/><text class="sk-tick" x="${r2(left - 6)}" y="${r2(y(t) + 4)}" text-anchor="end">${esc(fmtAxis(t))}</text>`;
     if (y2) for (const t of y2.ticks) svg += `<text class="sk-tick" x="${W - right + 6}" y="${r2(y2(t) + 4)}">${esc(fmtAxis2(t))}</text>`;
-    const every = rotate ? Math.max(1, Math.ceil((fs * 1.2) / xb.step)) : Math.max(1, Math.ceil((maxLabel + 8) / xb.step));
-    cats.forEach((c, i) => {
-      if (i % every) return;
-      const cx = xb(i) + xb.bandwidth / 2;
-      if (rotate) svg += `<text class="sk-tick sk-cat" transform="translate(${r2(cx + 3)},${r2(H - bottom + 8)}) rotate(-40)" text-anchor="end">${esc(truncate(c.label, 90, fs))}</text>`;
-      else svg += `<text class="sk-tick sk-cat" x="${r2(cx)}" y="${H - 6}" text-anchor="middle">${esc(c.label)}</text>`;
-    });
+    const tickY = H - bottom + 14;
+    if (xTicks) {
+      for (const t of xTicks) svg += `<line class="sk-axis" x1="${r2(t.x)}" x2="${r2(t.x)}" y1="${H - bottom}" y2="${H - bottom + 4}"/><text class="sk-tick sk-cat" x="${r2(t.x)}" y="${tickY}" text-anchor="middle">${esc(t.label)}</text>`;
+    } else {
+      const every = rotate ? Math.max(1, Math.ceil((fs * 1.2) / xb.step)) : Math.max(1, Math.ceil((maxLabel + 8) / xb.step));
+      cats.forEach((c, i) => {
+        if (i % every) return;
+        if (rotate) svg += `<text class="sk-tick sk-cat" transform="translate(${r2(cx(i) + 3)},${r2(H - bottom + 8)}) rotate(-40)" text-anchor="end">${esc(truncate(c.label, 90, fs))}</text>`;
+        else svg += `<text class="sk-tick sk-cat" x="${r2(cx(i))}" y="${tickY}" text-anchor="middle">${esc(c.label)}</text>`;
+      });
+    }
     // Bars
     const bars = series.filter((s) => s.kind === 'bar');
     const grouped = o.stack === 'none' && bars.length > 1;
-    const sub = grouped ? band(bars.length, 0, xb.bandwidth, 0.08, 0) : null;
+    const sub = grouped ? band(bars.length, 0, barW, 0.08, 0) : null;
     bars.forEach((s, si) => {
       const ys = yOf(s);
+      const base = ys.log ? ys.domain[0] : 0;
       for (let i = 0; i < cats.length; i++) {
         const v = s.values[i]!;
         if (!Number.isFinite(v)) continue;
-        const a = s.y0 ? s.y0[i]! : 0;
+        const a = s.y0 ? s.y0[i]! : base;
         const b = s.y1 ? s.y1[i]! : v;
         const y0 = ys(Math.max(a, b));
         const h = Math.max(1, Math.abs(ys(a) - ys(b)));
-        const xx = xb(i) + (sub ? sub(si) : 0);
-        const ww = sub ? sub.bandwidth : xb.bandwidth;
-        svg += `<rect class="sk-mark sk-bar sk-c${s.color}${dim(ctx, s.rows[i])}" data-row="${s.rows[i]}" x="${r2(xx)}" y="${r2(y0)}" width="${r2(ww)}" height="${r2(h)}"/>`;
+        const xx = cx(i) - barW / 2 + (sub ? sub(si) : 0);
+        const ww = sub ? sub.bandwidth : barW;
+        plot += `<rect class="sk-mark sk-bar sk-c${s.color}${sel(s.rows[i])}" data-row="${s.rows[i]}" x="${r2(xx)}" y="${r2(y0)}" width="${r2(ww)}" height="${r2(h)}"/>`;
         if (o.labels && ww > 14 && (!s.y0 || si === bars.length - 1)) svg += `<text class="sk-label" x="${r2(xx + ww / 2)}" y="${r2(y0 - 4)}" text-anchor="middle">${esc(s.col.fmt(s.y0 ? s.y1![i]! : v))}</text>`;
       }
     });
@@ -329,40 +466,105 @@ function render(ctx: ChartContext, p: Prepared, o: ChartOpts): void {
       const pts: [number, number][] = [];
       const base: [number, number][] = [];
       const segs: [number, number][][] = [];
+      const floor = ys.log ? ys.domain[0] : 0;
       for (let i = 0; i < cats.length; i++) {
         const v = s.y1 ? s.y1[i]! : s.values[i]!;
-        const cx = xb(i) + xb.bandwidth / 2;
         if (!Number.isFinite(s.values[i]!)) {
           if (pts.length) segs.push(pts.splice(0));
           continue;
         }
-        pts.push([cx, ys(v)]);
-        base.push([cx, ys(s.y0 ? s.y0[i]! : 0)]);
+        pts.push([cx(i), ys(v)]);
+        base.push([cx(i), ys(s.y0 ? s.y0[i]! : floor)]);
       }
       if (pts.length) segs.push(pts);
       if (s.kind === 'area') {
         const all = segs.flat();
-        if (all.length) svg += `<path class="sk-area sk-c${s.color}" d="${linePath(all, o.smooth)}L${base
+        if (all.length) plot += `<path class="sk-area sk-c${s.color}" d="${linePath(all, o.smooth)}L${base
           .slice()
           .reverse()
           .map(([a, b]) => `${r2(a)},${r2(b)}`)
           .join('L')}Z"/>`;
       }
-      for (const seg of segs) svg += `<path class="sk-line sk-c${s.color}" d="${linePath(seg, o.smooth)}"/>`;
+      for (const seg of segs) plot += `<path class="sk-line sk-c${s.color}" d="${linePath(seg, o.smooth)}"/>`;
       for (let i = 0; i < cats.length; i++) {
         const v = s.y1 ? s.y1[i]! : s.values[i]!;
         if (!Number.isFinite(s.values[i]!)) continue;
-        const cx = r2(xb(i) + xb.bandwidth / 2);
-        const cy = r2(ys(v));
-        svg += `<circle class="sk-hit sk-mark sk-c${s.color}${dim(ctx, s.rows[i])}${o.markers ? ' sk-marker' : ''}" data-row="${s.rows[i]}" cx="${cx}" cy="${cy}" r="${o.markers ? 3.5 : 6}"/>`;
-        if (o.labels) svg += `<text class="sk-label" x="${cx}" y="${r2(cy - 7)}" text-anchor="middle">${esc(s.col.fmt(s.values[i]!))}</text>`;
+        const px = r2(cx(i));
+        const py = r2(ys(v));
+        plot += `<circle class="sk-hit sk-mark sk-c${s.color}${sel(s.rows[i])}${o.markers ? ' sk-marker' : ''}" data-row="${s.rows[i]}" cx="${px}" cy="${py}" r="${o.markers ? 3.5 : 6}"/>`;
+        if (o.labels) svg += `<text class="sk-label" x="${px}" y="${r2(py - 7)}" text-anchor="middle">${esc(s.col.fmt(s.values[i]!))}</text>`;
       }
     }
-    if (y.domain[0] < 0) svg += `<line class="sk-axis" x1="${left}" x2="${W - right}" y1="${r2(y(0))}" y2="${r2(y(0))}"/>`;
+    if (!y.log && y.domain[0] < 0 && y.domain[1] > 0) svg += `<line class="sk-axis" x1="${left}" x2="${W - right}" y1="${r2(y(0))}" y2="${r2(y(0))}"/>`;
     svg += `<line class="sk-axis" x1="${left}" x2="${W - right}" y1="${H - bottom}" y2="${H - bottom}"/>`;
+    for (const r of refs) {
+      const yy = r2(y(r.v));
+      if (yy < top - 0.5 || yy > H - bottom + 0.5) continue;
+      svg += `<line class="sk-ref${r.tone ? ` sk-tone-${r.tone}` : ''}" x1="${left}" x2="${W - right}" y1="${yy}" y2="${yy}"/><text class="sk-ref-label${r.tone ? ` sk-tone-${r.tone}` : ''}" x="${W - right - 3}" y="${r2(yy - 4)}" text-anchor="end">${esc(r.label)}</text>`;
+    }
+    if (o.yTitle) svg += `<text class="sk-axis-title" transform="translate(${fs + 1},${r2((top + H - bottom) / 2)}) rotate(-90)" text-anchor="middle">${esc(o.yTitle)}</text>`;
+    if (y2 && o.y2Title) svg += `<text class="sk-axis-title" transform="translate(${W - 5},${r2((top + H - bottom) / 2)}) rotate(90)" text-anchor="middle">${esc(o.y2Title)}</text>`;
+    if (o.xTitle) svg += `<text class="sk-axis-title" x="${r2((left + W - right) / 2)}" y="${H - 3}" text-anchor="middle">${esc(o.xTitle)}</text>`;
+    // Marks outside fixed ends are cut at the plot (with room for line markers).
+    svg = `<defs><clipPath id="${clip}"><rect x="${left - 6}" y="${top - 6}" width="${r2(W - right - left + 12)}" height="${r2(H - bottom - top + 6)}"/></clipPath></defs>` + svg;
   }
   const legendTop = o.legend !== 'bottom';
-  ctx.el.innerHTML = `<div class="sk-chart">${legendTop ? legend : ''}<svg class="sk-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${svg}</svg>${legendTop ? '' : legend}</div>`;
+  return `<div class="sk-chart">${legendTop ? legend : ''}<svg class="sk-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${svg}<g clip-path="url(#${clip})">${plot}</g></svg>${legendTop ? '' : legend}</div>`;
+}
+
+/** Draw a cartesian chart: one plot, or with a `multiples` field a grid of small plots sharing one scale. */
+function render(ctx: ChartContext, kindFor: (role: string, i: number) => Kind, axisFor: (role: string) => 0 | 1, o: ChartOpts): void {
+  const all = prepare(ctx, kindFor, axisFor);
+  const legendOf = (p: Prepared) => {
+    const show = o.legend !== 'none' && (p.series.length > 1 || o.legend !== 'auto');
+    return show ? legendHtml(p.series.map((s) => s.name), ctx.palette) : '';
+  };
+  const facet = ctx.data.role('multiples')[0];
+  if (!facet || !ctx.data.rows) {
+    ctx.el.innerHTML = cartesianHtml(ctx, ctx, all, o, legendOf(all));
+    return;
+  }
+  // Small multiples: a panel per value of the field, the same categories, series and value scale in each.
+  const groups = new Map<unknown, number[]>();
+  for (let r = 0; r < ctx.data.rows; r++) {
+    const v = facet.values[r];
+    const k = typeof v === 'bigint' ? Number(v) : v;
+    let g = groups.get(k);
+    if (!g) groups.set(k, (g = []));
+    g.push(r);
+  }
+  const MAX = 24;
+  const keys = [...groups.keys()];
+  const shown = keys.slice(0, MAX);
+  const panels = shown.map((k) => ({ title: facet.fmt(facet.values[groups.get(k)![0]!]!), p: prepare(ctx, kindFor, axisFor, groups.get(k), all) }));
+  for (const { p } of panels) stackSeries(p, o.stack, o.horizontal ? ['bar'] : ['bar', 'area']);
+  const ext = [
+    [Infinity, -Infinity],
+    [Infinity, -Infinity],
+  ] as [number, number][];
+  for (const { p } of panels) {
+    const e = extents(p, o);
+    for (const a of [0, 1]) {
+      ext[a]![0] = Math.min(ext[a]![0], e[a]![0]);
+      ext[a]![1] = Math.max(ext[a]![1], e[a]![1]);
+    }
+  }
+  const legend = legendOf(all);
+  const legendH = legend ? 24 : 0;
+  const W = Math.max(60, ctx.width);
+  const H = Math.max(40, ctx.height - legendH - (keys.length > MAX ? 18 : 0));
+  const n = panels.length;
+  // Columns so that panels come out about 1.4 times as wide as they are tall.
+  let cols = Math.max(1, Math.min(n, Math.round(Math.sqrt((n * W) / (H * 1.4)))));
+  while (cols < n && W / cols > 140 && Math.ceil(n / cols) * 90 > H) cols++;
+  const rows = Math.ceil(n / cols);
+  const pw = Math.floor((W - (cols - 1) * 8) / cols);
+  const ph = Math.max(60, Math.floor((H - (rows - 1) * 8) / rows) - 18);
+  const po: ChartOpts = { ...o, legend: 'none', ext, xTitle: '', yTitle: '', y2Title: '' };
+  const cells = panels.map(({ title, p }) => `<div class="sk-panel"><div class="sk-panel-title">${esc(title)}</div>${cartesianHtml(ctx, { ...ctx, width: pw, height: ph }, p, po, '')}</div>`).join('');
+  const more = keys.length > MAX ? `<div class="sk-more">Showing ${MAX} of ${keys.length} panels</div>` : '';
+  const legendTop = o.legend !== 'bottom';
+  ctx.el.innerHTML = `<div class="sk-chart sk-multiples-wrap">${legendTop ? legend : ''}<div class="sk-multiples" style="grid-template-columns:repeat(${cols},${pw}px)">${cells}</div>${more}${legendTop ? '' : legend}</div>`;
 }
 
 function dim(ctx: ChartContext, row: number | undefined): string {
@@ -373,6 +575,8 @@ function dim(ctx: ChartContext, row: number | undefined): string {
 
 function opts(ctx: ChartContext, horizontal: boolean): ChartOpts {
   const o = ctx.options;
+  const num = (v: unknown) => (v === undefined || v === null || v === '' || !Number.isFinite(Number(v)) ? undefined : Number(v));
+  const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
   return {
     horizontal,
     stack: String(o.stack ?? 'none'),
@@ -381,39 +585,50 @@ function opts(ctx: ChartContext, horizontal: boolean): ChartOpts {
     labels: !!o.labels,
     legend: String(o.legend ?? 'auto'),
     secondary: o.secondaryAxis !== false,
+    continuous: o.xAxis === 'continuous',
+    log: o.yScale === 'log',
+    min: num(o.yMin),
+    max: num(o.yMax),
+    xTitle: str(o.xTitle),
+    yTitle: str(o.yTitle),
+    y2Title: str(o.y2Title),
+    refLines: Array.isArray(o.refLines) ? (o.refLines as RefLine[]) : [],
   };
 }
 
-
-/** Horizontal bars. Roles: `category`, optional `series`, measures. Options: stack (none, stacked, percent), labels, legend. */
+/**
+ * Horizontal bars. Roles: `category`, optional `series` and `multiples` (small multiples), measures. Options: stack
+ * (none, stacked, percent), labels, legend, and the value axis: yScale (linear, log), yMin, yMax, refLines, xTitle,
+ * yTitle.
+ */
 export function barChart(ctx: ChartContext): void {
-  render(ctx, prepare(ctx, () => 'bar', () => 0), opts(ctx, true));
+  render(ctx, () => 'bar', () => 0, opts(ctx, true));
 }
 
-/** Vertical columns. Same roles and options as barChart. */
+/** Vertical columns. Same roles and options as barChart, and xAxis: category (default) or continuous (dates, numbers). */
 export function columnChart(ctx: ChartContext): void {
-  render(ctx, prepare(ctx, () => 'bar', () => 0), opts(ctx, false));
+  render(ctx, () => 'bar', () => 0, opts(ctx, false));
 }
 
-/** Lines. Roles as barChart. Options: smooth, markers, labels, legend. */
+/** Lines. Roles as barChart. Options: smooth, markers, labels, legend, xAxis and the axis options of columnChart. */
 export function lineChart(ctx: ChartContext): void {
-  render(ctx, prepare(ctx, () => 'line', () => 0), opts(ctx, false));
+  render(ctx, () => 'line', () => 0, opts(ctx, false));
 }
 
-/** Areas. Roles as barChart. Options: stack, smooth, markers, labels, legend. */
+/** Areas. Roles as barChart. Options: stack, smooth, markers, labels, legend, and the axis options of columnChart. */
 export function areaChart(ctx: ChartContext): void {
-  render(ctx, prepare(ctx, () => 'area', () => 0), opts(ctx, false));
+  render(ctx, () => 'area', () => 0, opts(ctx, false));
 }
 
-/** Columns and lines: measures in role `columns` are bars, in role `lines` are lines (option secondaryAxis puts them on a second axis). */
+/**
+ * Columns and lines: measures in role `columns` are bars, in role `lines` are lines (option secondaryAxis puts them on
+ * a second axis, titled by y2Title). The axis options of columnChart apply.
+ */
 export function comboChart(ctx: ChartContext): void {
   render(
     ctx,
-    prepare(
-      ctx,
-      (role) => (role === 'lines' ? 'line' : 'bar'),
-      (role) => (role === 'lines' && ctx.options.secondaryAxis !== false ? 1 : 0),
-    ),
+    (role) => (role === 'lines' ? 'line' : 'bar'),
+    (role) => (role === 'lines' && ctx.options.secondaryAxis !== false ? 1 : 0),
     { ...opts(ctx, false), markers: true },
   );
 }
