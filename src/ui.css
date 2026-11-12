@@ -83,6 +83,14 @@
 .sk-axis-title { font-size: var(--sk-fs-label); fill: var(--sk-muted); font-weight: 600; }
 .sk-gridline { stroke: var(--sk-grid); stroke-width: 1; opacity: var(--sk-gridlines); shape-rendering: crispEdges; }
 .sk-axis { stroke: color-mix(in oklab, var(--sk-muted) 45%, transparent); stroke-width: 1; shape-rendering: crispEdges; }
+.sk-ref { stroke: var(--sk-muted); stroke-width: 1.25; stroke-dasharray: 5 3; fill: none; color: var(--sk-muted); }
+.sk-ref.sk-tone-good, .sk-ref.sk-tone-bad, .sk-ref.sk-tone-warn, .sk-ref.sk-tone-accent { stroke: currentColor; }
+.sk-ref-label { font-size: var(--sk-fs-label); fill: var(--sk-muted); paint-order: stroke; stroke: var(--sk-surface); stroke-width: 3px; stroke-linejoin: round; }
+.sk-ref-label.sk-tone-good, .sk-ref-label.sk-tone-bad, .sk-ref-label.sk-tone-warn, .sk-ref-label.sk-tone-accent { fill: currentColor; }
+.sk-multiples { display: grid; gap: 8px; overflow: auto; flex: 1; min-height: 0; }
+.sk-panel { display: flex; flex-direction: column; min-width: 0; }
+.sk-panel-title { font-size: var(--sk-fs-label); font-weight: 600; color: var(--sk-text); height: 18px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-more { font-size: var(--sk-fs-label); color: var(--sk-muted); padding-top: 4px; height: 18px; }
 .sk-mark { cursor: pointer; transition: opacity 0.18s, filter 0.18s; }
 .sk-bar, .sk-tile, .sk-slice, .sk-dot { fill: var(--c); }
 .sk-bar { rx: calc(var(--sk-bar-radius) * 1px); }

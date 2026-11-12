@@ -99,6 +99,52 @@ test('table and matrix', () => {
   assert.match(m.el.innerHTML, /sk-rowhead[^>]*>EU</);
 });
 
+test('axis options: continuous dates, log scale, fixed ends, reference lines, titles', () => {
+  // Uneven dates: the gap between Jan and Jun is five times the gap between Jun and Jul.
+  const dates = col('d', 'category', 'dimension', ['2025-07-01', '2025-01-01', '2025-06-01']);
+  dates.type = 'date';
+  const v = col('v', 'values', 'measure', [30, 10, 20]);
+  const c = ctx([dates, v], { xAxis: 'continuous' });
+  charts.lineChart(c);
+  const xs = [...c.el.innerHTML.matchAll(/<circle[^>]*data-row="(\d)" cx="([\d.]+)"/g)].map((m) => [Number(m[1]), Number(m[2])]);
+  assert.deepEqual(xs.map(([r]) => r), [1, 2, 0], 'sorted by date');
+  const [a, b, d] = xs.map(([, x]) => x);
+  assert.ok(Math.abs((b! - a!) / (d! - b!) - 151 / 30) < 0.05, `positions follow the dates: ${xs}`);
+  assert.match(c.el.innerHTML, />Mar 2025</, 'calendar ticks');
+  // Categories that aren't dates or numbers stay as bands.
+  const bands = ctx([col('c', 'category', 'dimension', cats), col('v', 'values', 'measure', revenue)], { xAxis: 'continuous' });
+  charts.lineChart(bands);
+  assert.match(bands.el.innerHTML, />Coffee</);
+
+  const big = col('v', 'values', 'measure', [5, 500, 50000]);
+  const lg = ctx([col('c', 'category', 'dimension', cats), big], { yScale: 'log', yTitle: 'Revenue', xTitle: 'Product' });
+  charts.columnChart(lg);
+  for (const t of ['1', '10', '100', '1K', '10K', '100K']) assert.match(lg.el.innerHTML, new RegExp(`class="sk-tick"[^>]*>${t}<`), `log tick ${t}`);
+  assert.match(lg.el.innerHTML, /class="sk-axis-title" transform="[^"]*rotate\(-90\)"[^>]*>Revenue</);
+  assert.match(lg.el.innerHTML, /class="sk-axis-title" x="[^"]*"[^>]*>Product</);
+
+  const fixed = ctx([col('c', 'category', 'dimension', cats), col('v', 'values', 'measure', revenue)], { yMin: 100, yMax: 200, refLines: [{ stat: 'avg' }, { value: 150, label: 'Target', tone: 'good' }] });
+  charts.columnChart(fixed);
+  assert.doesNotMatch(fixed.el.innerHTML, /class="sk-tick"[^>]*>(0|50|250)</, 'ticks inside the fixed ends');
+  assert.match(fixed.el.innerHTML, /<g clip-path="url\(#sk-clip-\d+\)"><rect/, 'marks are clipped to the plot');
+  assert.match(fixed.el.innerHTML, /class="sk-ref sk-tone-good"[^>]*\/><text class="sk-ref-label sk-tone-good"[^>]*>Target: 150</);
+});
+
+test('small multiples: a panel per value, one scale, rows kept', () => {
+  const region = col('g', 'multiples', 'dimension', ['EU', 'EU', 'US', 'US']);
+  const product = col('c', 'category', 'dimension', ['Tea', 'Coffee', 'Tea', 'Coffee']);
+  const v = col('v', 'values', 'measure', [10, 20, 30, 400]);
+  const c = ctx([region, product, v], { legend: 'none' });
+  charts.columnChart(c);
+  const panels = c.el.innerHTML.match(/<div class="sk-panel">/g) ?? [];
+  assert.equal(panels.length, 2);
+  assert.match(c.el.innerHTML, /sk-panel-title">EU</);
+  for (const r of [0, 1, 2, 3]) assert.match(c.el.innerHTML, new RegExp(`data-row="${r}"`));
+  // The same value scale in both panels: the EU panel's ticks reach 400 too.
+  const eu = c.el.innerHTML.split('sk-panel-title">US')[0]!;
+  assert.match(eu, /class="sk-tick"[^>]*>400</);
+});
+
 test('stepped matrix: parents with subtotals, collapse, tabular layout', () => {
   const region = col('r', 'rows', 'dimension', ['EU', 'EU', 'EU', 'US']);
   const country = col('c', 'rows', 'dimension', ['DE', 'DE', 'FR', 'NY']);

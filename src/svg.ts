@@ -34,6 +34,8 @@ export interface Linear {
   domain: [number, number];
   range: [number, number];
   ticks: number[];
+  /** A log scale (from logScale). */
+  log?: boolean;
 }
 
 export function linear(lo: number, hi: number, r0: number, r1: number, opts: { zero?: boolean; nice?: boolean; count?: number } = {}): Linear {
@@ -54,6 +56,108 @@ export function linear(lo: number, hi: number, r0: number, r1: number, opts: { z
   f.range = [r0, r1];
   f.ticks = ticks;
   return f;
+}
+
+/** A log-10 scale over [lo, hi] (both > 0): ticks at 1, 10, 100… (with 2 and 5 between when there are few decades). */
+export function logScale(lo: number, hi: number, r0: number, r1: number): Linear {
+  if (!(lo > 0)) lo = 1;
+  if (!(hi > lo)) hi = lo * 10;
+  const a = Math.floor(Math.log10(lo) + 1e-9);
+  const b = Math.ceil(Math.log10(hi) - 1e-9);
+  const d0 = 10 ** a;
+  const d1 = 10 ** Math.max(b, a + 1);
+  const span = Math.log10(d1) - Math.log10(d0);
+  const f = ((v: number) => (v > 0 ? r0 + ((Math.log10(v) - Math.log10(d0)) / span) * (r1 - r0) : r0)) as Linear;
+  f.domain = [d0, d1];
+  f.range = [r0, r1];
+  f.log = true;
+  const ticks: number[] = [];
+  for (let e = a; e <= Math.max(b, a + 1); e++) for (const m of span <= 2 ? [1, 2, 5] : [1]) if (m * 10 ** e <= d1 * (1 + 1e-9)) ticks.push(+(m * 10 ** e).toPrecision(12));
+  f.ticks = ticks;
+  return f;
+}
+
+/**
+ * A value axis: linear (from zero unless `min` is given) or, with `log` and positive values, log 10. `min` and `max`
+ * fix the ends; the nice ticks inside them are kept.
+ */
+export function valueScale(lo: number, hi: number, r0: number, r1: number, opts: { count?: number; log?: boolean; min?: number; max?: number } = {}): Linear {
+  const { min, max } = opts;
+  if (opts.log && (min ?? lo) > 0) {
+    const s = logScale(min ?? lo, max ?? hi, r0, r1);
+    if (min === undefined && max === undefined) return s;
+    return withDomain(s, min ?? s.domain[0], max ?? s.domain[1]);
+  }
+  const s = linear(min ?? lo, max ?? hi, r0, r1, { count: opts.count, zero: min === undefined });
+  if (min === undefined && max === undefined) return s;
+  return withDomain(s, min ?? s.domain[0], max ?? s.domain[1]);
+}
+
+/** The same kind of scale over a new range (for laying out once the margins are known). */
+export function rescale(s: Linear, r0: number, r1: number): Linear {
+  const f = s.log ? withDomain(logScale(s.domain[0], s.domain[1], r0, r1), s.domain[0], s.domain[1]) : linear(s.domain[0], s.domain[1], r0, r1, { nice: false, zero: false });
+  f.ticks = s.ticks;
+  return f;
+}
+
+function withDomain(s: Linear, d0: number, d1: number): Linear {
+  if (!(d1 > d0)) d1 = d0 + (s.log ? d0 * 9 : 1);
+  const [r0, r1] = s.range;
+  const t = (v: number) => (s.log ? Math.log10(Math.max(v, Number.MIN_VALUE)) : v);
+  const span = t(d1) - t(d0);
+  const f = ((v: number) => (s.log && !(v > 0) ? r0 : r0 + ((t(v) - t(d0)) / span) * (r1 - r0))) as Linear;
+  f.domain = [d0, d1];
+  f.range = [r0, r1];
+  f.log = s.log;
+  const eps = (d1 - d0) * 1e-9;
+  f.ticks = s.ticks.filter((v) => v >= d0 - eps && v <= d1 + eps);
+  return f;
+}
+
+const DAY = 86400000;
+
+/** A date or time value as milliseconds (UTC), or NaN: ISO strings ("2025-03-01", "2025-03"), epoch numbers. */
+export function timeValue(v: unknown): number {
+  if (typeof v === 'number') return v > 1e11 ? v : v * 1000;
+  if (typeof v !== 'string') return NaN;
+  const m = /^(\d{4})-(\d{2})(?:-(\d{2}))?(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(v);
+  if (!m) return NaN;
+  return Date.UTC(+m[1]!, +m[2]! - 1, m[3] ? +m[3] : 1, m[4] ? +m[4] : 0, m[5] ? +m[5] : 0, m[6] ? +m[6] : 0);
+}
+
+/**
+ * Calendar ticks between two times (ms, UTC): whole days, weeks, months, quarters or years, about `count` of them,
+ * with the date pattern that suits the step ("YYYY", "MMM YYYY", "D MMM").
+ */
+export function timeTicks(lo: number, hi: number, count = 5): { ticks: number[]; pattern: string } {
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return { ticks: [], pattern: 'YYYY-MM-DD' };
+  const span = Math.max(hi - lo, DAY);
+  const steps: [number, 'd' | 'm' | 'y', string][] = [
+    [1, 'd', 'D MMM'], [2, 'd', 'D MMM'], [7, 'd', 'D MMM'], [14, 'd', 'D MMM'],
+    [1, 'm', 'MMM YYYY'], [2, 'm', 'MMM YYYY'], [3, 'm', 'MMM YYYY'], [6, 'm', 'MMM YYYY'],
+    [1, 'y', 'YYYY'], [2, 'y', 'YYYY'], [5, 'y', 'YYYY'], [10, 'y', 'YYYY'], [25, 'y', 'YYYY'], [50, 'y', 'YYYY'], [100, 'y', 'YYYY'],
+  ];
+  const approx = (n: number, u: string) => n * (u === 'd' ? DAY : u === 'm' ? 30.44 * DAY : 365.25 * DAY);
+  const [n, unit, pattern] = steps.find(([k, u]) => span / approx(k, u) <= Math.max(1, count)) ?? steps.at(-1)!;
+  const d = new Date(lo);
+  let t: number;
+  if (unit === 'd') {
+    t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    if (n === 7 || n === 14) t += ((8 - new Date(t).getUTCDay()) % 7) * DAY; // Mondays
+  } else if (unit === 'm') {
+    const mo = Math.ceil((d.getUTCMonth() + (d.getUTCDate() > 1 || d.getUTCHours() ? 1 : 0)) / n) * n;
+    t = Date.UTC(d.getUTCFullYear(), mo, 1);
+  } else {
+    const y = d.getUTCFullYear() + (d.getUTCMonth() || d.getUTCDate() > 1 ? 1 : 0);
+    t = Date.UTC(Math.ceil(y / n) * n, 0, 1);
+  }
+  const ticks: number[] = [];
+  for (let i = 0; t <= hi && i < 1000; i++) {
+    if (t >= lo) ticks.push(t);
+    const x = new Date(t);
+    t = unit === 'd' ? t + n * DAY : unit === 'm' ? Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + n, 1) : Date.UTC(x.getUTCFullYear() + n, 0, 1);
+  }
+  return { ticks, pattern };
 }
 
 export interface Band {
