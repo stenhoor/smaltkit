@@ -1,7 +1,7 @@
 // Tables: a flat table (sortable headers, totals row, data bars or heat colours) and a pivot matrix
 // (row and column dimensions, row / column / grand totals). HTML, styled by ui.css.
 import type { Value } from './format.js';
-import type { ChartColumn, ChartContext, ChartData } from './charts.js';
+import { cellFormatHtml, type ChartColumn, type ChartContext, type ChartData } from './charts.js';
 import { esc, seqColor, toNum } from './svg.js';
 
 function rowClass(ctx: ChartContext, row: number): string {
@@ -70,7 +70,11 @@ export function tableView(ctx: ChartContext): void {
       cols.forEach((c, i) => {
         const v = c.values[r]!;
         const num = c.kind === 'measure';
-        html += `<td class="${num ? 'sk-num' : ''}"${num ? cellStyle(ctx.options.format, toNum(v), ext[i]!) : ''}>${esc(c.fmt(v))}</td>`;
+        const f = num ? ctx.cellFormat?.(c, r) : null;
+        const cf = cellFormatHtml(f);
+        // A filled conditional format replaces the heat colour (both are the cell's background).
+        const style = num && !(f?.fill && f.tone) ? cellStyle(ctx.options.format, toNum(v), ext[i]!) : '';
+        html += `<td class="${(num ? 'sk-num' : '') + cf.cls}"${style}>${cf.icon}${esc(c.fmt(v))}</td>`;
       });
       html += '</tr>';
     }
@@ -188,7 +192,12 @@ export function matrixView(ctx: ChartContext): void {
         const r = cell.get(ri + '|' + c);
         ms.forEach((m, mi) => {
           if (r === undefined) html += '<td class="sk-num"></td>';
-          else html += `<td class="sk-num sk-mark${rowClass(ctx, r)}" data-row="${r}"${cellStyle(ctx.options.format, toNum(m.values[r]!), ext[mi]!)}>${esc(m.fmt(m.values[r]!))}</td>`;
+          else {
+            const f = ctx.cellFormat?.(m, r);
+            const cf = cellFormatHtml(f);
+            const style = f?.fill && f.tone ? '' : cellStyle(ctx.options.format, toNum(m.values[r]!), ext[mi]!);
+            html += `<td class="sk-num sk-mark${rowClass(ctx, r)}${cf.cls}" data-row="${r}"${style}>${cf.icon}${esc(m.fmt(m.values[r]!))}</td>`;
+          }
         });
       }
       if (rt) {

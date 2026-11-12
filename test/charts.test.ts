@@ -98,3 +98,33 @@ test('table and matrix', () => {
   assert.match(m.el.innerHTML, /sk-matrix/);
   assert.match(m.el.innerHTML, /sk-rowhead[^>]*>EU</);
 });
+
+test('conditional formatting: tone, fill and icon in tables, matrices and KPI cards', () => {
+  const values = col('v', 'values', 'measure', revenue);
+  // Above 100 is good (filled), below 100 bad with a down arrow.
+  const cellFormat = (c: ChartColumn, row: number) => {
+    const v = Number(c.values[row]);
+    return v > 100 ? { tone: 'good' as const, fill: true } : { tone: 'bad' as const, icon: 'down' as const };
+  };
+  const t = { ...ctx([col('c', 'columns', 'dimension', cats), values], { format: 'heat' }), cellFormat };
+  tableView(t);
+  const cells = t.el.innerHTML.match(/<td class="sk-num[^"]*"[^>]*>.*?<\/td>/g)!;
+  assert.equal(cells.length, 3);
+  assert.match(cells[0]!, /class="sk-num sk-tone-good sk-fill">120</, 'filled: no heat style, which would hide the fill');
+  assert.match(cells[2]!, /class="sk-num sk-tone-bad" style="background:[^"]*"><svg class="sk-cf-icon"[^>]*><path d="M12 21/, 'text tone keeps the heat colour; down arrow first');
+  // Dimensions are never formatted.
+  assert.doesNotMatch(t.el.innerHTML, /<td class=" ?sk-tone/);
+
+  const m = { ...ctx([col('r', 'rows', 'dimension', ['EU', 'EU', 'US']), col('k', 'columns', 'dimension', ['Tea', 'Coffee', 'Tea']), col('v', 'values', 'measure', [50, 150, 250])]), cellFormat };
+  matrixView(m);
+  assert.equal((m.el.innerHTML.match(/sk-tone-good sk-fill/g) ?? []).length, 2);
+  assert.equal((m.el.innerHTML.match(/sk-tone-bad/g) ?? []).length, 1);
+
+  const k = { ...ctx([col('v', 'values', 'measure', [42])]), cellFormat };
+  charts.kpiCard(k);
+  assert.match(k.el.innerHTML, /<div class="sk-kpi-value sk-tone-bad"><svg class="sk-cf-icon"/);
+  // Without a hook, nothing changes.
+  const plain = ctx([col('v', 'values', 'measure', [42])]);
+  charts.kpiCard(plain);
+  assert.match(plain.el.innerHTML, /<div class="sk-kpi-value">42</);
+});

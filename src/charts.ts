@@ -59,6 +59,42 @@ export interface ChartContext {
   selected(row: number): boolean | null;
   /** Row limit the data was fetched with (tables say when they hit it). */
   limit?: number;
+  /**
+   * Conditional formatting: how to show one measure value (a table cell, a matrix cell, a KPI card's value) of a
+   * column at a data row. The app decides from its own rules; null or undefined leaves the value plain.
+   */
+  cellFormat?(column: ChartColumn, row: number): CellFormat | null | undefined;
+}
+
+/** A value's tone: its text colour, or its background with `fill`. Status tones always come with the value itself. */
+export type CellTone = 'good' | 'bad' | 'warn' | 'accent';
+export type CellIcon = 'up' | 'down' | 'flat' | 'check' | 'cross' | 'warn' | 'dot';
+
+export interface CellFormat {
+  tone?: CellTone;
+  /** Colour the cell's background with the tone instead of the text. */
+  fill?: boolean;
+  /** An icon before the value, in the tone's colour. */
+  icon?: CellIcon;
+}
+
+const ICON_PATHS: Record<CellIcon, string> = {
+  // Chevron style (smalt-brand): solid shapes, edges at 0°, 45° and 90°.
+  up: 'M12 3L21 12H15V21H9V12H3Z',
+  down: 'M12 21L3 12H9V3H15V12H21Z',
+  flat: 'M3 9.5H15V5L22 12L15 19V14.5H3Z',
+  check: 'M3 12.5L6.5 9L10 12.5L17.5 5L21 8.5L10 19.5Z',
+  cross: 'M5.5 3L12 9.5L18.5 3L21 5.5L14.5 12L21 18.5L18.5 21L12 14.5L5.5 21L3 18.5L9.5 12L3 5.5Z',
+  warn: 'M10 3H14V15H10ZM10 17H14V21H10Z',
+  dot: 'M7 7H17V17H7Z',
+};
+
+/** The classes and icon markup for a value's conditional format ('' when there is none). */
+export function cellFormatHtml(f: CellFormat | null | undefined): { cls: string; icon: string } {
+  if (!f) return { cls: '', icon: '' };
+  const cls = (f.tone ? ` sk-tone-${f.tone}` : '') + (f.fill && f.tone ? ' sk-fill' : '');
+  const icon = f.icon && ICON_PATHS[f.icon] ? `<svg class="sk-cf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON_PATHS[f.icon]}"/></svg>` : '';
+  return { cls, icon };
 }
 
 /** A legend (HTML) for series names. */
@@ -649,7 +685,8 @@ export function kpiCard(ctx: ChartContext): void {
         spark = `<svg class="sk-spark" width="${w}" height="${h}" preserveAspectRatio="none"><path class="sk-area sk-c0" d="M${xOf(idx[0]!)},${h}L${pts.join('L')}L${xOf(idx[idx.length - 1]!)},${h}Z"/><path class="sk-line sk-c0" d="M${pts.join('L')}"/></svg>`;
     }
     const caption = String(ctx.options.caption || v.label);
-    ctx.el.innerHTML = `<div class="sk-kpi"><div class="sk-kpi-value">${esc(v.fmt(val))}</div><div class="sk-kpi-caption">${esc(caption)}</div>${cmp}${spark}</div>`;
+    const cf = cellFormatHtml(ctx.data.rows ? ctx.cellFormat?.(v, 0) : null);
+    ctx.el.innerHTML = `<div class="sk-kpi"><div class="sk-kpi-value${cf.cls}">${cf.icon}${esc(v.fmt(val))}</div><div class="sk-kpi-caption">${esc(caption)}</div>${cmp}${spark}</div>`;
   }
 
 /** Scatter / bubble chart: roles `x`, `y`, optional `size` and `legend`; one point per row. */
