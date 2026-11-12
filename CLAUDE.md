@@ -21,8 +21,8 @@ copy here: lines and roles change, and a copy taken before the change is out of 
 ## Commands
 
 ```bash
-npm install            # prepare builds dist/ (tsc -p tsconfig.build.json)
-npm run typecheck      # tsc --noEmit, strict, over src/ and test/ (CI runs it)
+npm install            # prepare builds dist/ (tsc -p tsconfig.build.json: TypeScript 6.0.3, which emits)
+npm run typecheck      # TypeScript 7's tsc (typescript7), strict, no emit, over src/ and test/ (CI runs it)
 npm test               # build, then node --test test/*.test.ts against the built package
 ```
 
