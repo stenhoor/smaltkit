@@ -131,16 +131,32 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-spark { display: block; width: 100%; margin-top: auto; }
 .sk-spark .sk-line { stroke-width: 1.5; }
 
-.sk-table-wrap { height: 100%; overflow: auto; scrollbar-width: thin; }
+.sk-table-box { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.sk-table-wrap { height: 100%; flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; }
+.sk-pager { flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 2px; padding: 6px 2px 0; font-size: var(--sk-fs-label); color: var(--sk-muted); font-variant-numeric: tabular-nums; }
+.sk-pager-info { margin-right: auto; }
+.sk-pager-page { padding: 0 6px; }
+.sk-pager-btn { all: unset; cursor: pointer; min-width: 22px; height: 22px; text-align: center; border-radius: 4px; color: var(--sk-text); }
+.sk-pager-btn:hover:not([disabled]) { background: color-mix(in oklab, var(--sk-accent) 10%, transparent); }
+.sk-pager-btn[disabled] { opacity: 0.35; cursor: default; }
+.sk-pager-btn:focus-visible { outline: 2px solid var(--sk-focus); }
+.sk-col-resize { position: absolute; top: 0; right: -3px; width: 7px; height: 100%; cursor: col-resize; z-index: 2; }
+.sk-col-resize:hover, .sk-col-resize:active { background: linear-gradient(90deg, transparent 3px, var(--sk-accent) 3px, var(--sk-accent) 4px, transparent 4px); }
+.sk-table .sk-frozen { position: sticky; z-index: 1; background: var(--sk-surface); }
+.sk-table thead .sk-frozen, .sk-table tfoot .sk-frozen { z-index: 3; }
+.sk-table .sk-frozen-last { box-shadow: inset -1px 0 0 var(--sk-border); }
+.sk-table tbody tr.sk-mark:hover td.sk-frozen { background: color-mix(in oklab, var(--sk-accent) 7%, var(--sk-surface)); }
+.sk-table tr.sk-on td.sk-frozen { background: color-mix(in oklab, var(--sk-sel) 14%, var(--sk-surface)); }
+.sk-table[style*="table-layout"] td { max-width: none; }
 .sk-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--sk-fs-sub); font-variant-numeric: tabular-nums; }
-.sk-table th { position: sticky; top: 0; z-index: 1; background: var(--sk-surface); text-align: left; font-weight: 600; color: var(--sk-muted); font-size: var(--sk-fs-label); text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px; border-bottom: 1px solid var(--sk-border); cursor: default; white-space: nowrap; }
+.sk-table th { position: sticky; top: 0; z-index: 2; background: var(--sk-surface); text-align: left; font-weight: 600; color: var(--sk-muted); font-size: var(--sk-fs-label); text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px; border-bottom: 1px solid var(--sk-border); cursor: default; white-space: nowrap; }
 .sk-table thead th[data-col] { cursor: pointer; }
 .sk-table td { padding: 6px 10px; border-bottom: 1px solid var(--sk-grid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
 .sk-density-compact td { padding: 3px 8px; } .sk-density-relaxed td { padding: 10px 12px; }
 .sk-table .sk-num { text-align: right; font-family: var(--sk-font-num); }
 .sk-table tbody tr.sk-mark:hover td, .sk-table td.sk-mark:hover { background: color-mix(in oklab, var(--sk-accent) 7%, transparent); }
 .sk-table tr.sk-on td, .sk-table td.sk-on { background: color-mix(in oklab, var(--sk-sel) 14%, transparent); }
-.sk-table tfoot td, .sk-table tfoot th { position: sticky; bottom: 0; background: var(--sk-surface); font-weight: 650; border-top: 1px solid var(--sk-border); border-bottom: 0; color: var(--sk-text); text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); }
+.sk-table tfoot td, .sk-table tfoot th { position: sticky; bottom: 0; z-index: 2; background: var(--sk-surface); font-weight: 650; border-top: 1px solid var(--sk-border); border-bottom: 0; color: var(--sk-text); text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); }
 .sk-table td[data-bar] { background-image: linear-gradient(90deg, color-mix(in oklab, var(--sk-accent) 22%, transparent) var(--bar), transparent var(--bar)); background-repeat: no-repeat; }
 .sk-matrix th.sk-rowhead { position: static; text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); color: var(--sk-text); border-bottom-color: var(--sk-grid); font-weight: 500; }
 .sk-matrix th.sk-colhead { text-align: right; }

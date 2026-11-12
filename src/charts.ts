@@ -64,6 +64,11 @@ export interface ChartContext {
    * column at a data row. The app decides from its own rules; null or undefined leaves the value plain.
    */
   cellFormat?(column: ChartColumn, row: number): CellFormat | null | undefined;
+  /**
+   * The reader changed an option by hand (a table's column widths): the app may keep it (the designer saves it with the
+   * visual). Without it the change lasts while the element does.
+   */
+  setOption?(key: string, value: unknown): void;
 }
 
 /** A value's tone: its text colour, or its background with `fill`. Status tones always come with the value itself. */

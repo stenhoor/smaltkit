@@ -37,12 +37,24 @@ function cellStyle(mode: unknown, v: number, [lo, hi]: [number, number]): string
   return '';
 }
 
+/** A table's view state, per element: sort, page, and column widths set by dragging (until the app saves them). */
 const sortState = new WeakMap<object, { col: number; dir: 1 | -1 }>();
+const pageState = new WeakMap<object, number>();
+const widthState = new WeakMap<object, Record<string, number>>();
+
+/** The key a column's width is saved under: its field, else its label. */
+const widthKey = (c: ChartColumn) => c.ref ?? c.label;
 
 /**
  * Table. Roles: `columns` (dimensions) and `values` (measures); `extra.totals` (one row of the same
- * measures) adds a totals row. Options: format (none, bars, heat), density (compact, normal, relaxed).
- * Clicking a header sorts by it (when ctx.el is an element).
+ * measures) adds a totals row. Clicking a header sorts by it (when ctx.el is an element).
+ *
+ * Options:
+ * - format (none, bars, heat), density (compact, normal, relaxed).
+ * - pageSize: rows per page (0 or none: every row). A pager under the table moves between pages.
+ * - widths: column widths in px, by field (`ref`) or label. Dragging a header's right edge resizes a column and
+ *   calls ctx.setOption('widths', …) so the app can keep it.
+ * - freeze: how many leading columns stay in view when the table scrolls sideways (0 by default).
  */
 export function tableView(ctx: ChartContext): void {
     const { data } = ctx;
@@ -58,14 +70,31 @@ export function tableView(ctx: ChartContext): void {
       const c = cols[st.col]!;
       order.sort((a, b) => cmp(c.values[a]!, c.values[b]!) * st.dir);
     }
+    // Pages.
+    const size = Math.max(0, Math.floor(Number(ctx.options.pageSize) || 0));
+    const pages = size ? Math.max(1, Math.ceil(n / size)) : 1;
+    const page = Math.min(pages - 1, pageState.get(ctx.el) ?? 0);
+    const shown = size ? order.slice(page * size, page * size + size) : order;
+    // Widths: the app's saved ones, then any dragged since.
+    const widths: Record<string, number> = { ...((ctx.options.widths as Record<string, number> | undefined) ?? {}), ...(widthState.get(ctx.el) ?? {}) };
+    const widthOf = (c: ChartColumn) => {
+      const w = Number(widths[widthKey(c)]);
+      return Number.isFinite(w) && w >= 24 ? Math.round(w) : undefined;
+    };
+    const sized = cols.some((c) => widthOf(c) !== undefined);
+    const freeze = Math.max(0, Math.min(cols.length - 1, Math.floor(Number(ctx.options.freeze) || 0)));
+    const frozen = (i: number) => (i < freeze ? ` sk-frozen${i === freeze - 1 ? ' sk-frozen-last' : ''}" data-freeze="${i}` : '');
     const ext = cols.map((c) => (c.kind === 'measure' ? extent(c, n) : ([0, 0] as [number, number])));
-    let html = `<table class="sk-table sk-density-${esc(ctx.options.density)}"><thead><tr>`;
+    // With widths, a fixed layout: the sized columns keep their width, the others share what is left (at least 80px).
+    const tableStyle = sized ? ` style="table-layout:fixed;width:max(100%, ${cols.reduce((t, c) => t + (widthOf(c) ?? 80), 0)}px)"` : '';
+    let html = `<table class="sk-table sk-density-${esc(ctx.options.density)}${freeze ? ' sk-has-frozen' : ''}"${tableStyle}>`;
+    html += '<colgroup>' + cols.map((c) => `<col${widthOf(c) !== undefined ? ` style="width:${widthOf(c)}px"` : ''}>`).join('') + '</colgroup><thead><tr>';
     cols.forEach((c, i) => {
       const arrow = st?.col === i ? (st.dir === 1 ? ' ▲' : ' ▼') : '';
-      html += `<th data-col="${i}" class="${c.kind === 'measure' ? 'sk-num' : ''}">${esc(c.label)}${arrow}</th>`;
+      html += `<th data-col="${i}" class="${c.kind === 'measure' ? 'sk-num' : ''}${frozen(i)}"${st?.col === i ? ` aria-sort="${st.dir === 1 ? 'ascending' : 'descending'}"` : ''}>${esc(c.label)}${arrow}<span class="sk-col-resize" data-resize="${i}" title="Drag to resize; double-click to fit"></span></th>`;
     });
     html += '</tr></thead><tbody>';
-    for (const r of order) {
+    for (const r of shown) {
       html += `<tr class="sk-mark${rowClass(ctx, r)}" data-row="${r}">`;
       cols.forEach((c, i) => {
         const v = c.values[r]!;
@@ -74,7 +103,7 @@ export function tableView(ctx: ChartContext): void {
         const cf = cellFormatHtml(f);
         // A filled conditional format replaces the heat colour (both are the cell's background).
         const style = num && !(f?.fill && f.tone) ? cellStyle(ctx.options.format, toNum(v), ext[i]!) : '';
-        html += `<td class="${(num ? 'sk-num' : '') + cf.cls}"${style}>${cf.icon}${esc(c.fmt(v))}</td>`;
+        html += `<td class="${(num ? 'sk-num' : '') + cf.cls}${frozen(i)}"${style}>${cf.icon}${esc(c.fmt(v))}</td>`;
       });
       html += '</tr>';
     }
@@ -83,25 +112,104 @@ export function tableView(ctx: ChartContext): void {
     if (tot && tot.rows) {
       html += '<tfoot><tr>';
       cols.forEach((c, i) => {
-        if (c.kind !== 'measure') html += `<td>${i === 0 ? 'Total' : ''}</td>`;
+        if (c.kind !== 'measure') html += `<td class="${frozen(i)}">${i === 0 ? 'Total' : ''}</td>`;
         else {
           const t = tot.columns.find((x) => x.ref === c.ref && x.label === c.label) ?? tot.measures[cols.filter((x) => x.kind === 'measure').indexOf(c)];
-          html += `<td class="sk-num">${t ? esc(c.fmt(t.values[0]!)) : ''}</td>`;
+          html += `<td class="sk-num${frozen(i)}">${t ? esc(c.fmt(t.values[0]!)) : ''}</td>`;
         }
       });
       html += '</tr></tfoot>';
     }
     html += '</table>';
-    if (n >= (ctx.limit ?? 1000)) html += `<div class="sk-note">Showing the first ${n} rows</div>`;
-    ctx.el.innerHTML = `<div class="sk-table-wrap">${html}</div>`;
-    ctx.el.querySelector?.('thead')?.addEventListener('click', (e) => {
-      const th = (e.target as HTMLElement).closest('th');
+    const limited = n >= (ctx.limit ?? 1000);
+    let foot = '';
+    if (size && n > size) {
+      const from = page * size + 1;
+      const to = Math.min(n, from + size - 1);
+      foot = `<div class="sk-pager"><span class="sk-pager-info">${from.toLocaleString()}–${to.toLocaleString()} of ${n.toLocaleString()}${limited ? '+' : ''}</span><button type="button" class="sk-pager-btn" data-page="0"${page === 0 ? ' disabled' : ''} aria-label="First page">«</button><button type="button" class="sk-pager-btn" data-page="${page - 1}"${page === 0 ? ' disabled' : ''} aria-label="Previous page">‹</button><span class="sk-pager-page">${page + 1} / ${pages}</span><button type="button" class="sk-pager-btn" data-page="${page + 1}"${page >= pages - 1 ? ' disabled' : ''} aria-label="Next page">›</button><button type="button" class="sk-pager-btn" data-page="${pages - 1}"${page >= pages - 1 ? ' disabled' : ''} aria-label="Last page">»</button></div>`;
+    }
+    if (limited) foot += `<div class="sk-note">Showing the first ${n.toLocaleString()} rows</div>`;
+    ctx.el.innerHTML = `<div class="sk-table-box"><div class="sk-table-wrap">${html}</div>${foot}</div>`;
+    if (!ctx.el.querySelector) return;
+    const el = ctx.el as HTMLElement;
+    const table = el.querySelector('table') as HTMLTableElement | null;
+    // Frozen columns stick at the sum of the widths before them.
+    if (freeze && table) {
+      const ths = [...table.querySelectorAll<HTMLElement>('thead th')];
+      let left = 0;
+      const lefts = ths.slice(0, freeze).map((th) => {
+        const l = left;
+        left += th.getBoundingClientRect().width;
+        return l;
+      });
+      for (const cell of table.querySelectorAll<HTMLElement>('[data-freeze]')) cell.style.left = `${lefts[Number(cell.dataset.freeze)] ?? 0}px`;
+    }
+    el.querySelector('thead')?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.sk-col-resize')) return;
+      const th = target.closest('th');
       if (!th) return;
       const col = Number(th.dataset.col);
       const cur = sortState.get(ctx.el);
       sortState.set(ctx.el, { col, dir: cur?.col === col ? (-cur.dir as 1 | -1) : cols[col]!.kind === 'measure' ? -1 : 1 });
+      pageState.set(ctx.el, 0);
       tableView(ctx);
     });
+    el.querySelector('.sk-pager')?.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('button[data-page]') as HTMLButtonElement | null;
+      if (!btn || btn.disabled) return;
+      e.stopPropagation();
+      pageState.set(ctx.el, Number(btn.dataset.page));
+      tableView(ctx);
+      (el.querySelector('.sk-table-wrap') as HTMLElement | null)?.scrollTo?.({ top: 0 });
+    });
+    // Column resizing: drag a header's right edge; double-click fits the column to its content again.
+    const saveWidth = (i: number, w: number | undefined) => {
+      const key = widthKey(cols[i]!);
+      const next = { ...widths };
+      if (w === undefined) delete next[key];
+      else next[key] = Math.round(w);
+      widthState.set(ctx.el, next);
+      ctx.setOption?.('widths', Object.keys(next).length ? next : undefined);
+      tableView(ctx);
+    };
+    for (const handle of el.querySelectorAll<HTMLElement>('.sk-col-resize')) {
+      const i = Number(handle.dataset.resize);
+      handle.addEventListener('click', (e) => e.stopPropagation());
+      handle.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        saveWidth(i, undefined);
+      });
+      handle.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const th = handle.parentElement as HTMLElement;
+        const col = table?.querySelectorAll('col')[i] as HTMLElement | undefined;
+        const start = e.clientX;
+        const w0 = th.getBoundingClientRect().width;
+        let w = w0;
+        // Fix every column's current width first, so only this one moves.
+        if (table && !sized) {
+          const all = [...table.querySelectorAll<HTMLElement>('thead th')].map((x) => x.getBoundingClientRect().width);
+          table.querySelectorAll<HTMLElement>('col').forEach((c, j) => (c.style.width = `${all[j]}px`));
+          table.style.tableLayout = 'fixed';
+          table.style.width = `${all.reduce((a, b) => a + b, 0)}px`;
+        }
+        const total0 = table ? table.getBoundingClientRect().width : 0;
+        const move = (ev: PointerEvent) => {
+          w = Math.max(40, w0 + ev.clientX - start);
+          if (col) col.style.width = `${w}px`;
+          if (table) table.style.width = `${total0 - w0 + w}px`;
+        };
+        const up = () => {
+          removeEventListener('pointermove', move);
+          removeEventListener('pointerup', up);
+          if (Math.abs(w - w0) >= 2) saveWidth(i, w);
+        };
+        addEventListener('pointermove', move);
+        addEventListener('pointerup', up);
+      });
+    }
   }
 
 function cmp(a: Value, b: Value): number {
