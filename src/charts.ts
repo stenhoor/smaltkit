@@ -329,6 +329,8 @@ function cartesianHtml(ctx: ChartContext, f: Frame, p: Prepared, o: ChartOpts, l
 
   let svg = '';
   let plot = '';
+  /** Drawn over the marks: reference lines and their labels. */
+  let over = '';
   const catLabels = cats.map((c) => c.label);
   if (o.horizontal) {
     // Categories down the left, values along the bottom.
@@ -369,7 +371,7 @@ function cartesianHtml(ctx: ChartContext, f: Frame, p: Prepared, o: ChartOpts, l
     for (const r of refs) {
       const xx = r2(x(r.v));
       if (xx < left - 0.5 || xx > W - right + 0.5) continue;
-      svg += `<line class="sk-ref${r.tone ? ` sk-tone-${r.tone}` : ''}" x1="${xx}" x2="${xx}" y1="${top}" y2="${H - bottom}"/><text class="sk-ref-label${r.tone ? ` sk-tone-${r.tone}` : ''}" x="${r2(xx + 3)}" y="${top + 10}">${esc(r.label)}</text>`;
+      over += `<line class="sk-ref${r.tone ? ` sk-tone-${r.tone}` : ''}" x1="${xx}" x2="${xx}" y1="${top}" y2="${H - bottom}"/><text class="sk-ref-label${r.tone ? ` sk-tone-${r.tone}` : ''}" x="${r2(xx + 3)}" y="${top + 10}">${esc(r.label)}</text>`;
     }
     if (o.yTitle) svg += `<text class="sk-axis-title" transform="translate(${fs + 1},${r2((top + H - bottom) / 2)}) rotate(-90)" text-anchor="middle">${esc(o.yTitle)}</text>`;
     if (o.xTitle) svg += `<text class="sk-axis-title" x="${r2((left + W - right) / 2)}" y="${H - 3}" text-anchor="middle">${esc(o.xTitle)}</text>`;
@@ -500,7 +502,7 @@ function cartesianHtml(ctx: ChartContext, f: Frame, p: Prepared, o: ChartOpts, l
     for (const r of refs) {
       const yy = r2(y(r.v));
       if (yy < top - 0.5 || yy > H - bottom + 0.5) continue;
-      svg += `<line class="sk-ref${r.tone ? ` sk-tone-${r.tone}` : ''}" x1="${left}" x2="${W - right}" y1="${yy}" y2="${yy}"/><text class="sk-ref-label${r.tone ? ` sk-tone-${r.tone}` : ''}" x="${W - right - 3}" y="${r2(yy - 4)}" text-anchor="end">${esc(r.label)}</text>`;
+      over += `<line class="sk-ref${r.tone ? ` sk-tone-${r.tone}` : ''}" x1="${left}" x2="${W - right}" y1="${yy}" y2="${yy}"/><text class="sk-ref-label${r.tone ? ` sk-tone-${r.tone}` : ''}" x="${W - right - 3}" y="${r2(yy - 4)}" text-anchor="end">${esc(r.label)}</text>`;
     }
     if (o.yTitle) svg += `<text class="sk-axis-title" transform="translate(${fs + 1},${r2((top + H - bottom) / 2)}) rotate(-90)" text-anchor="middle">${esc(o.yTitle)}</text>`;
     if (y2 && o.y2Title) svg += `<text class="sk-axis-title" transform="translate(${W - 5},${r2((top + H - bottom) / 2)}) rotate(90)" text-anchor="middle">${esc(o.y2Title)}</text>`;
@@ -509,7 +511,7 @@ function cartesianHtml(ctx: ChartContext, f: Frame, p: Prepared, o: ChartOpts, l
     svg = `<defs><clipPath id="${clip}"><rect x="${left - 6}" y="${top - 6}" width="${r2(W - right - left + 12)}" height="${r2(H - bottom - top + 6)}"/></clipPath></defs>` + svg;
   }
   const legendTop = o.legend !== 'bottom';
-  return `<div class="sk-chart">${legendTop ? legend : ''}<svg class="sk-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${svg}<g clip-path="url(#${clip})">${plot}</g></svg>${legendTop ? '' : legend}</div>`;
+  return `<div class="sk-chart">${legendTop ? legend : ''}<svg class="sk-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${svg}<g clip-path="url(#${clip})">${plot}</g>${over}</svg>${legendTop ? '' : legend}</div>`;
 }
 
 /** Draw a cartesian chart: one plot, or with a `multiples` field a grid of small plots sharing one scale. */
