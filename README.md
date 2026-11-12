@@ -94,15 +94,16 @@ npm install          # builds dist/ (prepare)
 ```
 
 ```bash
-npm run typecheck    # tsc, strict, over src/ and test/
+npm run typecheck    # TypeScript 7's tsc, strict, over src/ and test/
 ```
 
 ```bash
 npm test             # builds, then node --test against the built package
 ```
 
-Sources are in `src/`; `dist/` is generated and not committed. Tests import the package by name (`smaltkit/urls`), so
-they check what the apps get. Node 22.18 or later runs the `.ts` tests directly.
+Sources are in `src/`; `dist/` is generated and not committed. TypeScript 7 checks the code (the `typescript7` dev
+dependency); TypeScript 6.0.3 (`typescript`, so `npx tsc`) still emits `dist/` and its `.d.ts` files. Tests import the
+package by name (`smaltkit/urls`), so they check what the apps get. Node 22.18 or later runs the `.ts` tests directly.
 
 ## License
 
