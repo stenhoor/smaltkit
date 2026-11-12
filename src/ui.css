@@ -139,6 +139,20 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-matrix .sk-total { font-weight: 650; background: color-mix(in oklab, var(--sk-text) 3%, var(--sk-surface)); }
 .sk-matrix tbody .sk-mark { cursor: pointer; }
 
+/* ---------------------------------------------------------------- conditional formatting (ChartContext.cellFormat) */
+.sk-tone-good { color: var(--sk-pos); } .sk-tone-bad { color: var(--sk-neg); }
+.sk-tone-warn { color: var(--sk-warning); } .sk-tone-accent { color: var(--sk-accent); }
+.sk-fill.sk-tone-good { background: color-mix(in oklab, var(--sk-pos) 16%, transparent); }
+.sk-fill.sk-tone-bad { background: color-mix(in oklab, var(--sk-neg) 16%, transparent); }
+.sk-fill.sk-tone-warn { background: color-mix(in oklab, var(--sk-warning) 18%, transparent); }
+.sk-fill.sk-tone-accent { background: color-mix(in oklab, var(--sk-accent) 14%, transparent); }
+.sk-fill { color: var(--sk-text); }
+.sk-cf-icon { width: 0.85em; height: 0.85em; fill: currentColor; vertical-align: -0.08em; margin-right: 0.3em; }
+.sk-fill .sk-cf-icon { fill: var(--sk-text); }
+.sk-tone-good .sk-cf-icon, .sk-fill.sk-tone-good .sk-cf-icon { fill: var(--sk-pos); }
+.sk-tone-bad .sk-cf-icon, .sk-fill.sk-tone-bad .sk-cf-icon { fill: var(--sk-neg); }
+.sk-tone-warn .sk-cf-icon, .sk-fill.sk-tone-warn .sk-cf-icon { fill: var(--sk-warning); }
+
 /* ---------------------------------------------------------------- controls (list, dropdown, buttons, range, search) */
 .sk-control { font-size: var(--sk-fs-sub); }
 .sk-list { display: flex; flex-direction: column; gap: 2px; height: 100%; overflow: auto; }
