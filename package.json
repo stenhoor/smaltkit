@@ -1,6 +1,6 @@
 {
   "name": "smaltkit",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
@@ -74,6 +74,10 @@
       "default": "./dist/typecheck.js"
     },
     "./typecheck-worker.js": "./dist/typecheck-worker.js",
+    "./typechecker": {
+      "types": "./dist/typechecker.d.ts",
+      "default": "./dist/typechecker.js"
+    },
     "./typescript": {
       "types": "./dist/typescript.d.ts",
       "default": "./dist/typescript.js"
@@ -98,7 +102,7 @@
     "test": "npm run build && node --test test/*.test.ts"
   },
   "dependencies": {
-    "smaltty": "github:stenhoor/smaltty#679e8892e1e6811c077a316687f50cdb7e8da98c"
+    "smaltty": "github:stenhoor/smaltty#b236be11313a4daa4daa7543a93cdd6f119be074"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

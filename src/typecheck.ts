@@ -2,9 +2,10 @@
 // uses (smaltdf, smaltts), read from their declarations (.d.ts). Its errors are warnings: the code still runs. Every
 // error it reports, tsc reports too; anything it doesn't model is quiet.
 //
-// typeChecker() checks in this thread; typeCheckWorker() in a worker (typecheck-worker.js), so typing stays smooth.
-// Both keep the libraries parsed between checks, so a re-check after an edit parses only the code.
-import { check, checkCache } from 'smaltty';
+// typeCheckWorker() checks in a worker (typecheck-worker.js), so typing stays smooth; typeChecker() (in typechecker.ts,
+// smaltkit/typechecker) checks in this thread. Both keep the libraries parsed between checks, so a re-check after an
+// edit parses only the code. This module loads nothing of the checker: a page that checks in a worker loads the
+// checker's code (smaltty/check) in the worker only.
 
 /** What the checked code can use. */
 export interface TypeCheckSetup {
@@ -30,44 +31,10 @@ export interface TypeWarning {
   message: string;
 }
 
-/** The path checked code is given: a tab or cell is one file, beside the libraries. */
-const CODE_PATH = '/__code__.ts';
-
-/** A checker for `setup`, in this thread: call it with the code, get its warnings. */
-export function typeChecker(setup: TypeCheckSetup): (code: string) => TypeWarning[] {
-  const files = new Map(Object.entries(setup.files));
-  const cache = checkCache();
-  const options = { roots: [CODE_PATH], packages: setup.packages ?? {}, globals: setup.globals ?? [], cache };
-  return (code) => {
-    files.set(CODE_PATH, code);
-    return check(files, options).map((d) => {
-      const before = code.slice(0, d.start).split('\n');
-      return { start: d.start, end: d.start + d.length, line: before.length, column: before[before.length - 1]!.length + 1, code: d.code, message: d.message };
-    });
-  };
-}
-
 /** What the page sends the worker. */
 export type TypeCheckRequest = { kind: 'setup'; setup: TypeCheckSetup } | { kind: 'check'; id: number; code: string };
 /** What the worker sends back: a check's warnings, or why it couldn't check. */
 export type TypeCheckReply = { id: number; warnings: TypeWarning[] } | { id: number; error: string };
-
-/** The worker's side: answers requests in order. Exported for typecheck-worker.ts and for tests. */
-export function typeCheckHandler(): (request: TypeCheckRequest) => TypeCheckReply | undefined {
-  let checker: ((code: string) => TypeWarning[]) | undefined;
-  return (request) => {
-    if (request.kind === 'setup') {
-      checker = typeChecker(request.setup);
-      return undefined;
-    }
-    if (!checker) return { id: request.id, error: 'the type checker has no setup' };
-    try {
-      return { id: request.id, warnings: checker(request.code) };
-    } catch (e) {
-      return { id: request.id, error: e instanceof Error ? e.message : String(e) };
-    }
-  };
-}
 
 /** A type checker in a worker. */
 export interface TypeCheckWorker {

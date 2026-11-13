@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { typeChecker, typeCheckHandler, typeCheckWorker, type TypeCheckRequest, type TypeCheckSetup } from 'smaltkit/typecheck';
+import { execFileSync } from 'node:child_process';
+import { typeCheckWorker, type TypeCheckRequest, type TypeCheckSetup } from 'smaltkit/typecheck';
+import { typeChecker, typeCheckHandler } from 'smaltkit/typechecker';
 
 // A library as a page has it: declarations only.
 const setup: TypeCheckSetup = {
@@ -85,4 +87,28 @@ test('typeCheckWorker: checks in order; one replaced before it starts resolves t
   } finally {
     delete (globalThis as { Worker?: unknown }).Worker;
   }
+});
+
+/** The files of dist/smaltty/ that importing `specifier` loads, in a fresh process (a resolve hook records them). */
+function smalttyLoaded(specifier: string): string[] {
+  const code = `
+    import { registerHooks } from 'node:module';
+    const urls = new Set();
+    registerHooks({ resolve(s, c, next) { const r = next(s, c); urls.add(r.url); return r; } });
+    await import(${JSON.stringify(specifier)});
+    console.log(JSON.stringify([...urls].filter((u) => u.includes('/dist/smaltty/')).map((u) => u.slice(u.lastIndexOf('/') + 1)).sort()));`;
+  return JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', code], { encoding: 'utf8', cwd: import.meta.dirname }));
+}
+
+test("the page's side loads none of smaltty: the checker is loaded in the worker only", () => {
+  assert.deepEqual(smalttyLoaded('smaltkit/typecheck'), []);
+  const checker = smalttyLoaded('smaltkit/typechecker');
+  assert.ok(checker.includes('checker.js') && checker.includes('builtins.js'), checker.join(', '));
+  assert.ok(!checker.includes('strip.js'), 'the checker loads no stripper');
+});
+
+test('smaltkit/typescript loads the stripping path and the binder, not the checker', () => {
+  const loaded = smalttyLoaded('smaltkit/typescript');
+  assert.ok(loaded.includes('strip.js') && loaded.includes('parser.js') && loaded.includes('binder.js'), loaded.join(', '));
+  assert.ok(!loaded.includes('checker.js') && !loaded.includes('builtins.js'), loaded.join(', '));
 });
