@@ -239,3 +239,19 @@ test('conditional formatting: tone, fill and icon in tables, matrices and KPI ca
   charts.kpiCard(plain);
   assert.match(plain.el.innerHTML, /<div class="sk-kpi-value">42</);
 });
+
+test('a donut shows the total it is given: overlapping slices add up to more than the whole', () => {
+  // Three tags of 60, 50 and 40 over sales that total 90: a sale can carry two tags.
+  const cols = [col('c', 'category', 'dimension', ['Organic', 'Gift', 'New']), col('v', 'values', 'measure', [60, 50, 40])];
+  const plain = ctx(cols, { labels: true });
+  charts.donutChart(plain);
+  assert.match(plain.el.innerHTML, /class="sk-donut-total"[^>]*>150</, 'without a total: the sum of the slices');
+  const given = ctx(cols, { labels: true, total: 90 });
+  charts.donutChart(given);
+  assert.match(given.el.innerHTML, /class="sk-donut-total"[^>]*>90</, 'the total given');
+  assert.match(given.el.innerHTML, />67%</, 'Organic: 60 of the 90');
+  assert.equal((given.el.innerHTML.match(/sk-slice/g) ?? []).length, 3, 'the slices still share the circle');
+  const bad = ctx(cols, { total: 'nonsense' });
+  charts.donutChart(bad);
+  assert.match(bad.el.innerHTML, /class="sk-donut-total"[^>]*>150</, 'an unusable total is ignored');
+});

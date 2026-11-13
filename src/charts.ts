@@ -645,7 +645,11 @@ export function pieChart(ctx: ChartContext): void {
   renderPie(ctx, false);
 }
 
-/** Donut: as pieChart, with options `hole` (0–1) and `center` (show the total). */
+/**
+ * Donut: as pieChart, with options `hole` (0–1), `center` (show the total) and `total`. Without `total`, the centre
+ * and the label percentages use the sum of the slices. With it (a number the app computed), they use that instead:
+ * for slices that overlap (a sale in two categories), the sum is more than the whole and `total` is the whole.
+ */
 export function donutChart(ctx: ChartContext): void {
   renderPie(ctx, true);
 }
@@ -664,6 +668,9 @@ function renderPie(ctx: ChartContext, donut: boolean): void {
   const n = ctx.data.rows;
   const vals = Array.from({ length: n }, (_, i) => Math.max(0, toNum(m.values[i])));
   const total = vals.reduce((a, b) => a + (b || 0), 0) || 1;
+  // The whole, when the app knows it apart from the slices (they overlap); the slices' angles still share the circle.
+  const given = Number(ctx.options.total);
+  const whole = ctx.options.total !== undefined && ctx.options.total !== null && Number.isFinite(given) && given > 0 ? given : total;
   const names = Array.from({ length: n }, (_, i) => (cat ? cat.fmt(cat.values[i]!) : m.label));
   const legendPos = String(ctx.options.legend ?? 'auto');
   const showLegend = legendPos !== 'none';
@@ -685,12 +692,12 @@ function renderPie(ctx: ChartContext, donut: boolean): void {
     if (ctx.options.labels && da > 0.25) {
       const mid = a + da / 2;
       const lr = donut ? (r0 + R) / 2 : R * 0.65;
-      svg += `<text class="sk-label sk-on-mark" x="${r2(cx + lr * Math.sin(mid))}" y="${r2(cy - lr * Math.cos(mid) + 4)}" text-anchor="middle">${esc(Math.round((v / total) * 100) + '%')}</text>`;
+      svg += `<text class="sk-label sk-on-mark" x="${r2(cx + lr * Math.sin(mid))}" y="${r2(cy - lr * Math.cos(mid) + 4)}" text-anchor="middle">${esc(Math.round((v / whole) * 100) + '%')}</text>`;
     }
     a += da;
   });
   if (donut && ctx.options.center !== false) {
-    svg += `<text class="sk-donut-total" x="${cx}" y="${r2(cy + 2)}" text-anchor="middle">${esc(axisFormatter(m.format)(total))}</text><text class="sk-donut-caption" x="${cx}" y="${r2(cy + 18)}" text-anchor="middle">${esc(truncate(m.label, r0 * 1.6, 11))}</text>`;
+    svg += `<text class="sk-donut-total" x="${cx}" y="${r2(cy + 2)}" text-anchor="middle">${esc(axisFormatter(m.format)(whole))}</text><text class="sk-donut-caption" x="${cx}" y="${r2(cy + 18)}" text-anchor="middle">${esc(truncate(m.label, r0 * 1.6, 11))}</text>`;
   }
   const legend = showLegend ? legendHtml(names, ctx.palette) : '';
   ctx.el.innerHTML = `<div class="sk-chart ${side ? 'sk-legend-right' : ''}">${side ? '' : legend}<svg class="sk-svg" width="${W}" height="${H}">${svg}</svg>${side ? legend : ''}</div>`;
