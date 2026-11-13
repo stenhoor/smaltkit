@@ -5,6 +5,7 @@ export * from './urls.js';
 export * from './format.js';
 export * from './svg.js';
 export * from './charts.js';
+export * from './maps.js';
 export * from './table.js';
 export * from './grid.js';
 export * from './sql.js';
