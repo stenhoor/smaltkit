@@ -110,7 +110,7 @@
     "test": "npm run build && node --test test/*.test.ts"
   },
   "dependencies": {
-    "smaltty": "github:stenhoor/smaltty#v0.12.0"
+    "smaltty": "github:stenhoor/smaltty#v0.13.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
