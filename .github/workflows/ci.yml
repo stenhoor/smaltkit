@@ -15,3 +15,28 @@ jobs:
       - run: npm ci          # also builds dist/ (prepare)
       - run: npm run typecheck
       - run: npm test
+
+  # The graph view and the timeline in Chromium, from the built package: Playwright's image, with the SwiftShader
+  # WebGPU adapter for the graph view. Playwright is installed here only, not a dependency of the package.
+  browser:
+    name: browser (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --user 1001
+    env:
+      NPM_CONFIG_PREFIX: /tmp/npm-global
+      NODE_PATH: /tmp/npm-global/lib/node_modules
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [graph, timeline]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci          # also builds dist/ (prepare)
+      - run: npm install -g playwright@1.64.1
+      - run: node test/browser/${{ matrix.suite }}.mjs --quick
