@@ -1,6 +1,6 @@
 {
   "name": "smaltkit",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
   "license": "MIT",
   "type": "module",
@@ -32,6 +32,10 @@
     "./charts": {
       "types": "./dist/charts.d.ts",
       "default": "./dist/charts.js"
+    },
+    "./maps": {
+      "types": "./dist/maps.d.ts",
+      "default": "./dist/maps.js"
     },
     "./table": {
       "types": "./dist/table.d.ts",

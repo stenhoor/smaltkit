@@ -311,3 +311,13 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-md th { background: var(--sk-panel); text-align: left; }
 
 @media (prefers-reduced-motion: reduce) { .sk-mark { transition: none; } .sk-grid-table td.sk-grid-copied { animation: none; } }
+
+/* Maps (maps.ts): shapes, filled regions, points and the colour legend. */
+.sk-map-shape { fill: color-mix(in oklab, var(--sk-text) 7%, var(--sk-surface)); stroke: var(--sk-surface); stroke-width: 0.6; vector-effect: non-scaling-stroke; }
+.sk-map-region { fill: var(--sk-seq-lo); cursor: pointer; }
+.sk-map-region:hover, .sk-map-point:hover { stroke: var(--sk-text); stroke-width: 1.2; }
+.sk-map-point { fill: var(--c, var(--sk-accent)); fill-opacity: 0.75; stroke: var(--sk-surface); stroke-width: 1; cursor: pointer; }
+.sk-map .sk-dim { opacity: 0.3; }
+.sk-map-legend { display: flex; align-items: center; gap: 6px; height: 26px; font-size: var(--sk-fs-label); color: var(--sk-muted); font-family: var(--sk-font-num); }
+.sk-map-ramp { width: 96px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--sk-seq-lo), var(--sk-seq-hi)); }
+.sk-map-note { margin-left: auto; }
