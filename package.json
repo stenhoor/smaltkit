@@ -90,6 +90,14 @@
       "types": "./dist/typescript.d.ts",
       "default": "./dist/typescript.js"
     },
+    "./graph": {
+      "types": "./dist/graph.d.ts",
+      "default": "./dist/graph.js"
+    },
+    "./timeline": {
+      "types": "./dist/timeline.d.ts",
+      "default": "./dist/timeline.js"
+    },
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
   },
@@ -107,7 +115,8 @@
     "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/ui.css dist/ui.css && node scripts/copy-smaltty.mjs",
     "prepare": "npm run build",
     "typecheck": "node node_modules/typescript7/bin/tsc -p .",
-    "test": "npm run build && node --test test/*.test.ts"
+    "test": "npm run build && node --test test/*.test.ts",
+    "test:browser": "npm run build && node test/browser/graph.mjs --quick && node test/browser/timeline.mjs"
   },
   "dependencies": {
     "smaltty": "github:stenhoor/smaltty#v0.13.0"

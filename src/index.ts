@@ -19,3 +19,5 @@ export * from './pretty.js';
 export * from './typescript.js';
 export * from './typecheck.js';
 export * from './typechecker.js';
+export * from './graph.js';
+export * from './timeline.js';
