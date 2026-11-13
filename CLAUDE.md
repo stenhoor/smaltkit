@@ -31,6 +31,14 @@ npm test               # build, then node --test test/*.test.ts against the buil
 - `src/` holds the modules (strict TypeScript). Each is its own subpath export (`smaltkit/urls` → `dist/urls.js`) and
   is re-exported from `src/index.ts`. Keep relative imports as `./name.js`.
 - `test/*.test.ts` import the package by name, so they test the built output.
+- The GPU modules are folders: `src/geo/` (maps: `core`, `map`, `layers`, `basemap`, `data`, `visual`) and
+  `src/graph/` (the graph renderer). Each `smaltkit/geo/<piece>` subpath points at a file inside them. The pieces
+  keep the import rules in `test/geo-modules.test.ts` (core imports nothing else; map, layers and basemap import only
+  core; no layer imports another; the vector-tile code uses no GPU; geo and graph import nothing outside themselves).
+  A new dependency between pieces changes that test on purpose. WGSL lives in the TypeScript as strings (`target` is a
+  reserved word there). A layer uploads its data once; whatever changes per frame is a uniform.
+- Tests of internals that aren't exported (`test/graph-*.test.ts`) import from `../dist/`; `test/helpers/expect.ts`
+  gives the ported suites their `expect`.
 - `dist/` and `node_modules/` are generated: do not edit or commit them.
 
 ## Rules for code here

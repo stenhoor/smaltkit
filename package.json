@@ -90,6 +90,83 @@
       "types": "./dist/typescript.d.ts",
       "default": "./dist/typescript.js"
     },
+    "./geo": {
+      "types": "./dist/geo/index.d.ts",
+      "default": "./dist/geo/index.js"
+    },
+    "./geo/core": {
+      "types": "./dist/geo/core/index.d.ts",
+      "default": "./dist/geo/core/index.js"
+    },
+    "./geo/map": {
+      "types": "./dist/geo/map/index.d.ts",
+      "default": "./dist/geo/map/index.js"
+    },
+    "./geo/layers": {
+      "types": "./dist/geo/layers/index.d.ts",
+      "default": "./dist/geo/layers/index.js"
+    },
+    "./geo/layer-kit": {
+      "types": "./dist/geo/layers/kit.d.ts",
+      "default": "./dist/geo/layers/kit.js"
+    },
+    "./geo/scatter": {
+      "types": "./dist/geo/layers/scatter.d.ts",
+      "default": "./dist/geo/layers/scatter.js"
+    },
+    "./geo/heatmap": {
+      "types": "./dist/geo/layers/heatmap.d.ts",
+      "default": "./dist/geo/layers/heatmap.js"
+    },
+    "./geo/aggregate": {
+      "types": "./dist/geo/layers/aggregate.d.ts",
+      "default": "./dist/geo/layers/aggregate.js"
+    },
+    "./geo/arcs": {
+      "types": "./dist/geo/layers/arcs.d.ts",
+      "default": "./dist/geo/layers/arcs.js"
+    },
+    "./geo/paths": {
+      "types": "./dist/geo/layers/paths.d.ts",
+      "default": "./dist/geo/layers/paths.js"
+    },
+    "./geo/polygons": {
+      "types": "./dist/geo/layers/polygons.d.ts",
+      "default": "./dist/geo/layers/polygons.js"
+    },
+    "./geo/basemap": {
+      "types": "./dist/geo/basemap/index.d.ts",
+      "default": "./dist/geo/basemap/index.js"
+    },
+    "./geo/vector-tiles": {
+      "types": "./dist/geo/basemap/vector-tiles.d.ts",
+      "default": "./dist/geo/basemap/vector-tiles.js"
+    },
+    "./geo/data": {
+      "types": "./dist/geo/data/index.d.ts",
+      "default": "./dist/geo/data/index.js"
+    },
+    "./geo/geojson": {
+      "types": "./dist/geo/data/geojson.d.ts",
+      "default": "./dist/geo/data/geojson.js"
+    },
+    "./geo/smaltdb": {
+      "types": "./dist/geo/data/smaltdb.d.ts",
+      "default": "./dist/geo/data/smaltdb.js"
+    },
+    "./geo/smaltcy": {
+      "types": "./dist/geo/data/smaltcy.d.ts",
+      "default": "./dist/geo/data/smaltcy.js"
+    },
+    "./geo/visual": {
+      "types": "./dist/geo/visual/index.d.ts",
+      "default": "./dist/geo/visual/index.js"
+    },
+    "./graph": {
+      "types": "./dist/graph/index.d.ts",
+      "default": "./dist/graph/index.js"
+    },
+    "./geo/tile-worker.js": "./dist/geo/basemap/tile-worker.js",
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
   },

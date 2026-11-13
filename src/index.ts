@@ -19,3 +19,7 @@ export * from './pretty.js';
 export * from './typescript.js';
 export * from './typecheck.js';
 export * from './typechecker.js';
+// The GPU modules, under namespaces (their names would clash): maps (`geo.createMap`, `geo.MapVisual`) and graphs
+// (`graph.createGraphView`). Their subpaths (`smaltkit/geo/…`, `smaltkit/graph`) load only one piece.
+export * as geo from './geo/index.js';
+export * as graph from './graph/index.js';

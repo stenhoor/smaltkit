@@ -31,9 +31,17 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | `smaltkit/typescript` | TypeScript for TypeScript tabs and cells, with [smaltty](https://github.com/stenhoor/smaltty): `stripTypes` replaces the types with spaces, so every line and column of the JavaScript is the one the user wrote, and code that would make code of its own (enums, namespaces with values, parameter properties, `<T>x`) is refused with a `TypeScriptSyntaxError` that gives the line, the column and what to write instead. TypeScript's rules: an import of something that is only a type says `type`. smaltty is there too, as `smaltty` (its parser, its binder, its node kinds: all of it but the checker), for code that works on TypeScript's structure. It loads smaltty's stripping path (`smaltty/strip`) and binder (`smaltty/bind`), never the checker. smaltty is copied into `dist/smaltty/`, so this loads without a bundler. |
 | `smaltkit/typecheck` | Type checking for TypeScript tabs and cells, with smaltty's checker: calls into the libraries the code uses, read from their declarations (`.d.ts`), with the names a page gives the code as `globals`. Errors are warnings (`TypeWarning`: offsets, line, column, tsc's code and message); every one is an error tsc reports too. `typeCheckWorker(setup)` checks in a worker (`typecheck-worker.js`), where a check replaced by a newer one before it starts resolves to `null`. This module loads none of the checker: its code (`smaltty/check`) is loaded in the worker only. A re-check after an edit takes about a millisecond: the libraries stay parsed between checks. The libraries can come prepared (`setup.prepared`: smaltty's `prepare()` buffer, written by the app's build), read in place of parsing their text, so the first check is quicker; a buffer this smaltty can't read is ignored, and the text read from `files` or fetched from `setup.fallback` (the app's `types.json`). `typeCheckWorker(setup, { warm: true })` gets the worker ready as soon as it starts (the prepared libraries read, a check of nothing): start it while the page is idle. |
 | `smaltkit/typechecker` | The same checks in the page's thread, loading the checker there: `typeChecker(setup)` (call it with the code, get its warnings; `.warm()` gets it ready), `typeCheckHandler()`, the worker's side of `typeCheckWorker`, and `preparedReadable(setup)`, whether this smaltty reads the setup's prepared libraries. |
+| `smaltkit/geo` | Maps drawn on the GPU (WebGPU), for large location data: everything below in one import. Each piece is also a subpath of its own, and loads only what it needs (`test/geo-modules.test.ts` holds this). |
+| `smaltkit/geo/core` | Web Mercator projection into float32 offsets, the camera (pan, zoom, bearing, pitch), colour ramps and palettes, WebGPU setup and the uniform arena, and the contract layers and basemaps implement. |
+| `smaltkit/geo/map` | The map: `createMap(container, options)` (pointer and wheel input, tooltips, attribution, `flyTo`, `fitBounds`, picking) and `MapRenderer`, the frame loop under it, for pages that bring their own input. |
+| `smaltkit/geo/layers` | Data layers that upload once and draw every frame from uniforms: scatter, heatmap, hexagon and grid bins (3D columns), great-circle arcs, paths and trips, polygons (3D blocks). Filters, selection (a byte per row) and picking run on the GPU. Each layer is also its own subpath (`geo/scatter`, `geo/heatmap`, `geo/aggregate`, `geo/arcs`, `geo/paths`, `geo/polygons`); `geo/layer-kit` is what they share, for writing a layer. |
+| `smaltkit/geo/basemap` | A vector basemap drawn by its own renderer: Mapbox Vector Tiles (OpenMapTiles schema, OpenFreeMap by default) decoded in a worker (`geo/tile-worker.js`), filled with stencil-then-cover, labels from a glyph atlas. `geo/vector-tiles` is the decoding and tile maths alone, with no GPU. |
+| `smaltkit/geo/data` | Columns for the layers: GeoJSON (`geo/geojson`), smaltdb queries in columnar mode (`geo/smaltdb`) and graph query results with coordinates as points and arcs (`geo/smaltcy`). The databases are passed in, never imported. |
+| `smaltkit/geo/visual` | Map visuals for hosts (a BI report, a notebook): `VISUALS`, a catalogue of visuals with their data roles and options; `buildVisual`, role-tagged columns to layers; `themeFromCss`, the host's colours from CSS variables; and `MapVisual`, mounted once per frame and updated on every host render. |
+| `smaltkit/graph` | Graphs drawn on the GPU: `createGraphView(canvas)` draws nodes and relationships in 2D or 3D, with the force-directed layout in compute shaders, a fixed layout for large graphs, labels, picking, search and enter and exit transitions. `resultsToGraph` turns graph query results into what it draws. |
 | `smaltkit/ui.css` | Styles for the charts, tables, grid, editor, controls, menus, dialogs and toasts, read from `--sk-*` custom properties that default to the smalt brand tokens. |
 
-Everything except the CSS is also exported from `smaltkit`. Planned next: the dev server and vendor scripts
+Everything except the CSS is also exported from `smaltkit` (the GPU modules as the namespaces `geo` and `graph`, since their names would clash). Planned next: the dev server and vendor scripts
 ([smaltbi ADR 0005](https://github.com/stenhoor/smaltbi/blob/main/docs/adr/0005-smaltkit-and-smalt-brand.md)).
 
 ## Use it
@@ -89,6 +97,33 @@ on any ancestor: `--sk-text`, `--sk-muted`, `--sk-surface`, `--sk-border`, `--sk
 
 The output is plain ES2022 modules with no dependencies, one file per module (`dist/urls.js`), so a page can load them
 without a bundler: copy `node_modules/smaltkit/dist/` next to the app, or use a bundler that resolves the package.
+
+## Maps and graphs on the GPU
+
+`smaltkit/geo/…` and `smaltkit/graph` draw with WebGPU, so they reach the data sizes SVG can't (millions of points,
+flows, density, large graphs). They need a browser with WebGPU and reject with an error that says so where there is
+none; the SVG charts and maps stay for small data that must print or export as vectors.
+
+```ts
+import { createMap } from 'smaltkit/geo/map';
+import { scatter } from 'smaltkit/geo/scatter';
+import { basemap } from 'smaltkit/geo/basemap';
+
+declare const lng: Float64Array, lat: Float64Array;
+const map = await createMap(document.getElementById('map')!, { center: [-73.98, 40.75], zoom: 11, basemap: basemap() });
+map.addLayer(scatter({ data: { lng, lat }, color: '#2F5BB7', radius: 2 }));
+```
+
+- **A host's visuals.** A BI tool or a notebook uses `smaltkit/geo/visual`: register the catalogue's visuals (their
+  roles and options), then mount a `MapVisual` in a visual's frame and call `update` with the columns by role, the
+  options, the theme (`themeFromCss`) and the selection on every render.
+- **Workers.** The basemap decodes tiles in a module worker it starts with `new URL('./tile-worker.js',
+  import.meta.url)`. Vite bundles that as it is; keep `smaltkit` out of Vite's dependency pre-bundling
+  (`optimizeDeps.exclude`) as for the type checker's worker. A page with a Content-Security-Policy needs
+  `worker-src 'self'`, or `blob:` if it inlines the worker (`createWorker`).
+- **The network.** The basemap fetches OpenFreeMap tiles unless it is given another TileJSON URL or none at all.
+- **TypeScript.** lib.dom in TypeScript 6.0 and 7.0 has WebGPU's types but not its flag constants; `src/webgpu.d.ts`
+  declares those for the build. Remove it when the build moves to TypeScript 7.1, which has them.
 
 ## Develop
 
