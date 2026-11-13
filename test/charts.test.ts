@@ -98,3 +98,144 @@ test('table and matrix', () => {
   assert.match(m.el.innerHTML, /sk-matrix/);
   assert.match(m.el.innerHTML, /sk-rowhead[^>]*>EU</);
 });
+
+test('axis options: continuous dates, log scale, fixed ends, reference lines, titles', () => {
+  // Uneven dates: the gap between Jan and Jun is five times the gap between Jun and Jul.
+  const dates = col('d', 'category', 'dimension', ['2025-07-01', '2025-01-01', '2025-06-01']);
+  dates.type = 'date';
+  const v = col('v', 'values', 'measure', [30, 10, 20]);
+  const c = ctx([dates, v], { xAxis: 'continuous' });
+  charts.lineChart(c);
+  const xs = [...c.el.innerHTML.matchAll(/<circle[^>]*data-row="(\d)" cx="([\d.]+)"/g)].map((m) => [Number(m[1]), Number(m[2])]);
+  assert.deepEqual(xs.map(([r]) => r), [1, 2, 0], 'sorted by date');
+  const [a, b, d] = xs.map(([, x]) => x);
+  assert.ok(Math.abs((b! - a!) / (d! - b!) - 151 / 30) < 0.05, `positions follow the dates: ${xs}`);
+  assert.match(c.el.innerHTML, />Mar 2025</, 'calendar ticks');
+  // Categories that aren't dates or numbers stay as bands.
+  const bands = ctx([col('c', 'category', 'dimension', cats), col('v', 'values', 'measure', revenue)], { xAxis: 'continuous' });
+  charts.lineChart(bands);
+  assert.match(bands.el.innerHTML, />Coffee</);
+
+  const big = col('v', 'values', 'measure', [5, 500, 50000]);
+  const lg = ctx([col('c', 'category', 'dimension', cats), big], { yScale: 'log', yTitle: 'Revenue', xTitle: 'Product' });
+  charts.columnChart(lg);
+  for (const t of ['1', '10', '100', '1K', '10K', '100K']) assert.match(lg.el.innerHTML, new RegExp(`class="sk-tick"[^>]*>${t}<`), `log tick ${t}`);
+  assert.match(lg.el.innerHTML, /class="sk-axis-title" transform="[^"]*rotate\(-90\)"[^>]*>Revenue</);
+  assert.match(lg.el.innerHTML, /class="sk-axis-title" x="[^"]*"[^>]*>Product</);
+
+  const fixed = ctx([col('c', 'category', 'dimension', cats), col('v', 'values', 'measure', revenue)], { yMin: 100, yMax: 200, refLines: [{ stat: 'avg' }, { value: 150, label: 'Target', tone: 'good' }] });
+  charts.columnChart(fixed);
+  assert.doesNotMatch(fixed.el.innerHTML, /class="sk-tick"[^>]*>(0|50|250)</, 'ticks inside the fixed ends');
+  assert.match(fixed.el.innerHTML, /<g clip-path="url\(#sk-clip-\d+\)"><rect/, 'marks are clipped to the plot');
+  assert.match(fixed.el.innerHTML, /class="sk-ref sk-tone-good"[^>]*\/><text class="sk-ref-label sk-tone-good"[^>]*>Target: 150</);
+});
+
+test('small multiples: a panel per value, one scale, rows kept', () => {
+  const region = col('g', 'multiples', 'dimension', ['EU', 'EU', 'US', 'US']);
+  const product = col('c', 'category', 'dimension', ['Tea', 'Coffee', 'Tea', 'Coffee']);
+  const v = col('v', 'values', 'measure', [10, 20, 30, 400]);
+  const c = ctx([region, product, v], { legend: 'none' });
+  charts.columnChart(c);
+  const panels = c.el.innerHTML.match(/<div class="sk-panel">/g) ?? [];
+  assert.equal(panels.length, 2);
+  assert.match(c.el.innerHTML, /sk-panel-title">EU</);
+  for (const r of [0, 1, 2, 3]) assert.match(c.el.innerHTML, new RegExp(`data-row="${r}"`));
+  // The same value scale in both panels: the EU panel's ticks reach 400 too.
+  const eu = c.el.innerHTML.split('sk-panel-title">US')[0]!;
+  assert.match(eu, /class="sk-tick"[^>]*>400</);
+});
+
+test('table depth: pages, column widths, frozen columns', () => {
+  const names = Array.from({ length: 23 }, (_, i) => `P${String(i + 1).padStart(2, '0')}`);
+  const name = col('n', 'columns', 'dimension', names);
+  name.ref = 'products.name';
+  const qty = col('q', 'values', 'measure', names.map((_, i) => i + 1));
+  const t = ctx([name, qty], { pageSize: 10, widths: { 'products.name': 180 }, freeze: 1 });
+  tableView(t);
+  const html = t.el.innerHTML;
+  assert.equal((html.match(/<tr class="sk-mark/g) ?? []).length, 10, 'one page of rows');
+  assert.match(html, />P01</);
+  assert.doesNotMatch(html, />P11</);
+  assert.match(html, /class="sk-pager-info">1–10 of 23</);
+  assert.match(html, /data-page="0" disabled aria-label="First page"/);
+  assert.match(html, /<span class="sk-pager-page">1 \/ 3<\/span>/);
+  assert.match(html, /<colgroup><col style="width:180px"><col><\/colgroup>/, 'the saved width');
+  assert.match(html, /table-layout:fixed;width:max\(100%, 260px\)/, 'fixed layout: 180 + 80 for the unsized column');
+  assert.match(html, /<th data-col="0" class=" sk-frozen sk-frozen-last" data-freeze="0">/);
+  assert.match(html, /<td class=" sk-frozen sk-frozen-last" data-freeze="0">P01<\/td>/);
+  // No page size: every row, no pager; no widths: no fixed layout.
+  const all = ctx([name, qty]);
+  tableView(all);
+  assert.equal((all.el.innerHTML.match(/<tr class="sk-mark/g) ?? []).length, 23);
+  assert.doesNotMatch(all.el.innerHTML, /sk-pager|table-layout|sk-frozen/);
+});
+
+test('stepped matrix: parents with subtotals, collapse, tabular layout', () => {
+  const region = col('r', 'rows', 'dimension', ['EU', 'EU', 'EU', 'US']);
+  const country = col('c', 'rows', 'dimension', ['DE', 'DE', 'FR', 'NY']);
+  const product = col('k', 'columns', 'dimension', ['Tea', 'Coffee', 'Tea', 'Tea']);
+  const value = col('v', 'values', 'measure', [1, 2, 3, 4]);
+  const sub = chartData([col('r', 'rows', 'dimension', ['EU', 'EU', 'US']), col('k', 'columns', 'dimension', ['Tea', 'Coffee', 'Tea']), col('v', 'values', 'measure', [4, 2, 4])], 3);
+  const subRt = chartData([col('r', 'rows', 'dimension', ['EU', 'US']), col('v', 'values', 'measure', [6, 4])], 2);
+  const rowTotals = chartData([col('r', 'rows', 'dimension', ['EU', 'EU', 'US']), col('c', 'rows', 'dimension', ['DE', 'FR', 'NY']), col('v', 'values', 'measure', [3, 3, 4])], 3);
+  const m = { ...ctx([region, country, product, value]), extra: { 'sub:1': sub, 'sub:1:rt': subRt, rowTotals } };
+  matrixView(m);
+  const html = m.el.innerHTML;
+  assert.match(html, /sk-stepped/);
+  assert.match(html, /<th>r › c<\/th>/, 'one header column, labels joined');
+  const parents = html.match(/<tr class="sk-parent">.*?<\/tr>/g)!;
+  assert.equal(parents.length, 2, 'EU and US');
+  assert.match(parents[0]!, /aria-expanded="true"[^>]*>▾<\/button>EU<\/th><td class="sk-num sk-subtotal">4<\/td><td class="sk-num sk-subtotal">2<\/td><td class="sk-num sk-subtotal sk-total">6<\/td>/);
+  assert.match(html, /sk-level-1" style="--level:1">FR</);
+  assert.equal((html.match(/data-row=/g) ?? []).length, 4, 'only leaves are marks');
+  // Sorted by value, a parent's rows still come together under it.
+  const order = [3, 0, 2, 1];
+  const pick = (c: ChartColumn) => ({ ...c, values: order.map((i) => c.values[i]!) });
+  const v2 = { ...ctx([region, country, product, value].map(pick)), extra: { 'sub:1': sub } };
+  matrixView(v2);
+  assert.equal((v2.el.innerHTML.match(/sk-parent/g) ?? []).length, 2);
+  assert.deepEqual([...v2.el.innerHTML.matchAll(/sk-level-\d"[^>]*>(?:<button[^>]*>.<\/button>)?(\w+)</g)].map((m) => m[1]), ['US', 'NY', 'EU', 'DE', 'FR']);
+  // Start collapsed: only the parents show.
+  const c = { ...ctx([region, country, product, value], { collapsed: true }), extra: { 'sub:1': sub } };
+  matrixView(c);
+  assert.equal((c.el.innerHTML.match(/<tr/g) ?? []).length - 2, 2, 'two parent rows under the two header rows');
+  assert.doesNotMatch(c.el.innerHTML, /data-row=/);
+  // Without subtotals the parent cells are empty; tabular keeps a column per level.
+  const n = { ...ctx([region, country, product, value], { subtotals: false }), extra: { 'sub:1': sub } };
+  matrixView(n);
+  assert.match(n.el.innerHTML, /EU<\/th><td class="sk-num sk-subtotal"><\/td>/);
+  const t = ctx([region, country, product, value], { layout: 'tabular' });
+  matrixView(t);
+  assert.doesNotMatch(t.el.innerHTML, /sk-parent|sk-stepped/);
+  assert.match(t.el.innerHTML, /<th>r<\/th><th>c<\/th>/);
+});
+
+test('conditional formatting: tone, fill and icon in tables, matrices and KPI cards', () => {
+  const values = col('v', 'values', 'measure', revenue);
+  // Above 100 is good (filled), below 100 bad with a down arrow.
+  const cellFormat = (c: ChartColumn, row: number) => {
+    const v = Number(c.values[row]);
+    return v > 100 ? { tone: 'good' as const, fill: true } : { tone: 'bad' as const, icon: 'down' as const };
+  };
+  const t = { ...ctx([col('c', 'columns', 'dimension', cats), values], { format: 'heat' }), cellFormat };
+  tableView(t);
+  const cells = t.el.innerHTML.match(/<td class="sk-num[^"]*"[^>]*>.*?<\/td>/g)!;
+  assert.equal(cells.length, 3);
+  assert.match(cells[0]!, /class="sk-num sk-tone-good sk-fill">120</, 'filled: no heat style, which would hide the fill');
+  assert.match(cells[2]!, /class="sk-num sk-tone-bad" style="background:[^"]*"><svg class="sk-cf-icon"[^>]*><path d="M12 21/, 'text tone keeps the heat colour; down arrow first');
+  // Dimensions are never formatted.
+  assert.doesNotMatch(t.el.innerHTML, /<td class=" ?sk-tone/);
+
+  const m = { ...ctx([col('r', 'rows', 'dimension', ['EU', 'EU', 'US']), col('k', 'columns', 'dimension', ['Tea', 'Coffee', 'Tea']), col('v', 'values', 'measure', [50, 150, 250])]), cellFormat };
+  matrixView(m);
+  assert.equal((m.el.innerHTML.match(/sk-tone-good sk-fill/g) ?? []).length, 2);
+  assert.equal((m.el.innerHTML.match(/sk-tone-bad/g) ?? []).length, 1);
+
+  const k = { ...ctx([col('v', 'values', 'measure', [42])]), cellFormat };
+  charts.kpiCard(k);
+  assert.match(k.el.innerHTML, /<div class="sk-kpi-value sk-tone-bad"><svg class="sk-cf-icon"/);
+  // Without a hook, nothing changes.
+  const plain = ctx([col('v', 'values', 'measure', [42])]);
+  charts.kpiCard(plain);
+  assert.match(plain.el.innerHTML, /<div class="sk-kpi-value">42</);
+});

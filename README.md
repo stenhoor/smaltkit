@@ -15,9 +15,9 @@ and need the same pieces around it; smaltkit holds those pieces once, in strict 
 | `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy, npm (jsDelivr) or a URL, starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. `npm: false` turns npm engines off, for an app whose engine has smaltql and plugins built in. |
 | `smaltkit/urls` | Rewrites pasted data URLs (GitHub, Hugging Face file pages) to raw-file URLs a page can fetch, and explains CORS errors. |
 | `smaltkit/format` | Number and date formatting: presets (`currency0`, `percent`, `month`, …), format objects and patterns, compact axis labels. Dates never shift time zones. |
-| `smaltkit/svg` | SVG helpers for charts: nice ticks, linear and band scales, arcs, line paths, text measuring, colour ramps. |
-| `smaltkit/charts` | Charts drawn as SVG/HTML strings: bar, column, line, area, combo, pie, donut, funnel, treemap, waterfall, gauge, KPI card, scatter, heatmap. |
-| `smaltkit/table` | A flat table (sortable headers, totals, data bars, heat colours) and a pivot matrix with row, column and grand totals. |
+| `smaltkit/svg` | SVG helpers for charts: nice ticks, linear, log and band scales, calendar ticks, arcs, line paths, text measuring, colour ramps. |
+| `smaltkit/charts` | Charts drawn as SVG/HTML strings: bar, column, line, area, combo, pie, donut, funnel, treemap, waterfall, gauge, KPI card, scatter, heatmap. Bar, column, line, area and combo take axis options (a continuous date or number axis, log scale, fixed ends, titles), reference lines, and small multiples (a `multiples` field: a panel per value, one scale). |
+| `smaltkit/table` | A flat table (sortable headers, totals, data bars, heat colours, pages, column widths set by dragging, frozen leading columns) and a pivot matrix with row, column and grand totals: stepped (levels indented, parents expand and collapse and show subtotals) or tabular. With the charts' `cellFormat` hook, measure values (and a KPI card's value) take a tone (good, bad, warning, accent) as text or background colour, and an icon. |
 | `smaltkit/grid` | A virtualized data grid: draws only the visible rows; resizable, sortable columns; keyboard selection, copy and in-place editing. Rows come from an array or from a source that fetches blocks as they scroll into view, so a page never holds a whole result. `exportRows` writes CSV, TSV, JSON, NDJSON or SQL. |
 | `smaltkit/sql` | SQL text utilities: a tokenizer and highlighter, statement splitting, parameter scanning, identifier and literal quoting, completion helpers and a light formatter. Text only: nothing here runs SQL. |
 | `smaltkit/editor` | A small code editor (a textarea over a highlighted layer, no dependencies) with line numbers, auto-indent, comment toggling, bracket pairing, a completion popup and warnings (`setWarnings`: underlined, and their lines marked in the gutter with the messages on hover). Languages: `sqlLanguage` (statement shading, completion from the schema) and `typescriptLanguage`, which highlights SQL inside `` sql`…` `` and `` exec`…` `` templates as SQL. |
@@ -95,15 +95,16 @@ npm install          # builds dist/ (prepare)
 ```
 
 ```bash
-npm run typecheck    # tsc, strict, over src/ and test/
+npm run typecheck    # TypeScript 7's tsc, strict, over src/ and test/
 ```
 
 ```bash
 npm test             # builds, then node --test against the built package
 ```
 
-Sources are in `src/`; `dist/` is generated and not committed. Tests import the package by name (`smaltkit/urls`), so
-they check what the apps get. Node 22.18 or later runs the `.ts` tests directly.
+Sources are in `src/`; `dist/` is generated and not committed. TypeScript 7 checks the code (the `typescript7` dev
+dependency); TypeScript 6.0.3 (`typescript`, so `npx tsc`) still emits `dist/` and its `.d.ts` files. Tests import the
+package by name (`smaltkit/urls`), so they check what the apps get. Node 22.18 or later runs the `.ts` tests directly.
 
 ## License
 

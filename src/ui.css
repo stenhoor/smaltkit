@@ -83,6 +83,14 @@
 .sk-axis-title { font-size: var(--sk-fs-label); fill: var(--sk-muted); font-weight: 600; }
 .sk-gridline { stroke: var(--sk-grid); stroke-width: 1; opacity: var(--sk-gridlines); shape-rendering: crispEdges; }
 .sk-axis { stroke: color-mix(in oklab, var(--sk-muted) 45%, transparent); stroke-width: 1; shape-rendering: crispEdges; }
+.sk-ref { stroke: var(--sk-muted); stroke-width: 1.25; stroke-dasharray: 5 3; fill: none; color: var(--sk-muted); }
+.sk-ref.sk-tone-good, .sk-ref.sk-tone-bad, .sk-ref.sk-tone-warn, .sk-ref.sk-tone-accent { stroke: currentColor; }
+.sk-ref-label { font-size: var(--sk-fs-label); fill: var(--sk-muted); paint-order: stroke; stroke: var(--sk-surface); stroke-width: 3px; stroke-linejoin: round; }
+.sk-ref-label.sk-tone-good, .sk-ref-label.sk-tone-bad, .sk-ref-label.sk-tone-warn, .sk-ref-label.sk-tone-accent { fill: currentColor; }
+.sk-multiples { display: grid; gap: 8px; overflow: auto; flex: 1; min-height: 0; }
+.sk-panel { display: flex; flex-direction: column; min-width: 0; }
+.sk-panel-title { font-size: var(--sk-fs-label); font-weight: 600; color: var(--sk-text); height: 18px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-more { font-size: var(--sk-fs-label); color: var(--sk-muted); padding-top: 4px; height: 18px; }
 .sk-mark { cursor: pointer; transition: opacity 0.18s, filter 0.18s; }
 .sk-bar, .sk-tile, .sk-slice, .sk-dot { fill: var(--c); }
 .sk-bar { rx: calc(var(--sk-bar-radius) * 1px); }
@@ -123,21 +131,56 @@ path.sk-mark.sk-c0:not(.sk-slice) { fill: var(--c); }
 .sk-spark { display: block; width: 100%; margin-top: auto; }
 .sk-spark .sk-line { stroke-width: 1.5; }
 
-.sk-table-wrap { height: 100%; overflow: auto; scrollbar-width: thin; }
+.sk-table-box { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.sk-table-wrap { height: 100%; flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; }
+.sk-pager { flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 2px; padding: 6px 2px 0; font-size: var(--sk-fs-label); color: var(--sk-muted); font-variant-numeric: tabular-nums; }
+.sk-pager-info { margin-right: auto; }
+.sk-pager-page { padding: 0 6px; }
+.sk-pager-btn { all: unset; cursor: pointer; min-width: 22px; height: 22px; text-align: center; border-radius: 4px; color: var(--sk-text); }
+.sk-pager-btn:hover:not([disabled]) { background: color-mix(in oklab, var(--sk-accent) 10%, transparent); }
+.sk-pager-btn[disabled] { opacity: 0.35; cursor: default; }
+.sk-pager-btn:focus-visible { outline: 2px solid var(--sk-focus); }
+.sk-col-resize { position: absolute; top: 0; right: -3px; width: 7px; height: 100%; cursor: col-resize; z-index: 2; }
+.sk-col-resize:hover, .sk-col-resize:active { background: linear-gradient(90deg, transparent 3px, var(--sk-accent) 3px, var(--sk-accent) 4px, transparent 4px); }
+.sk-table .sk-frozen { position: sticky; z-index: 1; background: var(--sk-surface); }
+.sk-table thead .sk-frozen, .sk-table tfoot .sk-frozen { z-index: 3; }
+.sk-table .sk-frozen-last { box-shadow: inset -1px 0 0 var(--sk-border); }
+.sk-table tbody tr.sk-mark:hover td.sk-frozen { background: color-mix(in oklab, var(--sk-accent) 7%, var(--sk-surface)); }
+.sk-table tr.sk-on td.sk-frozen { background: color-mix(in oklab, var(--sk-sel) 14%, var(--sk-surface)); }
+.sk-table[style*="table-layout"] td { max-width: none; }
 .sk-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--sk-fs-sub); font-variant-numeric: tabular-nums; }
-.sk-table th { position: sticky; top: 0; z-index: 1; background: var(--sk-surface); text-align: left; font-weight: 600; color: var(--sk-muted); font-size: var(--sk-fs-label); text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px; border-bottom: 1px solid var(--sk-border); cursor: default; white-space: nowrap; }
+.sk-table th { position: sticky; top: 0; z-index: 2; background: var(--sk-surface); text-align: left; font-weight: 600; color: var(--sk-muted); font-size: var(--sk-fs-label); text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px; border-bottom: 1px solid var(--sk-border); cursor: default; white-space: nowrap; }
 .sk-table thead th[data-col] { cursor: pointer; }
 .sk-table td { padding: 6px 10px; border-bottom: 1px solid var(--sk-grid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
 .sk-density-compact td { padding: 3px 8px; } .sk-density-relaxed td { padding: 10px 12px; }
 .sk-table .sk-num { text-align: right; font-family: var(--sk-font-num); }
 .sk-table tbody tr.sk-mark:hover td, .sk-table td.sk-mark:hover { background: color-mix(in oklab, var(--sk-accent) 7%, transparent); }
 .sk-table tr.sk-on td, .sk-table td.sk-on { background: color-mix(in oklab, var(--sk-sel) 14%, transparent); }
-.sk-table tfoot td, .sk-table tfoot th { position: sticky; bottom: 0; background: var(--sk-surface); font-weight: 650; border-top: 1px solid var(--sk-border); border-bottom: 0; color: var(--sk-text); text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); }
+.sk-table tfoot td, .sk-table tfoot th { position: sticky; bottom: 0; z-index: 2; background: var(--sk-surface); font-weight: 650; border-top: 1px solid var(--sk-border); border-bottom: 0; color: var(--sk-text); text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); }
 .sk-table td[data-bar] { background-image: linear-gradient(90deg, color-mix(in oklab, var(--sk-accent) 22%, transparent) var(--bar), transparent var(--bar)); background-repeat: no-repeat; }
 .sk-matrix th.sk-rowhead { position: static; text-transform: none; letter-spacing: 0; font-size: var(--sk-fs-sub); color: var(--sk-text); border-bottom-color: var(--sk-grid); font-weight: 500; }
 .sk-matrix th.sk-colhead { text-align: right; }
 .sk-matrix .sk-total { font-weight: 650; background: color-mix(in oklab, var(--sk-text) 3%, var(--sk-surface)); }
 .sk-matrix tbody .sk-mark { cursor: pointer; }
+.sk-stepped th.sk-rowhead { padding-left: calc(1.6em + var(--level, 0) * 1.1em); white-space: nowrap; }
+.sk-stepped tr.sk-parent th.sk-rowhead, .sk-stepped .sk-subtotal { font-weight: 650; }
+.sk-stepped tr.sk-parent, .sk-stepped tr.sk-parent > th { background: color-mix(in oklab, var(--sk-text) 2%, var(--sk-surface)); }
+.sk-caret { all: unset; cursor: pointer; display: inline-block; width: 1.1em; margin-left: -1.1em; color: var(--sk-muted); text-align: center; }
+.sk-caret:focus-visible { outline: 2px solid var(--sk-focus); outline-offset: 1px; border-radius: 2px; }
+
+/* ---------------------------------------------------------------- conditional formatting (ChartContext.cellFormat) */
+.sk-tone-good { color: var(--sk-pos); } .sk-tone-bad { color: var(--sk-neg); }
+.sk-tone-warn { color: var(--sk-warning); } .sk-tone-accent { color: var(--sk-accent); }
+.sk-fill.sk-tone-good { background: color-mix(in oklab, var(--sk-pos) 16%, transparent); }
+.sk-fill.sk-tone-bad { background: color-mix(in oklab, var(--sk-neg) 16%, transparent); }
+.sk-fill.sk-tone-warn { background: color-mix(in oklab, var(--sk-warning) 18%, transparent); }
+.sk-fill.sk-tone-accent { background: color-mix(in oklab, var(--sk-accent) 14%, transparent); }
+.sk-fill { color: var(--sk-text); }
+.sk-cf-icon { width: 0.85em; height: 0.85em; fill: currentColor; vertical-align: -0.08em; margin-right: 0.3em; }
+.sk-fill .sk-cf-icon { fill: var(--sk-text); }
+.sk-tone-good .sk-cf-icon, .sk-fill.sk-tone-good .sk-cf-icon { fill: var(--sk-pos); }
+.sk-tone-bad .sk-cf-icon, .sk-fill.sk-tone-bad .sk-cf-icon { fill: var(--sk-neg); }
+.sk-tone-warn .sk-cf-icon, .sk-fill.sk-tone-warn .sk-cf-icon { fill: var(--sk-warning); }
 
 /* ---------------------------------------------------------------- controls (list, dropdown, buttons, range, search) */
 .sk-control { font-size: var(--sk-fs-sub); }
