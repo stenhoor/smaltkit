@@ -26,6 +26,20 @@ test('a tab: the globals in scope, its errors as warnings with lines and columns
   assert.deepEqual(check("const table = (n: number) => n;\ntable(1).toFixed(2);\n"), [], 'a name the code declares comes first');
 });
 
+test("syntax: 'tolerant' sets aside the broken statement and checks the rest; strict, the default, doesn't", () => {
+  const code = "table('t').hed(5);\nconst x = (1 + ;\nshow(table('t'), 'all', 3);\n";
+  assert.deepEqual(typeChecker(setup)(code), [], 'strict: code with a syntax error gets no warnings, as before');
+  const warnings = typeChecker({ ...setup, syntax: 'tolerant' })(code);
+  const syntax = warnings.filter((w) => w.code < 2000);
+  assert.equal(syntax.length, 1, 'one syntax error');
+  assert.equal(syntax[0]!.line, 2, 'on the broken line');
+  assert.deepEqual(
+    warnings.filter((w) => w.code >= 2000).map((w) => [w.line, w.code]),
+    [[1, 2551], [3, 2554]],
+    'the other lines checked',
+  );
+});
+
 test('imports: the same library imported by name', () => {
   const check = typeChecker(setup);
   assert.deepEqual(check("import { table } from '@smaltdb/df';\ntable('a').fliter(1);\n").map((w) => [w.line, w.code]), [[2, 2551]]);

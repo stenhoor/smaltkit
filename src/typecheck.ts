@@ -36,6 +36,13 @@ export interface TypeCheckSetup {
    * typeChecker(), in the page's thread, fetches nothing: it reads `files`.
    */
   fallback?: string;
+  /**
+   * How a syntax error in the checked code is taken (smaltty 0.14.0's `syntax` option). `'strict'`, the default: code
+   * with a syntax error gets no warnings, as before. `'tolerant'`: the statement the error is in is set aside and the
+   * error is a warning (a code under 2000, as tsc's syntax errors), and the rest of the code is checked. An app turns it
+   * on when it stops reporting syntax errors its own way, so none is shown twice.
+   */
+  syntax?: 'strict' | 'tolerant';
 }
 
 /** An error in the checked code, as a warning: where (offsets, and a 1-based line and column) and what. */
