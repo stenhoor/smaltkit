@@ -116,7 +116,8 @@ map.addLayer(scatter({ data: { lng, lat }, color: '#2F5BB7', radius: 2 }));
 
 - **A host's visuals.** A BI tool or a notebook uses `smaltkit/geo/visual`: register the catalogue's visuals (their
   roles and options), then mount a `MapVisual` in a visual's frame and call `update` with the columns by role, the
-  options, the theme (`themeFromCss`) and the selection on every render.
+  options, the theme (`themeFromCss`) and the selection on every render. [docs/gpu-visuals.md](docs/gpu-visuals.md)
+  is the step-by-step guide for an app, with what each step changes in a BI report.
 - **Workers.** The basemap decodes tiles in a module worker it starts with `new URL('./tile-worker.js',
   import.meta.url)`. Vite bundles that as it is; keep `smaltkit` out of Vite's dependency pre-bundling
   (`optimizeDeps.exclude`) as for the type checker's worker. A page with a Content-Security-Policy needs
