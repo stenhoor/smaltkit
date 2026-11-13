@@ -79,6 +79,21 @@ test('points by latitude and longitude, sized by a measure, without shapes', () 
   assert.match(empty.el.innerHTML, /Add a shapes file/);
 });
 
+test('the colour scale covers only the rows drawn: one with no position or no shape does not stretch it', () => {
+  const money = (c: ChartColumn): ChartColumn => ({ ...c, fmt: (v) => `$${v}` });
+  const legend = /<span>\$10<\/span><span class="sk-map-ramp"><\/span><span>\$30<\/span>/;
+  // Points: the third row (an online shop) has no coordinates and the largest value.
+  const pts = ctx([col('la', 'latitude', 'dimension', [51.5, 40.7, null]), col('lo', 'longitude', 'dimension', [-0.1, -74, null]), money(col('v', 'values', 'measure', [10, 30, 900]))], {});
+  mapChart(pts);
+  assert.match(pts.el.innerHTML, legend, 'legend from the drawn points');
+  assert.match(pts.el.innerHTML, /data-row="1"[^>]*style="fill:color-mix\(in oklab, var\(--sk-seq-hi\) 100%/, 'the highest drawn point is the darkest');
+  // Regions: Atlantis has no shape and the largest value.
+  const reg = ctx([col('l', 'location', 'dimension', ['West', 'East', 'Atlantis']), money(col('v', 'values', 'measure', [10, 30, 900]))], { shapes: topo });
+  mapChart(reg);
+  assert.match(reg.el.innerHTML, legend, 'legend from the drawn regions');
+  assert.match(reg.el.innerHTML, /data-row="1" d="[^"]+" style="fill:color-mix\(in oklab, var\(--sk-seq-hi\) 100%/);
+});
+
 test('features keep their properties', () => {
   const f: Feature = toFeatures(topo)[0]!;
   assert.equal(f.properties?.name, 'West');

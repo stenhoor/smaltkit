@@ -257,11 +257,18 @@ export function mapChart(ctx: ChartContext): void {
   // Points need room for their circles at the edges.
   const rmax = Math.max(4, Math.min(W, H) / 18);
   const project = fitProjection(kind, features, W, H, features.length ? 8 : rmax + 4, features.length ? [] : pts.map((x) => x.p));
-  // Colour scale over the measure.
+  // Rows by location name, and the row each shape shows.
+  const rowsByName = new Map<string, number>();
+  if (loc) for (let r = 0; r < data.rows; r++) rowsByName.set(norm(loc.fmt(loc.values[r]!)), r).set(norm(loc.values[r]), r);
+  const key = typeof ctx.options.key === 'string' && ctx.options.key ? ctx.options.key : 'name';
+  const shapeRow = features.map((f) => (loc ? featureKeys(f, key).map((k) => rowsByName.get(k)).find((x) => x !== undefined) : undefined));
+  // Colour scale over the measure, of the rows the map draws: a row with no shape or no position (an online shop on
+  // a map of stores) would otherwise stretch the scale and pale every mark.
+  const drawn = new Set<number>([...shapeRow.filter((r): r is number => r !== undefined), ...pts.map((x) => x.row)]);
   let lo = Infinity;
   let hi = -Infinity;
   if (val) {
-    for (let r = 0; r < data.rows; r++) {
+    for (const r of drawn) {
       const v = toNum(val.values[r]);
       if (Number.isFinite(v)) {
         lo = Math.min(lo, v);
@@ -273,25 +280,21 @@ export function mapChart(ctx: ChartContext): void {
     const v = val ? toNum(val.values[r]) : NaN;
     return Number.isFinite(v) ? seqColor((v - lo) / (hi - lo || 1)) : '';
   };
-  // Rows by location name.
-  const rowsByName = new Map<string, number>();
-  if (loc) for (let r = 0; r < data.rows; r++) rowsByName.set(norm(loc.fmt(loc.values[r]!)), r).set(norm(loc.values[r]), r);
-  const key = typeof ctx.options.key === 'string' && ctx.options.key ? ctx.options.key : 'name';
   let svg = '';
   let matched = 0;
-  for (const f of features) {
+  features.forEach((f, i) => {
     const d = geoPath(f.geometry, project);
-    if (!d) continue;
-    const row = loc ? featureKeys(f, key).map((k) => rowsByName.get(k)).find((x) => x !== undefined) : undefined;
+    if (!d) return;
+    const row = shapeRow[i];
     const title = esc(String((f.properties ?? {})[key] ?? (f.properties ?? {}).name ?? f.id ?? ''));
     if (row === undefined) {
       svg += `<path class="sk-map-shape" d="${d}"><title>${title}</title></path>`;
-      continue;
+      return;
     }
     matched++;
     const c = colourOf(row);
     svg += `<path class="sk-map-shape sk-mark sk-map-region${dim(ctx, row)}" data-row="${row}" d="${d}"${c ? ` style="fill:${c}"` : ''}/>`;
-  }
+  });
   if (points) {
     const smax = size ? Math.max(...pts.map((x) => Math.abs(toNum(size.values[x.row])) || 0), 0) : 0;
     for (const { row, p } of pts) {
