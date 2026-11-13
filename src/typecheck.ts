@@ -4,12 +4,17 @@
 //
 // typeCheckWorker() checks in a worker (typecheck-worker.js), so typing stays smooth; typeChecker() (in typechecker.ts,
 // smaltkit/typechecker) checks in this thread. Both keep the libraries parsed between checks, so a re-check after an
-// edit parses only the code. This module loads nothing of the checker: a page that checks in a worker loads the
+// edit parses only the code. An app's build can prepare the libraries (smaltty's prepare()): the first check then reads
+// them in place of parsing their text, and a worker started and warmed while the page is idle is ready when it's
+// wanted. This module loads nothing of the checker: a page that checks in a worker loads the
 // checker's code (smaltty/check) in the worker only.
 
 /** What the checked code can use. */
 export interface TypeCheckSetup {
-  /** The libraries' files, path to text (`/df/index.d.ts` → its declarations). */
+  /**
+   * The libraries' files, path to text (`/df/index.d.ts` → its declarations). With `prepared`, the files it holds
+   * needn't be here (`{}`): their text is read only if the buffer can't be.
+   */
   files: Record<string, string>;
   /** Import names to paths: `{ '@smaltdb/df': '/df/index.d.ts' }`. */
   packages?: Record<string, string>;
@@ -18,6 +23,19 @@ export interface TypeCheckSetup {
    * that runs smaltdf has `table` and `col`.
    */
   globals?: string[];
+  /**
+   * The libraries prepared: smaltty's `prepare()` buffer for them, as an app's build writes it beside their text. The
+   * checker reads it in place of parsing their text, so the first check is quicker. A buffer this smaltty can't read
+   * (a build by another smaltty, kept by the browser from an earlier deploy) is ignored: the text in `files` is read
+   * instead, or, in typeCheckWorker's worker, the text fetched from `fallback`.
+   */
+  prepared?: ArrayBuffer | Uint8Array;
+  /**
+   * An absolute URL of the libraries' text as a TypeCheckSetup (JSON: the app's `types.json`), which typeCheckWorker's
+   * worker fetches only if `prepared` can't be read; its files, packages and globals fill in what this setup lacks.
+   * typeChecker(), in the page's thread, fetches nothing: it reads `files`.
+   */
+  fallback?: string;
 }
 
 /** An error in the checked code, as a warning: where (offsets, and a 1-based line and column) and what. */
@@ -31,8 +49,11 @@ export interface TypeWarning {
   message: string;
 }
 
-/** What the page sends the worker. */
-export type TypeCheckRequest = { kind: 'setup'; setup: TypeCheckSetup } | { kind: 'check'; id: number; code: string };
+/**
+ * What the page sends the worker. `warm`: get ready while the page is idle (read the prepared libraries, and check
+ * nothing), so the first check is quick; it has no reply.
+ */
+export type TypeCheckRequest = { kind: 'setup'; setup: TypeCheckSetup } | { kind: 'check'; id: number; code: string } | { kind: 'warm' };
 /** What the worker sends back: a check's warnings, or why it couldn't check. */
 export type TypeCheckReply = { id: number; warnings: TypeWarning[] } | { id: number; error: string };
 
@@ -49,9 +70,11 @@ export interface TypeCheckWorker {
 
 /**
  * A type checker for `setup` in a worker (`typecheck-worker.js`, beside this module, unless `workerUrl` names
- * another). Throws where workers can't start; an app then does without warnings.
+ * another). Throws where workers can't start; an app then does without warnings. With `warm`, the worker gets ready
+ * as soon as it starts (it reads the prepared libraries and checks nothing): start it while the page is idle, before
+ * the first check is wanted.
  */
-export function typeCheckWorker(setup: TypeCheckSetup, options: { workerUrl?: string | URL } = {}): TypeCheckWorker {
+export function typeCheckWorker(setup: TypeCheckSetup, options: { workerUrl?: string | URL; warm?: boolean } = {}): TypeCheckWorker {
   const worker = new Worker(options.workerUrl ?? new URL('./typecheck-worker.js', import.meta.url), { type: 'module' });
   let next = 0;
   let pending: { id: number; resolve: (w: TypeWarning[] | null) => void; reject: (e: Error) => void } | undefined;
@@ -78,6 +101,7 @@ export function typeCheckWorker(setup: TypeCheckSetup, options: { workerUrl?: st
     pending = waiting = undefined;
   };
   worker.postMessage({ kind: 'setup', setup } satisfies TypeCheckRequest);
+  if (options.warm) worker.postMessage({ kind: 'warm' } satisfies TypeCheckRequest);
   return {
     check(code) {
       return new Promise((resolve, reject) => {
