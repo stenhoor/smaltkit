@@ -5,17 +5,18 @@
 // instead. Type checking against smaltdf comes later, here too.
 //
 // smaltty is ours and has no dependencies. The build copies it into dist/smaltty/, so this module loads it with a
-// relative import, in a page, without a bundler.
-import smalttyTranspiler, { ParseError, strip, type Transpiler, type TranspileOptions } from 'smaltty';
+// relative import, in a page, without a bundler. It loads smaltty's stripping path (smaltty/strip) and its binder
+// (smaltty/bind), never the checker, which smaltkit/typecheck runs in a worker.
+import smalttyTranspiler, { ParseError, strip, type Transpiler, type TranspileOptions } from 'smaltty/strip';
 
 export type { Transpiler, TranspileOptions };
 
 /**
- * All of smaltty, for code that works on TypeScript's structure: `smaltty.parse` (TypeScript's syntax tree, stored
- * flat), `smaltty.bind` (which declaration each name means), `smaltty.strip`, and the node kinds and flags (`K`, `F`).
- * A namespace, so its names don't meet smaltkit's own.
+ * smaltty, for code that works on TypeScript's structure: `smaltty.parse` (TypeScript's syntax tree, stored flat),
+ * `smaltty.bind` (which declaration each name means), `smaltty.strip`, and the node kinds and flags (`K`, `F`): all of
+ * smaltty but its checker, which is smaltkit/typecheck's. A namespace, so its names don't meet smaltkit's own.
  */
-export * as smaltty from 'smaltty';
+export * as smaltty from './typescript-kit.js';
 
 /** A SyntaxError in TypeScript, or code that can't be stripped: `line` and `column` (1-based) say where. */
 export const TypeScriptSyntaxError = ParseError;

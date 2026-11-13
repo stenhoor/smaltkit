@@ -16,3 +16,4 @@ export * from './markdown.js';
 export * from './pretty.js';
 export * from './typescript.js';
 export * from './typecheck.js';
+export * from './typechecker.js';
