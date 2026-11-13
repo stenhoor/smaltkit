@@ -22,7 +22,7 @@ export function typeChecker(setup: TypeCheckSetup): TypeChecker {
   const files = new Map(Object.entries(setup.files));
   const cache = checkCache();
   const prepared = setup.prepared === undefined ? undefined : readPrepared(setup.prepared);
-  const options = { roots: [CODE_PATH], packages: setup.packages ?? {}, globals: setup.globals ?? [], cache, ...(prepared ? { prepared } : {}) };
+  const options = { roots: [CODE_PATH], packages: setup.packages ?? {}, globals: setup.globals ?? [], cache, ...(prepared ? { prepared } : {}), ...(setup.syntax ? { syntax: setup.syntax } : {}) };
   const checker = (code: string): TypeWarning[] => {
     files.set(CODE_PATH, code);
     return check(files, options).map((d) => {
