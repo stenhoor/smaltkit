@@ -69,6 +69,10 @@
       "types": "./dist/markdown.d.ts",
       "default": "./dist/markdown.js"
     },
+    "./git": {
+      "types": "./dist/git.d.ts",
+      "default": "./dist/git.js"
+    },
     "./pretty": {
       "types": "./dist/pretty.d.ts",
       "default": "./dist/pretty.js"

@@ -14,6 +14,7 @@ export * from './dom.js';
 export * from './manifest.js';
 export * from './controls.js';
 export * from './markdown.js';
+export * from './git.js';
 export * from './pretty.js';
 export * from './typescript.js';
 export * from './typecheck.js';
