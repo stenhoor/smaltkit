@@ -49,6 +49,10 @@
       "types": "./dist/sql.d.ts",
       "default": "./dist/sql.js"
     },
+    "./cypher": {
+      "types": "./dist/cypher.d.ts",
+      "default": "./dist/cypher.js"
+    },
     "./editor": {
       "types": "./dist/editor.d.ts",
       "default": "./dist/editor.js"

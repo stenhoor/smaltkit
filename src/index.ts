@@ -9,6 +9,7 @@ export * from './maps.js';
 export * from './table.js';
 export * from './grid.js';
 export * from './sql.js';
+export * from './cypher.js';
 export * from './editor.js';
 export * from './dom.js';
 export * from './manifest.js';

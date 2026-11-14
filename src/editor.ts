@@ -1,10 +1,11 @@
 // A small code editor: a transparent <textarea> over a highlighted <pre>, with line numbers, auto-indent, comment
 // toggling, bracket and quote pairing, and a completion popup. Styled by ui.css (.sk-editor).
 //
-// The language decides highlighting, comments, statement shading and completion: `sqlLanguage` (the default) or
-// `typescriptLanguage`, which highlights SQL inside sql`…` and exec`…` templates as SQL.
+// The language decides highlighting, comments, statement shading and completion: `sqlLanguage` (the default),
+// `typescriptLanguage`, which highlights SQL inside sql`…` and exec`…` templates as SQL, or `cypherLanguage`.
 
 import { aliasesIn, FUNCTIONS, highlight as highlightSql, KEYWORDS, statementAt, unquote, wordBefore, type Statement } from './sql.js';
+import { completeCypher, cypherStatementAt, cypherWordBefore, highlightCypher, type CypherVocabulary } from './cypher.js';
 import { esc } from './svg.js';
 
 /** A column as completion knows it. */
@@ -23,6 +24,8 @@ export type SchemaTable = SchemaColumn[] & { kind?: string; type?: string };
 export interface EditorSchema {
   names: Set<string>;
   tables: Map<string, SchemaTable>;
+  /** A graph's labels, relationship types and property keys, for Cypher completion. */
+  graph?: CypherVocabulary;
 }
 
 export interface CompletionItem {
@@ -634,6 +637,21 @@ export const typescriptLanguage: EditorLanguage = {
   name: 'TypeScript',
   highlight: highlightTypeScript,
   lineComment: '//',
+};
+
+// ---------------------------------------------------------------------------------------------------- Cypher
+
+/**
+ * Cypher (smaltcy's dialect): highlighting, `//` comments, statement shading, and completion of keywords, functions,
+ * and the schema's graph vocabulary (labels after `:` in a node, types in a relationship, property keys after `.`).
+ */
+export const cypherLanguage: EditorLanguage = {
+  name: 'Cypher',
+  highlight: highlightCypher,
+  lineComment: '//',
+  statementAt: cypherStatementAt,
+  complete: (text, pos, schema, explicit) => completeCypher(text, pos, schema.graph ?? null, explicit),
+  wordBefore: cypherWordBefore,
 };
 
 /** "Mod+Enter", "Shift+Mod+Enter", "F5", "Mod+E" */
