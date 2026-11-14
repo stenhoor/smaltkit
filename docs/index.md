@@ -4,7 +4,7 @@ layout: home
 hero:
   name: 'sm<span class="alt">alt</span><span class="suffix kit">kit</span>'
   text: 'Small. Alternative.<br>Reusable.'
-  tagline: Reusable components for the smaltworks applications.
+  tagline: Components for the smaltworks applications, built to be reused.
   image:
     light: /case-mark.svg
     dark: /case-mark-on-dark.svg

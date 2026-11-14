@@ -5,7 +5,7 @@
   </picture>
 </h1>
 
-**Small. Alternative. Reusable.** Reusable components for the smaltworks applications.
+**Small. Alternative. Reusable.** Components for the smaltworks applications, built to be reused.
 
 <a href="https://smaltworks.dev/stability"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress-on-dark.svg"><img alt="Work in progress. Come build with us." src="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress.svg" height="56"></picture></a>
 

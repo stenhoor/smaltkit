@@ -8,7 +8,7 @@ import { agentDocs, packageVersion } from './theme/agents'
 const REPO = 'https://github.com/stenhoor/smaltkit'
 // Served at stenhoor.github.io/smaltkit/; DOCS_BASE overrides it.
 const base = process.env.DOCS_BASE ?? '/smaltkit/'
-const description = 'Reusable components for the smaltworks applications: the engine loader, data steps, formatting, text tools, charts, tables, the grid, the editor and the rest, in plain ES modules with no dependencies.'
+const description = 'Components for the smaltworks applications, built to be reused: the engine loader, data steps, formatting, text tools, charts, tables, the grid, the editor and the rest, in plain ES modules with no dependencies.'
 
 // A module's sidebar entry; a module whose functions have pages of their own (docs/reference/<module>/) lists them
 // under it.
