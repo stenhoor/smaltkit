@@ -216,7 +216,7 @@ export interface CypherVocabulary {
 
 export interface CypherCompletion {
   label: string;
-  /** 'label', 'type', 'prop', 'fn' or 'kw'. */
+  /** 'label', 'type', 'prop', 'fn' or 'kw' (the popup shows it, so `detail` is left empty). */
   kind: string;
   detail: string;
 }
@@ -238,16 +238,16 @@ export function completeCypher(text: string, pos: number, vocab: CypherVocabular
   };
   if (qualifier === ':') {
     const inRel = relationshipOpen(text, start - 1);
-    for (const t of (inRel ? vocab?.types : vocab?.labels) ?? []) add(t, inRel ? 'type' : 'label', inRel ? 'relationship type' : 'label');
+    for (const t of (inRel ? vocab?.types : vocab?.labels) ?? []) add(t, inRel ? 'type' : 'label');
     return { items: items.slice(0, 60), start };
   }
   if (qualifier) {
-    for (const p of vocab?.properties ?? []) add(p, 'prop', 'property');
+    for (const p of vocab?.properties ?? []) add(p, 'prop');
     return { items: items.slice(0, 60), start };
   }
   for (const f of CYPHER_FUNCTIONS) add(f, 'fn');
   for (const k of CYPHER_KEYWORDS) add(k, 'kw');
-  for (const l of vocab?.labels ?? []) add(l, 'label', 'label');
+  for (const l of vocab?.labels ?? []) add(l, 'label');
   return { items: items.slice(0, 60), start };
 }
 
