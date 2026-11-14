@@ -14,7 +14,8 @@ jobs:
           node-version: 22
       - run: npm ci          # also builds dist/ (prepare)
       - run: npm run typecheck
-      - run: npm test
+      - run: npm test           # with test/docs.test.ts: the docs' examples print what they show
+      - run: npm run docs:build # fails if the generated reference is out of date or an example doesn't type-check
 
   # The graph view and the timeline in Chromium, from the built package: Playwright's image, with the SwiftShader
   # WebGPU adapter for the graph view. Playwright is installed here only, not a dependency of the package.

@@ -120,16 +120,22 @@
     "prepare": "npm run build",
     "typecheck": "node node_modules/typescript7/bin/tsc -p .",
     "test": "npm run build && node --test test/*.test.ts",
-    "test:browser": "npm run build && node test/browser/graph.mjs --quick && node test/browser/timeline.mjs"
+    "test:browser": "npm run build && node test/browser/graph.mjs --quick && node test/browser/timeline.mjs",
+    "docs:api": "node scripts/docs-api.mjs",
+    "docs:examples": "node scripts/docs-examples.mjs --write",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "node scripts/docs-api.mjs --check && node scripts/docs-examples.mjs --types && vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "smaltty": "github:stenhoor/smaltty#v0.14.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "smaltdb": "^0.8.3",
     "typescript": "~6.0.3",
     "typescript7": "npm:typescript@~7.0.2",
-    "smaltdb": "^0.8.3"
+    "vitepress": "^1.6.4"
   },
   "peerDependencies": {
     "smaltdb": ">=0.8.3 <0.10.0"
