@@ -21,7 +21,14 @@ export * as smaltty from './typescript-kit.js';
 /** A SyntaxError in TypeScript, or code that can't be stripped: `line` and `column` (1-based) say where. */
 export const TypeScriptSyntaxError = ParseError;
 
-/** JavaScript for TypeScript `code`: its types replaced by spaces. Throws a TypeScriptSyntaxError. */
+/**
+ * JavaScript for TypeScript `code`: its types replaced by spaces, so every line and column is the one written.
+ * @param code TypeScript, as a module.
+ * @param options `filename`: named in error messages.
+ * @returns The JavaScript, as long as the code.
+ * @throws TypeScriptSyntaxError for a syntax error, or for code that would make code of its own (an enum, a namespace
+ *   with values, a parameter property, `<T>x`), with the line, the column and what to write instead.
+ */
 export function stripTypes(code: string, options: { filename?: string } = {}): string {
   return strip(code, options.filename === undefined ? {} : { fileName: options.filename });
 }

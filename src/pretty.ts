@@ -14,7 +14,14 @@ export interface JsonFormatOptions {
   indent?: number;
 }
 
-/** A value as JSON, laid out to fit the width. */
+/**
+ * A value as JSON, laid out to fit the width: an object or array stays on one line when it fits, and has one item per
+ * line when it doesn't. Bigints are written as numbers.
+ * @param value Anything JSON.stringify takes.
+ * @param options `width`, the widest line to aim for (default 100), and `indent`, spaces per level (default 2).
+ * @returns The JSON text.
+ * @throws TypeError when the value is circular.
+ */
 export function formatJson(value: unknown, options: JsonFormatOptions = {}): string {
   const width = options.width ?? 100;
   const unit = ' '.repeat(options.indent ?? 2);
@@ -100,7 +107,11 @@ const CONTINUES = /^(?:\?\.|\.(?!\.\.)|\?\?|\|\||&&|=>|\+(?!\+)|-(?!-)|\/(?![/*]
 
 /**
  * TypeScript (or JavaScript) re-indented by bracket depth, with continued lines one level in. Lines inside a template
- * literal or a block comment keep their text exactly.
+ * literal or a block comment keep their text exactly. Only whitespace at the start and end of lines changes, so what the
+ * code does can't change; runs of blank lines become one.
+ * @param code The code.
+ * @param options `indent`: spaces per level (default 2).
+ * @returns The code, re-indented.
  */
 export function formatTypeScript(code: string, options: TsFormatOptions = {}): string {
   const unit = ' '.repeat(options.indent ?? 2);

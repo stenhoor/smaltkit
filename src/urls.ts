@@ -32,8 +32,10 @@ const rules: Rule[] = [
 ];
 
 /**
- * Rewrite a pasted data URL to one the browser can fetch.
- * Returns { url, changed, note } — `note` explains a rewrite or a URL that cannot work.
+ * Rewrite a pasted data URL to one the browser can fetch: GitHub and Hugging Face file pages become their raw files.
+ * @param input What was pasted. Text that isn't an http(s) URL comes back trimmed and unchanged.
+ * @returns `url`, the URL to fetch; `changed`, whether it differs from the input; `note`, a sentence for people that
+ *   explains a rewrite or why a URL can't work (a GitHub folder), or `''`.
  */
 export function normalizeDataUrl(input: string | null | undefined): NormalizedUrl {
   const raw = String(input ?? '').trim();
@@ -54,7 +56,10 @@ export function normalizeDataUrl(input: string | null | undefined): NormalizedUr
 
 /**
  * Extra help for a CORS / network error message: why it happens and, for GitHub-style links, the
- * URL that works. Returns '' when the message is not about CORS.
+ * URL that works.
+ * @param message An error or its message, such as a failed fetch's.
+ * @returns A sentence to show under the error: the raw file's URL when the message names a link that has one, else
+ *   why the browser blocks the read and what to do. `''` when the message is not about CORS or the network.
  */
 export function corsHint(message: unknown): string {
   const text = String(message ?? '');

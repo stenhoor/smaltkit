@@ -47,22 +47,12 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### formatJson {#formatJson}
+Each has a page of its own.
 
-```ts
-function formatJson(value: unknown, options?: JsonFormatOptions): string;
-```
-
-A value as JSON, laid out to fit the width.
-
-#### formatTypeScript {#formatTypeScript}
-
-```ts
-function formatTypeScript(code: string, options?: TsFormatOptions): string;
-```
-
-TypeScript (or JavaScript) re-indented by bracket depth, with continued lines one level in. Lines inside a template
-literal or a block comment keep their text exactly.
+| Function | |
+| --- | --- |
+| [`formatJson`](./pretty/formatJson) | A value as JSON, laid out to fit the width: an object or array stays on one line when it fits, and has one item per line when it doesn't. |
+| [`formatTypeScript`](./pretty/formatTypeScript) | TypeScript (or JavaScript) re-indented by bracket depth, with continued lines one level in. |
 
 ### Interfaces
 

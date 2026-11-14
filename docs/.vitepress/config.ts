@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import path from 'node:path'
+import { existsSync, readdirSync } from 'node:fs'
 import { smaltLight, smaltDark } from './theme/shiki'
 import { smaltworksMenu, smaltworksFooter } from './theme/smaltworks'
 import { agentDocs, packageVersion } from './theme/agents'
@@ -9,7 +10,18 @@ const REPO = 'https://github.com/stenhoor/smaltkit'
 const base = process.env.DOCS_BASE ?? '/smaltkit/'
 const description = 'Shared UI code for the smalt apps: the engine loader, charts, tables, the grid, the editor and the rest, in plain ES modules with no dependencies.'
 
-const ref = (text: string, module: string) => ({ text, link: `/reference/${module}` })
+// A module's sidebar entry; a module whose functions have pages of their own (docs/reference/<module>/) lists them
+// under it.
+const ref = (text: string, module: string) => {
+  const dir = path.join(__dirname, '..', 'reference', module)
+  if (!existsSync(dir)) return { text, link: `/reference/${module}` }
+  const items = readdirSync(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => f.slice(0, -3))
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({ text: name, link: `/reference/${module}/${name}` }))
+  return { text, link: `/reference/${module}`, collapsed: true, items }
+}
 
 export default defineConfig({
   title: 'smaltkit',

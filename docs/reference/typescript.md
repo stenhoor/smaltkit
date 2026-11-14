@@ -48,15 +48,11 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### stripTypes {#stripTypes}
+Each has a page of its own.
 
-```ts
-function stripTypes(code: string, options?: {
-    filename?: string;
-}): string;
-```
-
-JavaScript for TypeScript `code`: its types replaced by spaces. Throws a TypeScriptSyntaxError.
+| Function | |
+| --- | --- |
+| [`stripTypes`](./typescript/stripTypes) | JavaScript for TypeScript `code`: its types replaced by spaces, so every line and column is the one written. |
 
 ### Constants
 
