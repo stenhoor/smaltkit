@@ -48,7 +48,7 @@ The gutter's HTML for `lines` lines, the lines with warnings marked and titled w
 function highlightTypeScript(text: string): string;
 ```
 
-HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` templates highlighted as SQL.
+HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` and Cypher in cypher`…` highlighted.
 
 #### markedHtml {#markedHtml}
 
@@ -143,7 +143,8 @@ SQL (smaltql's dialect): highlighting, `--` comments, statement shading and comp
 const typescriptLanguage: EditorLanguage;
 ```
 
-TypeScript: highlighting (SQL inside sql`…` and exec`…`), `//` comments. Completion comes from a language service.
+TypeScript: highlighting (SQL inside sql`…` and exec`…`, Cypher inside cypher`…` and cypher.run`…`), `//` comments.
+Completion comes from a language service.
 
 ### Interfaces
 
