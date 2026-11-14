@@ -24,7 +24,12 @@ export interface ChoiceOptions {
   onChange(values: Value[]): void;
 }
 
-/** Equal values, across number and bigint (an integer column can come back as either). */
+/**
+ * Equal values, across number and bigint (an integer column can come back as either).
+ * @param a A value.
+ * @param b Another.
+ * @returns True when they are the same value.
+ */
 export function sameValue(a: Value, b: Value): boolean {
   return a === b || ((typeof a === 'bigint' || typeof b === 'bigint') && a !== null && b !== null && String(a) === String(b));
 }
@@ -33,6 +38,10 @@ export function sameValue(a: Value, b: Value): boolean {
  * Choose values from a list. `list`: checkboxes (radios when `single`); `dropdown`: the same in a <details> menu, with
  * "All" or "n selected" as its label; `buttons`: chips, Ctrl/Cmd-click to add to the selection. A "Clear" button
  * appears while something is selected.
+ * @param el The element to draw into.
+ * @param style `'list'`, `'dropdown'` or `'buttons'`.
+ * @param o The values, the selection, how values are shown, and `onChange`.
+ * @returns Nothing: the control is drawn into `el` and reports through `o.onChange`. Call it again to redraw.
  */
 export function choiceControl(el: ControlElement, style: ChoiceStyle, o: ChoiceOptions): void {
   const fmt = o.format ?? ((v: Value) => String(v ?? ''));
@@ -82,7 +91,12 @@ export interface RangeOptions {
   onChange(range: [Value, Value] | null): void;
 }
 
-/** Two inputs, from and to. */
+/**
+ * Two inputs, from and to, for a range of numbers or dates.
+ * @param el The element to draw into.
+ * @param o The kind, the data's extent, the current range and `onChange`.
+ * @returns Nothing: the control reports a change of either end through `o.onChange`.
+ */
 export function rangeControl(el: ControlElement, o: RangeOptions): void {
   const show = (x: Value | undefined) => (x === null || x === undefined ? '' : esc(o.kind === 'date' ? String(x).slice(0, 10) : x));
   const lim = `min="${show(o.min)}" max="${show(o.max)}"`;
@@ -103,7 +117,12 @@ export interface SearchOptions {
   onChange(text: string): void;
 }
 
-/** A search box that reports its text after typing pauses. */
+/**
+ * A search box that reports its text after typing pauses.
+ * @param el The element to draw into.
+ * @param o The text, a placeholder, the pause and `onChange`.
+ * @returns Nothing: the control reports through `o.onChange`.
+ */
 export function searchControl(el: ControlElement, o: SearchOptions): void {
   el.innerHTML = `<div class="sk-control"><input class="sk-input" type="search" placeholder="${esc(o.placeholder ?? 'Search…')}" value="${esc(o.value)}"></div>`;
   const input = el.querySelector?.<HTMLInputElement>('input');

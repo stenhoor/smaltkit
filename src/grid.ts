@@ -44,7 +44,12 @@ export type ExportFormat = 'csv' | 'tsv' | 'json' | 'ndjson' | 'sql';
 const ROW_H = 26;
 const OVERSCAN = 12;
 
-/** A value as the grid shows it; null for NULL. */
+/**
+ * A value as the grid shows it; null for NULL.
+ * @param v A result value.
+ * @returns Its text: whole numbers as written, others to 12 decimal places at most, bytes as a hex preview with their
+ *   size (`x'0102' (2 B)`); null for null.
+ */
 export function formatValue(v: GridValue): string | null {
   if (v === null || v === undefined) return null;
   if (v instanceof Uint8Array) {
@@ -55,7 +60,11 @@ export function formatValue(v: GridValue): string | null {
   return String(v);
 }
 
-/** A value as text for copying and export. */
+/**
+ * A value as text for copying and export: everything, unlike formatValue's preview.
+ * @param v A result value.
+ * @returns Its text; bytes in full as `x'…'`; `''` for null.
+ */
 export function plainValue(v: GridValue): string {
   if (v === null || v === undefined) return '';
   if (v instanceof Uint8Array) return "x'" + [...v].map((b) => b.toString(16).padStart(2, '0')).join('') + "'";
@@ -491,6 +500,10 @@ export class Grid {
 /**
  * The view order for sorting rows by a column: nulls first, then numbers, then strings, then everything else; equal
  * values keep their order. Null when `dir` is null (unsorted).
+ * @param rows The rows.
+ * @param col The column to sort by.
+ * @param dir `'asc'`, `'desc'`, or null for the rows' own order.
+ * @returns Row indexes in view order, or null.
  */
 export function sortOrder(rows: GridRow[], col: number, dir: SortDir): number[] | null {
   if (!dir) return null;
@@ -512,7 +525,15 @@ export function sortOrder(rows: GridRow[], col: number, dir: SortDir): number[] 
   return idx;
 }
 
-/** CSV / TSV / JSON / NDJSON / SQL INSERT text for rows. */
+/**
+ * CSV / TSV / JSON / NDJSON / SQL INSERT text for rows.
+ * @param format `'csv'`, `'tsv'`, `'json'`, `'ndjson'` or `'sql'`.
+ * @param columns The column names, or the grid's columns.
+ * @param rows The rows, in column order.
+ * @param tableName The table the SQL inserts into. Default `result`.
+ * @returns The text, ending with a newline (JSON's array doesn't). CSV quotes what needs it; TSV turns tabs and line
+ *   breaks into spaces; JSON writes a bigint as a number when it's safe, else as text.
+ */
 export function exportRows(format: ExportFormat, columns: (string | GridColumn)[], rows: GridRow[], tableName = 'result'): string {
   const names = columns.map((c) => (typeof c === 'string' ? c : c.name));
   if (format === 'json') {

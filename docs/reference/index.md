@@ -5,7 +5,7 @@ everything from `smaltkit`; the styles are `smaltkit/ui.css`. Each page says wha
 examples, and lists its API: the signatures and doc comments of everything it exports, generated from its declarations.
 
 Functions are moving to pages of their own, a few modules at a time: so far those of `smaltkit/urls`, `format`,
-`markdown`, `pretty`, `typescript`, `sql`, `cypher`, `svg`, `charts`, `maps`, `table`, `graph` and `timeline`. A function's page has its signature, parameters, what it returns and the errors it
+`markdown`, `pretty`, `typescript`, `sql`, `cypher`, `svg`, `charts`, `maps`, `table`, `graph`, `timeline`, `grid`, `editor`, `controls` and `dom`. A function's page has its signature, parameters, what it returns and the errors it
 raises, then examples, a demo and related functions.
 
 Examples with their output under them are tests: CI runs them against the built package and checks what they print.
