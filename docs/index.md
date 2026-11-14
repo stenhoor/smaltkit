@@ -3,8 +3,12 @@ layout: home
 
 hero:
   name: 'sm<span class="alt">alt</span><span class="suffix kit">kit</span>'
-  text: Shared UI code for the smalt apps.
-  tagline: The engine loader, charts, tables, the data grid, the code editor and the rest of what the smalt apps share around smaltdb, in strict TypeScript, as plain ES modules that load in a page without a bundler. No dependencies.
+  text: 'Small. Alternative.<br>Reusable.'
+  tagline: Shared UI code for the smalt apps.
+  image:
+    light: /case-mark.svg
+    dark: /case-mark-on-dark.svg
+    alt: smaltkit
   actions:
     - theme: brand
       text: Quick start
@@ -30,3 +34,6 @@ features:
     link: /reference/styles
     linkText: smaltkit/ui.css
 ---
+
+The engine loader, charts, tables, the data grid, the code editor and the rest of what the smalt apps share around
+smaltdb, in strict TypeScript, as plain ES modules that load in a page without a bundler. No dependencies.

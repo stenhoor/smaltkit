@@ -57,7 +57,8 @@ export default defineConfig({
     },
   },
   themeConfig: {
-    siteTitle: 'smaltkit',
+    siteTitle: false,
+    logo: { light: '/lockup.svg', dark: '/lockup-on-dark.svg', alt: 'smaltkit' },
     nav: [
       { text: 'Quick start', link: '/quick-start' },
       { text: 'Reference', link: '/reference/' },
