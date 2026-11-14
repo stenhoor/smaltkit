@@ -4,7 +4,7 @@
 // The rest of each page (what the module is for, its examples) is written by hand. `--check` writes nothing and fails if a page is out of date (CI).
 //
 //   npm run build && node scripts/docs-api.mjs [--check]
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 
@@ -84,12 +84,12 @@ function members(decl) {
   });
 }
 
-function api(module) {
+/** A module's exports, by kind (KIND's order), each sorted by name. */
+function exportsOf(module) {
   const sf = program.getSourceFile(path.join(root, 'dist', `${module}.d.ts`));
   const modSym = checker.getSymbolAtLocation(sf);
-  if (!modSym) return '_This module exports nothing._\n';
   const groups = new Map(KIND.map(([k]) => [k, []]));
-  for (const exported of checker.getExportsOfModule(modSym)) {
+  for (const exported of modSym ? checker.getExportsOfModule(modSym) : []) {
     const sym = exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
     if (isInternal(sym)) continue;
     const decl = sym.declarations?.[0];
@@ -98,11 +98,81 @@ function api(module) {
     if (!kind) continue;
     groups.get(kind).push({ name: exported.name, sym, decl, exported });
   }
+  for (const items of groups.values()) items.sort((a, b) => a.name.localeCompare(b.name));
+  return groups;
+}
+
+/**
+ * Whether a module's functions have pages of their own (docs/reference/<module>/<function>.md): a module moves to them
+ * when that folder exists, and then every function needs its page.
+ */
+const hasPages = (module) => existsSync(path.join(root, 'docs', 'reference', module));
+
+/** A doc comment's text without its tags. */
+const summaryOf = (sym) => ts.displayPartsToString(sym.getDocumentationComment(checker)).trim();
+
+/** The first sentence of a text, on one line. */
+const firstSentence = (text) => {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  return /^(.*?[.!?])(\s|$)/.exec(flat)?.[1] ?? flat;
+};
+
+/** A doc comment's tags by name, as text: `@param name text` gives { name, text }. */
+function tags(sym, name) {
+  return sym
+    .getJsDocTags(checker)
+    .filter((t) => t.name === name)
+    .map((t) => ts.displayPartsToString(t.text ?? []).trim());
+}
+
+const cell = (text) => prose(text).replace(/\n+/g, ' ').replace(/\|/g, '\\|');
+const typeText = (node, sf) => (node ? printer.printNode(ts.EmitHint.Unspecified, node, sf).replace(/\s+/g, ' ') : 'unknown');
+
+/** The generated part of a function's page: import, signature, summary, parameters, returns, errors. */
+function functionApi(module, { name, sym, decl }) {
+  const sf = decl.getSourceFile();
+  const decls = sym.declarations.filter((d) => ts.isFunctionDeclaration(d));
+  let out = '```ts\n' + `import { ${name} } from 'smaltkit/${module}';\n` + decls.map(signature).join('\n') + '\n```\n\n';
+  const summary = summaryOf(sym);
+  if (summary) out += `${prose(summary)}\n\n`;
+  const docOf = new Map(
+    tags(sym, 'param').map((t) => {
+      const m = /^(\S+)\s*([\s\S]*)$/.exec(t);
+      return [m[1], m[2]];
+    }),
+  );
+  const params = decl.parameters ?? [];
+  if (params.length) {
+    out += '## Parameters\n\n| Parameter | Type | |\n| --- | --- | --- |\n';
+    for (const p of params) {
+      const pname = p.name.getText(sf);
+      const optional = p.questionToken || p.initializer ? '?' : '';
+      out += `| \`${pname}${optional}\` | \`${cell(typeText(p.type, sf))}\` | ${cell(docOf.get(pname) ?? '')} |\n`;
+    }
+    out += '\n';
+  }
+  const returns = tags(sym, 'returns')[0];
+  out += `## Returns\n\n\`${typeText(decl.type, sf)}\`${returns ? `: ${prose(returns.replace(/\s+/g, ' '))}` : ''}\n\n`;
+  const throws = tags(sym, 'throws');
+  if (throws.length) out += `## Errors\n\n${throws.map((t) => `- ${prose(t.replace(/\s+/g, ' '))}`).join('\n')}\n\n`;
+  return out;
+}
+
+/** A new function page: its title, its generated part, and the sections written by hand. */
+const stub = (name) => `# ${name}\n\n${START}\n${END}\n\n## Examples\n\n## See also\n`;
+
+function api(module) {
+  const groups = exportsOf(module);
   let out = '';
   for (const [kind, items] of groups) {
     if (!items.length) continue;
-    items.sort((a, b) => a.name.localeCompare(b.name));
     out += `### ${kind}\n\n`;
+    if (kind === 'Functions' && hasPages(module)) {
+      out += 'Each has a page of its own.\n\n| Function | |\n| --- | --- |\n';
+      for (const { name, sym } of items) out += `| [\`${name}\`](./${module}/${name}) | ${cell(firstSentence(summaryOf(sym)))} |\n`;
+      out += '\n';
+      continue;
+    }
     for (const { name, sym, decl, exported } of items) {
       out += `#### ${name} {#${name}}\n\n`;
       if (kind === 'Namespaces') {
@@ -138,14 +208,23 @@ function cssProperties() {
 
 const blocks = [
   ...modules.map((m) => ({ page: `reference/${m}.md`, start: START, end: END, text: () => api(m) })),
+  ...modules.filter(hasPages).flatMap((m) =>
+    exportsOf(m)
+      .get('Functions')
+      .map((item) => ({ page: `reference/${m}/${item.name}.md`, start: START, end: END, text: () => functionApi(m, item), stub: stub(item.name) })),
+  ),
   { page: 'reference/styles.md', start: '<!-- css:start -->', end: '<!-- css:end -->', text: cssProperties },
 ];
 
 let stale = 0;
-for (const { page: rel, start: START, end: END, text: generate } of blocks) {
+for (const { page: rel, start: START, end: END, text: generate, stub: fresh } of blocks) {
   const page = path.join(root, 'docs', rel);
+  if (!existsSync(page) && fresh && !check) {
+    writeFileSync(page, fresh);
+    console.log(`started docs/${rel}: write its examples`);
+  }
   if (!existsSync(page)) {
-    console.error(`docs/${rel} is missing`);
+    console.error(`docs/${rel} is missing${fresh ? ': run npm run docs:api to start it' : ''}`);
     stale++;
     continue;
   }
@@ -165,6 +244,16 @@ for (const { page: rel, start: START, end: END, text: generate } of blocks) {
   } else {
     writeFileSync(page, next);
     console.log(`wrote docs/${rel}`);
+  }
+}
+// A function page whose function is gone.
+for (const m of modules.filter(hasPages)) {
+  const names = new Set(exportsOf(m).get('Functions').map((i) => i.name));
+  for (const f of readdirSync(path.join(root, 'docs', 'reference', m))) {
+    if (f.endsWith('.md') && !names.has(f.slice(0, -3))) {
+      console.error(`docs/reference/${m}/${f}: smaltkit/${m} exports no function ${f.slice(0, -3)}`);
+      stale++;
+    }
   }
 }
 if (stale) process.exit(1);

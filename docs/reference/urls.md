@@ -41,23 +41,12 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### corsHint {#corsHint}
+Each has a page of its own.
 
-```ts
-function corsHint(message: unknown): string;
-```
-
-Extra help for a CORS / network error message: why it happens and, for GitHub-style links, the
-URL that works. Returns '' when the message is not about CORS.
-
-#### normalizeDataUrl {#normalizeDataUrl}
-
-```ts
-function normalizeDataUrl(input: string | null | undefined): NormalizedUrl;
-```
-
-Rewrite a pasted data URL to one the browser can fetch.
-Returns { url, changed, note } — `note` explains a rewrite or a URL that cannot work.
+| Function | |
+| --- | --- |
+| [`corsHint`](./urls/corsHint) | Extra help for a CORS / network error message: why it happens and, for GitHub-style links, the URL that works. |
+| [`normalizeDataUrl`](./urls/normalizeDataUrl) | Rewrite a pasted data URL to one the browser can fetch: GitHub and Hugging Face file pages become their raw files. |
 
 ### Interfaces
 

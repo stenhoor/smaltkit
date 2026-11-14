@@ -2,13 +2,24 @@
 // Charts build markup strings (fast: one innerHTML per render) and style everything through the
 // theme's CSS variables.
 
+/**
+ * Text escaped for HTML and SVG, in text and in attributes.
+ * @param s Anything; null and undefined are `''`.
+ * @returns The text with `& < > " '` escaped.
+ */
 export function esc(s: unknown): string {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
 
 export const r2 = (n: number) => Math.round(n * 100) / 100;
 
-/** "Nice" tick values covering [lo, hi]. */
+/**
+ * "Nice" tick values covering [lo, hi]: steps of 1, 2 or 5 times a power of ten.
+ * @param lo The smallest value.
+ * @param hi The largest value.
+ * @param count About how many ticks. Default 5.
+ * @returns The ticks, and the axis ends they reach, which cover `lo` and `hi`.
+ */
 export function niceTicks(lo: number, hi: number, count = 5): { ticks: number[]; min: number; max: number } {
   if (!Number.isFinite(lo) || !Number.isFinite(hi)) return { ticks: [0, 1], min: 0, max: 1 };
   if (lo === hi) {
@@ -38,6 +49,15 @@ export interface Linear {
   log?: boolean;
 }
 
+/**
+ * A linear scale from values in [lo, hi] to positions in [r0, r1].
+ * @param lo The smallest value.
+ * @param hi The largest value.
+ * @param r0 The position of `lo`, such as the bottom of a plot.
+ * @param r1 The position of `hi`.
+ * @param opts `zero`: include 0 (default true). `nice`: extend to nice ticks (default true). `count`: about how many.
+ * @returns The scale, a function with its `domain`, `range` and `ticks`.
+ */
 export function linear(lo: number, hi: number, r0: number, r1: number, opts: { zero?: boolean; nice?: boolean; count?: number } = {}): Linear {
   if (opts.zero !== false) {
     lo = Math.min(0, lo);
@@ -58,7 +78,14 @@ export function linear(lo: number, hi: number, r0: number, r1: number, opts: { z
   return f;
 }
 
-/** A log-10 scale over [lo, hi] (both > 0): ticks at 1, 10, 100… (with 2 and 5 between when there are few decades). */
+/**
+ * A log-10 scale over [lo, hi] (both > 0): ticks at 1, 10, 100… (with 2 and 5 between when there are few decades).
+ * @param lo The smallest value, above 0.
+ * @param hi The largest value.
+ * @param r0 The position of `lo`.
+ * @param r1 The position of `hi`.
+ * @returns The scale, with `log` true.
+ */
 export function logScale(lo: number, hi: number, r0: number, r1: number): Linear {
   if (!(lo > 0)) lo = 1;
   if (!(hi > lo)) hi = lo * 10;
@@ -80,6 +107,12 @@ export function logScale(lo: number, hi: number, r0: number, r1: number): Linear
 /**
  * A value axis: linear (from zero unless `min` is given) or, with `log` and positive values, log 10. `min` and `max`
  * fix the ends; the nice ticks inside them are kept.
+ * @param lo The smallest value.
+ * @param hi The largest value.
+ * @param r0 The position of the axis's start.
+ * @param r1 The position of its end.
+ * @param opts `count`: about how many ticks. `log`: a log scale. `min`, `max`: fixed ends.
+ * @returns The scale.
  */
 export function valueScale(lo: number, hi: number, r0: number, r1: number, opts: { count?: number; log?: boolean; min?: number; max?: number } = {}): Linear {
   const { min, max } = opts;
@@ -93,7 +126,13 @@ export function valueScale(lo: number, hi: number, r0: number, r1: number, opts:
   return withDomain(s, min ?? s.domain[0], max ?? s.domain[1]);
 }
 
-/** The same kind of scale over a new range (for laying out once the margins are known). */
+/**
+ * The same kind of scale over a new range (for laying out once the margins are known).
+ * @param s A scale from linear, logScale or valueScale.
+ * @param r0 The new start position.
+ * @param r1 The new end position.
+ * @returns A scale with the same domain and ticks over [r0, r1].
+ */
 export function rescale(s: Linear, r0: number, r1: number): Linear {
   const f = s.log ? withDomain(logScale(s.domain[0], s.domain[1], r0, r1), s.domain[0], s.domain[1]) : linear(s.domain[0], s.domain[1], r0, r1, { nice: false, zero: false });
   f.ticks = s.ticks;
@@ -116,7 +155,12 @@ function withDomain(s: Linear, d0: number, d1: number): Linear {
 
 const DAY = 86400000;
 
-/** A date or time value as milliseconds (UTC), or NaN: ISO strings ("2025-03-01", "2025-03"), epoch numbers. */
+/**
+ * A date or time value as milliseconds (UTC), or NaN: ISO strings ("2025-03-01", "2025-03"), epoch numbers.
+ * @param v A date as text (`YYYY-MM`, `YYYY-MM-DD`, with a time after a space or `T`), or an epoch number: seconds,
+ *   or milliseconds above 10¹¹.
+ * @returns Milliseconds since the epoch, UTC, or NaN for anything else.
+ */
 export function timeValue(v: unknown): number {
   if (typeof v === 'number') return v > 1e11 ? v : v * 1000;
   if (typeof v !== 'string') return NaN;
@@ -128,6 +172,10 @@ export function timeValue(v: unknown): number {
 /**
  * Calendar ticks between two times (ms, UTC): whole days, weeks, months, quarters or years, about `count` of them,
  * with the date pattern that suits the step ("YYYY", "MMM YYYY", "D MMM").
+ * @param lo The first time, in milliseconds (UTC).
+ * @param hi The last time.
+ * @param count About how many ticks. Default 5.
+ * @returns The ticks, in milliseconds, and a pattern for formatDate.
  */
 export function timeTicks(lo: number, hi: number, count = 5): { ticks: number[]; pattern: string } {
   if (!Number.isFinite(lo) || !Number.isFinite(hi)) return { ticks: [], pattern: 'YYYY-MM-DD' };
@@ -166,7 +214,15 @@ export interface Band {
   step: number;
 }
 
-/** A band scale over `n` slots in [r0, r1]. `pad` is the inner gap as a fraction of the step. */
+/**
+ * A band scale over `n` slots in [r0, r1], for bars.
+ * @param n How many slots.
+ * @param r0 The start position.
+ * @param r1 The end position.
+ * @param pad The gap between bands, as a fraction of the step. Default 0.2.
+ * @param outer The gap before the first band and after the last, in steps. Default half of `pad`.
+ * @returns The scale: slot `i` to its band's start, with `step` (band and gap) and `bandwidth`.
+ */
 export function band(n: number, r0: number, r1: number, pad = 0.2, outer = pad / 2): Band {
   r1 = Math.max(r0, r1);
   const step = (r1 - r0) / Math.max(1, n - pad + outer * 2);
@@ -176,13 +232,25 @@ export function band(n: number, r0: number, r1: number, pad = 0.2, outer = pad /
   return f;
 }
 
-/** Rough text width for layout (avoids measuring the DOM on every render). */
+/**
+ * Rough text width for layout (avoids measuring the DOM on every render), from per-character widths of a sans serif.
+ * @param s The text.
+ * @param fontPx The font size in pixels.
+ * @returns The width in pixels, roughly.
+ */
 export function textWidth(s: string, fontPx: number): number {
   let w = 0;
   for (const ch of s) w += /[il.,:;|!'1 ]/.test(ch) ? 0.3 : /[mwMW@%]/.test(ch) ? 0.85 : /[A-Z0-9$€£]/.test(ch) ? 0.62 : 0.53;
   return w * fontPx;
 }
 
+/**
+ * Text cut to fit a width, with `…`, by textWidth's measure.
+ * @param s The text.
+ * @param maxPx The width it must fit, in pixels.
+ * @param fontPx The font size in pixels.
+ * @returns The text as it is when it fits, else as much as fits followed by `…`.
+ */
 export function truncate(s: string, maxPx: number, fontPx: number): string {
   if (textWidth(s, fontPx) <= maxPx) return s;
   let out = s;
@@ -190,7 +258,16 @@ export function truncate(s: string, maxPx: number, fontPx: number): string {
   return out + '…';
 }
 
-/** SVG path for an annular sector (angles in radians, 0 = 12 o'clock, clockwise). */
+/**
+ * SVG path for an annular sector (angles in radians, 0 = 12 o'clock, clockwise), for pies, donuts and gauges.
+ * @param cx The centre's x.
+ * @param cy The centre's y.
+ * @param r0 The inner radius: 0 for a pie slice.
+ * @param r1 The outer radius.
+ * @param a0 The start angle.
+ * @param a1 The end angle. A whole turn draws a full ring.
+ * @returns The path's `d`.
+ */
 export function arc(cx: number, cy: number, r0: number, r1: number, a0: number, a1: number): string {
   if (a1 - a0 >= Math.PI * 2 - 1e-6) a1 = a0 + Math.PI * 2 - 1e-4;
   const p = (r: number, a: number) => `${r2(cx + r * Math.sin(a))},${r2(cy - r * Math.cos(a))}`;
@@ -199,7 +276,12 @@ export function arc(cx: number, cy: number, r0: number, r1: number, a0: number, 
   return `M${p(r1, a0)}A${r2(r1)},${r2(r1)} 0 ${large} 1 ${p(r1, a1)}L${p(r0, a1)}A${r2(r0)},${r2(r0)} 0 ${large} 0 ${p(r0, a0)}Z`;
 }
 
-/** Monotone-ish smooth path through points (Catmull-Rom with tension), or straight segments. */
+/**
+ * Monotone-ish smooth path through points (Catmull-Rom with tension), or straight segments.
+ * @param pts The points, as `[x, y]`.
+ * @param smooth Curves instead of straight segments. Default false.
+ * @returns The path's `d`, with coordinates rounded to hundredths; `''` for no points.
+ */
 export function linePath(pts: [number, number][], smooth = false): string {
   if (!pts.length) return '';
   if (!smooth || pts.length < 3) return 'M' + pts.map(([x, y]) => `${r2(x)},${r2(y)}`).join('L');
@@ -217,18 +299,31 @@ export function linePath(pts: [number, number][], smooth = false): string {
   return d;
 }
 
-/** A color between the theme's sequential ramp ends, as a CSS `color-mix()`. t in [0, 1]. */
+/**
+ * A color between the theme's sequential ramp ends (`--sk-seq-lo` and `--sk-seq-hi`), as a CSS `color-mix()`.
+ * @param t Where on the ramp, from 0 to 1; outside it is clamped.
+ * @returns A CSS colour.
+ */
 export function seqColor(t: number): string {
   const p = Math.round(Math.max(0, Math.min(1, t)) * 100);
   return `color-mix(in oklab, var(--sk-seq-hi) ${p}%, var(--sk-seq-lo))`;
 }
 
-/** A diverging color: t in [-1, 1]. */
+/**
+ * A diverging color: from `--sk-div-mid` at 0 towards `--sk-div-lo` (below 0) or `--sk-div-hi` (above).
+ * @param t From -1 to 1; beyond is clamped.
+ * @returns A CSS colour.
+ */
 export function divColor(t: number): string {
   const p = Math.round(Math.min(1, Math.abs(t)) * 100);
   return `color-mix(in oklab, var(${t < 0 ? '--sk-div-lo' : '--sk-div-hi'}) ${p}%, var(--sk-div-mid))`;
 }
 
+/**
+ * A value as a number, for plotting.
+ * @param v A number, bigint or numeric text.
+ * @returns The number; NaN for null, undefined, `''` and text that isn't a number.
+ */
 export function toNum(v: unknown): number {
   if (typeof v === 'number') return v;
   if (typeof v === 'bigint') return Number(v);

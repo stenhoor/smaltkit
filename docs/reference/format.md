@@ -34,48 +34,15 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### axisFormatter {#axisFormatter}
+Each has a page of its own.
 
-```ts
-function axisFormatter(f: Format | undefined, locale?: string): Formatter;
-```
-
-A short formatter for axis ticks: compact numbers.
-
-#### dateParts {#dateParts}
-
-```ts
-function dateParts(v: Value): {
-    y: number;
-    mo: number;
-    d: number;
-    h: number;
-    mi: number;
-    s: number;
-} | null;
-```
-
-Parse an ISO-like date string (or epoch number) into its parts without time-zone shifts.
-
-#### formatDate {#formatDate}
-
-```ts
-function formatDate(v: Value, pattern: string): string;
-```
-
-#### formatSpec {#formatSpec}
-
-```ts
-function formatSpec(f: Format | undefined): FormatSpec;
-```
-
-#### formatter {#formatter}
-
-```ts
-function formatter(f: Format | undefined, type?: ColumnType, locale?: string): Formatter;
-```
-
-Build a formatter for a field's format and type.
+| Function | |
+| --- | --- |
+| [`axisFormatter`](./format/axisFormatter) | A short formatter for axis ticks: compact numbers (`2.5M`), whole percentages, and dates in the format's pattern. |
+| [`dateParts`](./format/dateParts) | Parse an ISO-like date string (or epoch number) into its parts without time-zone shifts. |
+| [`formatDate`](./format/formatDate) | A date written with a pattern, without time-zone shifts. |
+| [`formatSpec`](./format/formatSpec) | The format object a format stands for: a preset's, a pattern's, or the object itself with its `preset` filled in. |
+| [`formatter`](./format/formatter) | Build a formatter for a field's format and type. |
 
 ### Interfaces
 

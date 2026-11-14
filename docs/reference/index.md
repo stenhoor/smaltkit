@@ -4,6 +4,10 @@ smaltkit is one module per job. Import a module by its subpath (`smaltkit/engine
 everything from `smaltkit`; the styles are `smaltkit/ui.css`. Each page says what the module is for, shows it with
 examples, and lists its API: the signatures and doc comments of everything it exports, generated from its declarations.
 
+Functions are moving to pages of their own, a few modules at a time: so far those of `smaltkit/urls`, `format`,
+`markdown`, `pretty`, `typescript`, `sql`, `cypher` and `svg`. A function's page has its signature, parameters, what it returns and the errors it
+raises, then examples, a demo and related functions.
+
 Examples with their output under them are tests: CI runs them against the built package and checks what they print.
 Examples for a page (the charts, the grid, the editor) need a DOM and are type-checked only.
 

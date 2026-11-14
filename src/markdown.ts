@@ -9,7 +9,11 @@ export interface MarkdownOptions {
   headingOffset?: number;
 }
 
-/** Inline markdown: code spans first (their text is literal), then bold, italic and links. */
+/**
+ * Inline markdown: code spans first (their text is literal), then bold, italic and links.
+ * @param src One line or run of text.
+ * @returns HTML with everything escaped. Links open in a new tab; a link that isn't http(s) stays as its text.
+ */
 export function markdownInline(src: string): string {
   const parts = src.split(/(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/);
   let html = '';
@@ -43,7 +47,12 @@ function strongEm(s: string): string {
 
 const cells = (line: string) => line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
 
-/** Markdown to HTML. */
+/**
+ * Markdown to HTML: headings, paragraphs, bold, italic, code, links, lists, quotes, rules, fenced code and pipe tables.
+ * @param src The markdown.
+ * @param options `headingOffset`: added to each heading's level.
+ * @returns HTML with everything escaped, so raw HTML in `src` shows as text. Style it with ui.css's `.sk-md`.
+ */
 export function markdown(src: string, options: MarkdownOptions = {}): string {
   const offset = options.headingOffset ?? 0;
   const lines = src.replace(/\r\n?/g, '\n').split('\n');

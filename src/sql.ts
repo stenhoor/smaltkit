@@ -52,6 +52,12 @@ export interface ParamSlot {
 /** A SQL value as smaltdb returns or accepts it. */
 export type SqlValue = string | number | bigint | Uint8Array | null;
 
+/**
+ * The text's tokens, in order and covering it all: whitespace, comments, strings, quoted identifiers, words, numbers,
+ * parameters, operators and punctuation. Unterminated strings and comments run to the end.
+ * @param text SQL, whole or partial: tokenizing never fails.
+ * @returns The tokens, each with its type, its text and its offsets in `text`.
+ */
 export function tokenize(text: string): Token[] {
   const out: Token[] = [];
   const n = text.length;
@@ -139,7 +145,13 @@ export function tokenize(text: string): Token[] {
 
 const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** HTML for the editor's highlight layer. `names` is an optional Set of lower-cased object names. */
+/**
+ * HTML for the editor's highlight layer: each token in a span classed by its kind (`sk-tk-k` for keywords, `sk-tk-f`
+ * functions, `sk-tk-obj` the database's objects, …).
+ * @param text SQL.
+ * @param names Lower-cased names of the database's tables and views, shown as objects.
+ * @returns The HTML, with the text escaped, ending with a newline.
+ */
 export function highlight(text: string, names?: Set<string>): string {
   let html = '';
   const toks = tokenize(text);
@@ -182,7 +194,12 @@ export function highlight(text: string, names?: Set<string>): string {
   return html + '\n';
 }
 
-/** Split a script into statements: [{ sql, start, end }] (offsets into `text`, trimmed of whitespace/semicolon). */
+/**
+ * Split a script into statements, at semicolons outside strings, identifiers and comments.
+ * @param text A script.
+ * @returns The statements, each with its text (trimmed of whitespace and its semicolon) and its offsets in `text`.
+ *   Empty statements are left out.
+ */
 export function splitStatements(text: string): Statement[] {
   const toks = tokenize(text);
   const out: Statement[] = [];
@@ -216,7 +233,12 @@ export function splitStatements(text: string): Statement[] {
   return out;
 }
 
-/** The statement containing (or just before) offset `pos`. */
+/**
+ * The statement containing (or just before) offset `pos`: the one to run when the cursor is there.
+ * @param text A script.
+ * @param pos An offset in `text`, such as the cursor's.
+ * @returns The statement, or null for a script with none.
+ */
 export function statementAt(text: string, pos: number): Statement | null {
   const stmts = splitStatements(text);
   if (stmts.length === 0) return null;
@@ -227,7 +249,11 @@ export function statementAt(text: string, pos: number): Statement | null {
   return best ?? stmts[0];
 }
 
-/** First significant keyword of a statement, upper-cased. */
+/**
+ * First significant keyword of a statement, upper-cased: comments and opening brackets are skipped.
+ * @param sql A statement.
+ * @returns The keyword, such as `SELECT`, or `''`.
+ */
 export function leadingKeyword(sql: string): string {
   for (const t of tokenize(sql)) {
     if (t.type === 'ws' || t.type === 'comment' || (t.type === 'punct' && t.text === '(')) continue;
@@ -236,7 +262,13 @@ export function leadingKeyword(sql: string): string {
   return '';
 }
 
-/** Whether a statement produces rows (and should be streamed into a grid rather than run with exec). */
+/**
+ * Whether a statement produces rows (and should be streamed into a grid rather than run with exec): `SELECT`,
+ * `VALUES`, `TABLE`, `EXPLAIN`, `PRAGMA` without `=`, `WITH` unless it writes without `RETURNING`, and any statement
+ * with `RETURNING`.
+ * @param sql A statement.
+ * @returns True when it returns rows.
+ */
 export function returnsRows(sql: string): boolean {
   const kw = leadingKeyword(sql);
   if (['SELECT', 'WITH', 'VALUES', 'EXPLAIN', 'PRAGMA', 'TABLE'].includes(kw)) {
@@ -252,7 +284,11 @@ export function returnsRows(sql: string): boolean {
   return tokenize(sql).some((t) => t.type === 'word' && t.text.toUpperCase() === 'RETURNING');
 }
 
-/** Whether a statement changes the schema (the object explorer should refresh). */
+/**
+ * Whether a statement changes the schema (the object explorer should refresh): `CREATE`, `DROP`, `ALTER` or `REFRESH`.
+ * @param sql A statement.
+ * @returns True when it changes the schema.
+ */
 export function changesSchema(sql: string): boolean {
   return ['CREATE', 'DROP', 'ALTER', 'REFRESH'].includes(leadingKeyword(sql));
 }
@@ -260,6 +296,9 @@ export function changesSchema(sql: string): boolean {
 /**
  * Parameter slots in the order the engine numbers them: `?` takes the next number, `?N` is explicit,
  * and a name (`:a`, `@a`, `$a`) takes the next number on first use.
+ * @param sql A statement.
+ * @returns A slot for every number from 1 to the highest used, with its label as written (`?N` for a bare `?`, and
+ *   for a number nothing names).
  */
 export function scanParams(sql: string): ParamSlot[] {
   const slots: ParamSlot[] = [];
@@ -284,12 +323,21 @@ export function scanParams(sql: string): ParamSlot[] {
   return slots;
 }
 
-/** Quote an identifier when needed. */
+/**
+ * Quote an identifier when needed: a name that isn't a plain word, or that is a keyword, goes in double quotes.
+ * @param name A table or column name.
+ * @returns The name, quoted if it must be.
+ */
 export function quoteIdent(name: string): string {
   if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) && !KEYWORDS.has(name.toUpperCase())) return name;
   return '"' + String(name).replace(/"/g, '""') + '"';
 }
 
+/**
+ * A value as a SQL literal.
+ * @param v The value. Booleans are 1 and 0, bytes are a hex blob (`x'0102'`).
+ * @returns The literal: `NULL`, a number, a quoted string with its quotes doubled, or a blob.
+ */
 export function quoteLiteral(v: SqlValue | boolean | undefined): string {
   if (v === null || v === undefined) return 'NULL';
   if (typeof v === 'number' || typeof v === 'bigint') return String(v);
@@ -298,7 +346,12 @@ export function quoteLiteral(v: SqlValue | boolean | undefined): string {
   return "'" + String(v).replace(/'/g, "''") + "'";
 }
 
-/** A safe table name derived from a file name or URL. */
+/**
+ * A safe table name derived from a file name or URL.
+ * @param source A file name, path or URL.
+ * @returns Its last part without a data file's extension, lower-cased, with anything but letters, digits and `_` made
+ *   `_`; `t_` before a leading digit, and `data` when nothing is left.
+ */
 export function tableNameFrom(source: string): string {
   let base = String(source).split(/[\\/?#]/).filter(Boolean).pop() ?? 'data';
   base = base.replace(/\.(csv|tsv|txt|json|ndjson|jsonl|parquet)(\.gz)?$/i, '');
@@ -308,7 +361,12 @@ export function tableNameFrom(source: string): string {
   return base;
 }
 
-/** Identifier-ish word immediately before offset `pos` (for completion). */
+/**
+ * Identifier-ish word immediately before offset `pos` (for completion).
+ * @param text SQL.
+ * @param pos An offset in `text`, such as the cursor's.
+ * @returns The word, where it starts, and the name before a dot in front of it (`t` in `t.na`), or null.
+ */
 export function wordBefore(text: string, pos: number): { word: string; start: number; qualifier: string | null } {
   let i = pos;
   while (i > 0 && /[A-Za-z0-9_$]/.test(text[i - 1])) i--;
@@ -322,7 +380,13 @@ export function wordBefore(text: string, pos: number): { word: string; start: nu
   return { word, start: i, qualifier };
 }
 
-/** Table aliases in a statement: Map alias(lower) → table name. */
+/**
+ * Table aliases in a statement, for completing `alias.` with the table's columns.
+ * @param sql A statement.
+ * @param tableNames The database's table names, lower-cased.
+ * @returns Lower-cased alias (and each table's own name) to table name, for tables after `FROM`, `JOIN`, `UPDATE`,
+ *   `INTO` or a comma.
+ */
 export function aliasesIn(sql: string, tableNames: Set<string>): Map<string, string> {
   const map = new Map<string, string>();
   const toks = tokenize(sql).filter((t) => t.type !== 'ws' && t.type !== 'comment');
@@ -339,13 +403,22 @@ export function aliasesIn(sql: string, tableNames: Set<string>): Map<string, str
   return map;
 }
 
+/**
+ * An identifier without its quotes: `"a""b"`, `` `a` `` and `[a]` styles.
+ * @param s An identifier as written.
+ * @returns Its name, with doubled quotes made single; a name without quotes as it is.
+ */
 export function unquote(s: string): string {
   if (s.length >= 2 && (s[0] === '"' || s[0] === '`')) return s.slice(1, -1).replace(new RegExp(s[0] + s[0], 'g'), s[0]);
   if (s.length >= 2 && s[0] === '[') return s.slice(1, -1);
   return s;
 }
 
-/** A light SQL formatter: one clause per line, upper-case keywords. Comments and literals are kept as written. */
+/**
+ * A light SQL formatter: one clause per line, upper-case keywords. Comments and literals are kept as written.
+ * @param sql A statement or a script.
+ * @returns The SQL, laid out.
+ */
 export function formatSql(sql: string): string {
   const breakBefore = new Set(['SELECT', 'FROM', 'WHERE', 'GROUP', 'ORDER', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'INTERSECT', 'EXCEPT', 'VALUES', 'SET', 'RETURNING', 'WINDOW']);
   const joins = new Set(['JOIN', 'LEFT', 'RIGHT', 'FULL', 'INNER', 'CROSS', 'NATURAL']);

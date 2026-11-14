@@ -26,21 +26,12 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### markdown {#markdown}
+Each has a page of its own.
 
-```ts
-function markdown(src: string, options?: MarkdownOptions): string;
-```
-
-Markdown to HTML.
-
-#### markdownInline {#markdownInline}
-
-```ts
-function markdownInline(src: string): string;
-```
-
-Inline markdown: code spans first (their text is literal), then bold, italic and links.
+| Function | |
+| --- | --- |
+| [`markdown`](./markdown/markdown) | Markdown to HTML: headings, paragraphs, bold, italic, code, links, lists, quotes, rules, fenced code and pipe tables. |
+| [`markdownInline`](./markdown/markdownInline) | Inline markdown: code spans first (their text is literal), then bold, italic and links. |
 
 ### Interfaces
 

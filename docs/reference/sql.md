@@ -59,124 +59,25 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### aliasesIn {#aliasesIn}
+Each has a page of its own.
 
-```ts
-function aliasesIn(sql: string, tableNames: Set<string>): Map<string, string>;
-```
-
-Table aliases in a statement: Map alias(lower) → table name.
-
-#### changesSchema {#changesSchema}
-
-```ts
-function changesSchema(sql: string): boolean;
-```
-
-Whether a statement changes the schema (the object explorer should refresh).
-
-#### formatSql {#formatSql}
-
-```ts
-function formatSql(sql: string): string;
-```
-
-A light SQL formatter: one clause per line, upper-case keywords. Comments and literals are kept as written.
-
-#### highlight {#highlight}
-
-```ts
-function highlight(text: string, names?: Set<string>): string;
-```
-
-HTML for the editor's highlight layer. `names` is an optional Set of lower-cased object names.
-
-#### leadingKeyword {#leadingKeyword}
-
-```ts
-function leadingKeyword(sql: string): string;
-```
-
-First significant keyword of a statement, upper-cased.
-
-#### quoteIdent {#quoteIdent}
-
-```ts
-function quoteIdent(name: string): string;
-```
-
-Quote an identifier when needed.
-
-#### quoteLiteral {#quoteLiteral}
-
-```ts
-function quoteLiteral(v: SqlValue | boolean | undefined): string;
-```
-
-#### returnsRows {#returnsRows}
-
-```ts
-function returnsRows(sql: string): boolean;
-```
-
-Whether a statement produces rows (and should be streamed into a grid rather than run with exec).
-
-#### scanParams {#scanParams}
-
-```ts
-function scanParams(sql: string): ParamSlot[];
-```
-
-Parameter slots in the order the engine numbers them: `?` takes the next number, `?N` is explicit,
-and a name (`:a`, `@a`, `$a`) takes the next number on first use.
-
-#### splitStatements {#splitStatements}
-
-```ts
-function splitStatements(text: string): Statement[];
-```
-
-Split a script into statements: [{ sql, start, end }] (offsets into `text`, trimmed of whitespace/semicolon).
-
-#### statementAt {#statementAt}
-
-```ts
-function statementAt(text: string, pos: number): Statement | null;
-```
-
-The statement containing (or just before) offset `pos`.
-
-#### tableNameFrom {#tableNameFrom}
-
-```ts
-function tableNameFrom(source: string): string;
-```
-
-A safe table name derived from a file name or URL.
-
-#### tokenize {#tokenize}
-
-```ts
-function tokenize(text: string): Token[];
-```
-
-#### unquote {#unquote}
-
-```ts
-function unquote(s: string): string;
-```
-
-#### wordBefore {#wordBefore}
-
-```ts
-function wordBefore(text: string, pos: number): {
-    word: string;
-    start: number;
-    qualifier: string | null;
-};
-```
-
-Identifier-ish word immediately before offset `pos` (for completion).
+| Function | |
+| --- | --- |
+| [`aliasesIn`](./sql/aliasesIn) | Table aliases in a statement, for completing `alias.` with the table's columns. |
+| [`changesSchema`](./sql/changesSchema) | Whether a statement changes the schema (the object explorer should refresh): `CREATE`, `DROP`, `ALTER` or `REFRESH`. |
+| [`formatSql`](./sql/formatSql) | A light SQL formatter: one clause per line, upper-case keywords. |
+| [`highlight`](./sql/highlight) | HTML for the editor's highlight layer: each token in a span classed by its kind (`sk-tk-k` for keywords, `sk-tk-f` functions, `sk-tk-obj` the database's objects, …). |
+| [`leadingKeyword`](./sql/leadingKeyword) | First significant keyword of a statement, upper-cased: comments and opening brackets are skipped. |
+| [`quoteIdent`](./sql/quoteIdent) | Quote an identifier when needed: a name that isn't a plain word, or that is a keyword, goes in double quotes. |
+| [`quoteLiteral`](./sql/quoteLiteral) | A value as a SQL literal. |
+| [`returnsRows`](./sql/returnsRows) | Whether a statement produces rows (and should be streamed into a grid rather than run with exec): `SELECT`, `VALUES`, `TABLE`, `EXPLAIN`, `PRAGMA` without `=`, `WITH` unless it writes without `RETURNING`, and any statement with `RETURNING`. |
+| [`scanParams`](./sql/scanParams) | Parameter slots in the order the engine numbers them: `?` takes the next number, `?N` is explicit, and a name (`:a`, `@a`, `$a`) takes the next number on first use. |
+| [`splitStatements`](./sql/splitStatements) | Split a script into statements, at semicolons outside strings, identifiers and comments. |
+| [`statementAt`](./sql/statementAt) | The statement containing (or just before) offset `pos`: the one to run when the cursor is there. |
+| [`tableNameFrom`](./sql/tableNameFrom) | A safe table name derived from a file name or URL. |
+| [`tokenize`](./sql/tokenize) | The text's tokens, in order and covering it all: whitespace, comments, strings, quoted identifiers, words, numbers, parameters, operators and punctuation. |
+| [`unquote`](./sql/unquote) | An identifier without its quotes: `"a""b"`, `` `a` `` and `[a]` styles. |
+| [`wordBefore`](./sql/wordBefore) | Identifier-ish word immediately before offset `pos` (for completion). |
 
 ### Constants
 

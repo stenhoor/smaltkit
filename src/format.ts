@@ -43,6 +43,11 @@ const PRESETS: Record<string, FormatSpec> = {
   text: {},
 };
 
+/**
+ * The format object a format stands for: a preset's, a pattern's, or the object itself with its `preset` filled in.
+ * @param f A preset name, a pattern such as `"$#,0.00"`, a FormatSpec, or undefined for none.
+ * @returns The FormatSpec; `{}` for no format. A pattern it can't read is kept as a prefix.
+ */
 export function formatSpec(f: Format | undefined): FormatSpec {
   if (!f) return {};
   if (typeof f === 'string') return PRESETS[f] ?? parsePattern(f);
@@ -94,7 +99,12 @@ function numberFormat(spec: FormatSpec, locale: string | undefined): Intl.Number
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-/** Parse an ISO-like date string (or epoch number) into its parts without time-zone shifts. */
+/**
+ * Parse an ISO-like date string (or epoch number) into its parts without time-zone shifts.
+ * @param v A date as `YYYY-MM`, `YYYY-MM-DD` or `YYYY-MM-DD HH:mm[:ss]` (a `T` works too), or an epoch number: seconds,
+ *   or milliseconds above 10¹¹, read in UTC.
+ * @returns The year, month (1–12), day, hours, minutes and seconds, or null for a value that isn't a date.
+ */
 export function dateParts(v: Value): { y: number; mo: number; d: number; h: number; mi: number; s: number } | null {
   if (typeof v === 'number') {
     const dt = new Date(v > 1e11 ? v : v * 1000);
@@ -106,6 +116,12 @@ export function dateParts(v: Value): { y: number; mo: number; d: number; h: numb
   return { y: +m[1]!, mo: +m[2]!, d: m[3] ? +m[3] : 1, h: m[4] ? +m[4] : 0, mi: m[5] ? +m[5] : 0, s: m[6] ? +m[6] : 0 };
 }
 
+/**
+ * A date written with a pattern, without time-zone shifts.
+ * @param v A date, as dateParts reads it.
+ * @param pattern Text with the tokens `YYYY YY MMMM MMM MM M DD D HH mm ss Q` (Q is the quarter); other text is kept.
+ * @returns The date in the pattern; for a value that isn't a date, the value as text (`''` for null).
+ */
 export function formatDate(v: Value, pattern: string): string {
   const p = dateParts(v);
   if (!p) return v === null ? '' : String(v);
@@ -146,7 +162,15 @@ export interface Formatter {
   (v: Value): string;
 }
 
-/** Build a formatter for a field's format and type. */
+/**
+ * Build a formatter for a field's format and type. Formatters are cached by format and locale, so build one per field
+ * and call it per value.
+ * @param f The format: a preset name, a pattern or a FormatSpec; undefined formats numbers with up to two decimals.
+ * @param type What the column holds. With `'text'` (or another type that isn't a number), a number without a numeric
+ *   format is shown as written. Default `'any'`.
+ * @param locale A BCP 47 locale for `Intl`, such as `'de-DE'`; the format's own `locale` wins. Default: the page's.
+ * @returns A function from a value to its text: null is `(Blank)`, bytes are `<n bytes>`.
+ */
 export function formatter(f: Format | undefined, type: ColumnType = 'any', locale?: string): Formatter {
   const spec = formatSpec(f);
   if (spec.date) {
@@ -170,7 +194,12 @@ export function formatter(f: Format | undefined, type: ColumnType = 'any', local
   };
 }
 
-/** A short formatter for axis ticks: compact numbers. */
+/**
+ * A short formatter for axis ticks: compact numbers (`2.5M`), whole percentages, and dates in the format's pattern.
+ * @param f The field's format, as for formatter.
+ * @param locale A BCP 47 locale, as for formatter.
+ * @returns A function from a tick value to its label.
+ */
 export function axisFormatter(f: Format | undefined, locale?: string): Formatter {
   const spec = formatSpec(f);
   if (spec.date) return formatter(f, 'date', locale);

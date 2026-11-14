@@ -128,7 +128,9 @@ npm run docs:examples # after changing an example: runs the examples and writes 
 
 The docs site is deployed to stenhoor.github.io/smaltkit/ from `main` by `.github/workflows/docs.yml`. Its reference has
 a page per module: the top is written by hand (what the module is for, examples), the API under it is generated from
-`dist/*.d.ts` and the doc comments. An example followed by a `text` block is a test (`test/docs.test.ts`): it runs
+`dist/*.d.ts` and the doc comments. A module with a folder (`docs/reference/<module>/`) has a page per function too:
+signature, parameters, returns and errors generated (from `@param`, `@returns` and `@throws`), then examples, a demo and
+see also, written by hand. An example followed by a `text` block is a test (`test/docs.test.ts`): it runs
 against the built package and must print that text. `npm run docs:build` fails if the generated API is out of date or
 an example doesn't type-check. The theme files in `docs/.vitepress/theme/` (all but `index.ts`) and the badges in
 `docs/public/` are copied from [smalt-brand](https://github.com/stenhoor/smalt-brand) unchanged.
