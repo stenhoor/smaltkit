@@ -1,6 +1,6 @@
 # smaltkit for agents
 
-smaltkit is the browser code the smalt apps share: one ES module per job, imported by its subpath
+smaltkit is reusable components for the smaltworks applications, UI and more: one ES module per job, imported by its subpath
 (`smaltkit/format`), or everything from `smaltkit`. It has no dependencies and loads in a page without a bundler.
 
 - **Install:** smaltkit is not on npm yet. Depend on a full commit: `"smaltkit": "github:stenhoor/smaltkit#<commit>"`.
