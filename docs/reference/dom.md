@@ -57,6 +57,11 @@ function download(name: string, data: BlobPart, type?: string): void;
 function esc(s: unknown): string;
 ```
 
+Text escaped for HTML and SVG, in text and in attributes.
+
+- `@param` s Anything; null and undefined are `''`.
+- `@returns` The text with `& < > " '` escaped.
+
 #### fileName {#fileName}
 
 ```ts

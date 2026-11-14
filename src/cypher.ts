@@ -28,7 +28,11 @@ export interface CypherToken {
   end: number;
 }
 
-/** The text's tokens, in order and covering it all. Unterminated strings and comments run to the end. */
+/**
+ * The text's tokens, in order and covering it all. Unterminated strings and comments run to the end.
+ * @param text Cypher, whole or partial: tokenizing never fails.
+ * @returns The tokens, each with its type, its text and its offsets in `text`.
+ */
 export function tokenizeCypher(text: string): CypherToken[] {
   const out: CypherToken[] = [];
   const n = text.length;
@@ -104,6 +108,8 @@ function isLabelAt(toks: readonly CypherToken[], k: number, depth: readonly stri
 /**
  * HTML for the editor's highlight layer, ending with a newline: keywords, functions, labels and relationship types,
  * property keys, parameters, strings, numbers and comments.
+ * @param text Cypher.
+ * @returns The HTML, with the text escaped.
  */
 export function highlightCypher(text: string): string {
   const toks = tokenizeCypher(text);
@@ -148,7 +154,11 @@ export interface CypherStatement {
   end: number;
 }
 
-/** The statements in the text, split at semicolons outside strings, names and comments. */
+/**
+ * The statements in the text, split at semicolons outside strings, names and comments.
+ * @param text A script.
+ * @returns The statements, each with its text (in `sql`, trimmed) and its offsets in `text`.
+ */
 export function splitCypher(text: string): CypherStatement[] {
   const out: CypherStatement[] = [];
   let start = -1;
@@ -167,7 +177,12 @@ export function splitCypher(text: string): CypherStatement[] {
   return out;
 }
 
-/** The statement containing (or just before) offset `pos`. */
+/**
+ * The statement containing (or just before) offset `pos`: the one to run when the cursor is there.
+ * @param text A script.
+ * @param pos An offset in `text`, such as the cursor's.
+ * @returns The statement, or null for a script with none.
+ */
 export function cypherStatementAt(text: string, pos: number): CypherStatement | null {
   const stmts = splitCypher(text);
   if (stmts.length === 0) return null;
@@ -180,6 +195,9 @@ export function cypherStatementAt(text: string, pos: number): CypherStatement | 
 /**
  * The word being typed at `pos`, and its qualifier: `':'` after a colon (a label or relationship type), the variable's
  * name after a dot (a property key), else null.
+ * @param text Cypher.
+ * @param pos An offset in `text`, such as the cursor's.
+ * @returns The word, where it starts, and its qualifier.
  */
 export function cypherWordBefore(text: string, pos: number): { word: string; start: number; qualifier: string | null } {
   let i = pos;
@@ -224,6 +242,11 @@ export interface CypherCompletion {
 /**
  * Completion candidates at `pos`: labels or relationship types after a `:` in a pattern, property keys after a `.`,
  * else keywords, functions and the graph's labels. `explicit` (Ctrl+Space) lists them even with nothing typed.
+ * @param text Cypher.
+ * @param pos The cursor's offset in `text`.
+ * @param vocab The graph's labels, relationship types and property keys, or null for none.
+ * @param explicit Whether the user asked for completion, so a list shows with nothing typed.
+ * @returns The candidates whose names start with the word typed, and where that word starts (what a pick replaces).
  */
 export function completeCypher(text: string, pos: number, vocab: CypherVocabulary | null, explicit: boolean): { items: CypherCompletion[]; start: number } {
   const { word, start, qualifier } = cypherWordBefore(text, pos);

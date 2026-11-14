@@ -26,63 +26,16 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### completeCypher {#completeCypher}
+Each has a page of its own.
 
-```ts
-function completeCypher(text: string, pos: number, vocab: CypherVocabulary | null, explicit: boolean): {
-    items: CypherCompletion[];
-    start: number;
-};
-```
-
-Completion candidates at `pos`: labels or relationship types after a `:` in a pattern, property keys after a `.`,
-else keywords, functions and the graph's labels. `explicit` (Ctrl+Space) lists them even with nothing typed.
-
-#### cypherStatementAt {#cypherStatementAt}
-
-```ts
-function cypherStatementAt(text: string, pos: number): CypherStatement | null;
-```
-
-The statement containing (or just before) offset `pos`.
-
-#### cypherWordBefore {#cypherWordBefore}
-
-```ts
-function cypherWordBefore(text: string, pos: number): {
-    word: string;
-    start: number;
-    qualifier: string | null;
-};
-```
-
-The word being typed at `pos`, and its qualifier: `':'` after a colon (a label or relationship type), the variable's
-name after a dot (a property key), else null.
-
-#### highlightCypher {#highlightCypher}
-
-```ts
-function highlightCypher(text: string): string;
-```
-
-HTML for the editor's highlight layer, ending with a newline: keywords, functions, labels and relationship types,
-property keys, parameters, strings, numbers and comments.
-
-#### splitCypher {#splitCypher}
-
-```ts
-function splitCypher(text: string): CypherStatement[];
-```
-
-The statements in the text, split at semicolons outside strings, names and comments.
-
-#### tokenizeCypher {#tokenizeCypher}
-
-```ts
-function tokenizeCypher(text: string): CypherToken[];
-```
-
-The text's tokens, in order and covering it all. Unterminated strings and comments run to the end.
+| Function | |
+| --- | --- |
+| [`completeCypher`](./cypher/completeCypher) | Completion candidates at `pos`: labels or relationship types after a `:` in a pattern, property keys after a `.`, else keywords, functions and the graph's labels. |
+| [`cypherStatementAt`](./cypher/cypherStatementAt) | The statement containing (or just before) offset `pos`: the one to run when the cursor is there. |
+| [`cypherWordBefore`](./cypher/cypherWordBefore) | The word being typed at `pos`, and its qualifier: `':'` after a colon (a label or relationship type), the variable's name after a dot (a property key), else null. |
+| [`highlightCypher`](./cypher/highlightCypher) | HTML for the editor's highlight layer, ending with a newline: keywords, functions, labels and relationship types, property keys, parameters, strings, numbers and comments. |
+| [`splitCypher`](./cypher/splitCypher) | The statements in the text, split at semicolons outside strings, names and comments. |
+| [`tokenizeCypher`](./cypher/tokenizeCypher) | The text's tokens, in order and covering it all. |
 
 ### Constants
 
