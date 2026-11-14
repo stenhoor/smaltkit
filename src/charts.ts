@@ -33,7 +33,12 @@ export interface ChartData {
   role(name: string): ChartColumn[];
 }
 
-/** Build ChartData from columns. */
+/**
+ * Build ChartData from columns: the columns, the dimensions and the measures, and `role(name)` to find them.
+ * @param columns The result's columns, each tagged with a role and a kind.
+ * @param rows How many rows the columns hold.
+ * @returns The data for a ChartContext.
+ */
 export function chartData(columns: ChartColumn[], rows: number): ChartData {
   return {
     rows,
@@ -94,7 +99,11 @@ const ICON_PATHS: Record<CellIcon, string> = {
   dot: 'M7 7H17V17H7Z',
 };
 
-/** The classes and icon markup for a value's conditional format ('' when there is none). */
+/**
+ * The classes and icon markup for a value's conditional format ('' when there is none).
+ * @param f The format ctx.cellFormat gave for a value, or null for none.
+ * @returns `cls`, classes to add to the value's element (`sk-tone-good`, `sk-fill`, …), and `icon`, an inline SVG.
+ */
 export function cellFormatHtml(f: CellFormat | null | undefined): { cls: string; icon: string } {
   if (!f) return { cls: '', icon: '' };
   const cls = (f.tone ? ` sk-tone-${f.tone}` : '') + (f.fill && f.tone ? ' sk-fill' : '');
@@ -102,7 +111,13 @@ export function cellFormatHtml(f: CellFormat | null | undefined): { cls: string;
   return { cls, icon };
 }
 
-/** A legend (HTML) for series names. */
+/**
+ * A legend (HTML) for series names, each with its palette colour.
+ * @param names The series names, in palette order.
+ * @param palette How many palette colours there are: names past it reuse them.
+ * @param offset The palette colour of the first name. Default 0.
+ * @returns The legend's HTML, its names escaped.
+ */
 export function legendHtml(names: string[], palette: number, offset = 0): string {
   return '<div class="sk-legend">' + names.map((n, i) => `<span class="sk-legend-item sk-c${(i + offset) % palette}"><i></i>${esc(n)}</span>`).join('') + '</div>';
 }
@@ -607,22 +622,40 @@ function opts(ctx: ChartContext, horizontal: boolean): ChartOpts {
  * Horizontal bars. Roles: `category`, optional `series` and `multiples` (small multiples), measures. Options: stack
  * (none, stacked, percent), labels, legend, and the value axis: yScale (linear, log), yMin, yMax, refLines, xTitle,
  * yTitle.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
  */
 export function barChart(ctx: ChartContext): void {
   render(ctx, () => 'bar', () => 0, opts(ctx, true));
 }
 
-/** Vertical columns. Same roles and options as barChart, and xAxis: category (default) or continuous (dates, numbers). */
+/**
+ * Vertical columns. Same roles and options as barChart, and xAxis: category (default) or continuous (dates, numbers).
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function columnChart(ctx: ChartContext): void {
   render(ctx, () => 'bar', () => 0, opts(ctx, false));
 }
 
-/** Lines. Roles as barChart. Options: smooth, markers, labels, legend, xAxis and the axis options of columnChart. */
+/**
+ * Lines. Roles as barChart. Options: smooth, markers, labels, legend, xAxis and the axis options of columnChart.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function lineChart(ctx: ChartContext): void {
   render(ctx, () => 'line', () => 0, opts(ctx, false));
 }
 
-/** Areas. Roles as barChart. Options: stack, smooth, markers, labels, legend, and the axis options of columnChart. */
+/**
+ * Areas. Roles as barChart. Options: stack, smooth, markers, labels, legend, and the axis options of columnChart.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function areaChart(ctx: ChartContext): void {
   render(ctx, () => 'area', () => 0, opts(ctx, false));
 }
@@ -630,6 +663,9 @@ export function areaChart(ctx: ChartContext): void {
 /**
  * Columns and lines: measures in role `columns` are bars, in role `lines` are lines (option secondaryAxis puts them on
  * a second axis, titled by y2Title). The axis options of columnChart apply.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
  */
 export function comboChart(ctx: ChartContext): void {
   render(
@@ -640,7 +676,12 @@ export function comboChart(ctx: ChartContext): void {
   );
 }
 
-/** Pie. Roles: `category` and one measure. Options: labels, legend. */
+/**
+ * Pie. Roles: `category` and one measure. Options: labels, legend.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function pieChart(ctx: ChartContext): void {
   renderPie(ctx, false);
 }
@@ -649,6 +690,9 @@ export function pieChart(ctx: ChartContext): void {
  * Donut: as pieChart, with options `hole` (0–1), `center` (show the total) and `total`. Without `total`, the centre
  * and the label percentages use the sum of the slices. With it (a number the app computed), they use that instead:
  * for slices that overlap (a sale in two categories), the sum is more than the whole and `total` is the whole.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
  */
 export function donutChart(ctx: ChartContext): void {
   renderPie(ctx, true);
@@ -714,7 +758,13 @@ export interface Rect {
   h: number;
 }
 
-/** Squarified treemap layout (Bruls, Huizing, van Wijk). */
+/**
+ * Squarified treemap layout (Bruls, Huizing, van Wijk): rectangles with areas in proportion to the values, as close to
+ * square as the layout allows.
+ * @param nodes The values, each with its index `i`, largest first for the best layout.
+ * @param rect The rectangle to fill.
+ * @returns A rectangle per node, with its index.
+ */
 export function squarify(nodes: TreeNode[], rect: Rect): (Rect & { i: number })[] {
   const out: (Rect & { i: number })[] = [];
   const total = nodes.reduce((a, n) => a + n.v, 0);
@@ -764,7 +814,12 @@ export function squarify(nodes: TreeNode[], rect: Rect): (Rect & { i: number })[
 }
 
 
-/** Funnel: roles `category` (stage) and one measure. */
+/**
+ * Funnel: roles `category` (stage) and one measure.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function funnelChart(ctx: ChartContext): void {
     if (empty(ctx)) return;
     const cat = ctx.data.role('category')[0];
@@ -788,7 +843,12 @@ export function funnelChart(ctx: ChartContext): void {
     ctx.el.innerHTML = `<svg class="sk-svg" width="${ctx.width}" height="${ctx.height}">${svg}</svg>`;
   }
 
-/** Treemap (squarified): role `category` and one measure. */
+/**
+ * Treemap (squarified): role `category` and one measure.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function treemapChart(ctx: ChartContext): void {
     if (empty(ctx)) return;
     const cat = ctx.data.role('category')[0];
@@ -809,7 +869,12 @@ export function treemapChart(ctx: ChartContext): void {
     ctx.el.innerHTML = `<svg class="sk-svg" width="${ctx.width}" height="${ctx.height}">${svg}</svg>`;
   }
 
-/** Waterfall: role `category` and one measure (the change); option `total` adds a total bar. */
+/**
+ * Waterfall: role `category` and one measure (the change); option `total` adds a total bar.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function waterfallChart(ctx: ChartContext): void {
     if (empty(ctx)) return;
     const cat = ctx.data.role('category')[0];
@@ -847,7 +912,12 @@ export function waterfallChart(ctx: ChartContext): void {
     ctx.el.innerHTML = `<svg class="sk-svg" width="${ctx.width}" height="${ctx.height}">${svg}</svg>`;
   }
 
-/** Gauge: roles `values`, optional `target` and `max`; option `maxValue` when there is no max column. */
+/**
+ * Gauge: roles `values`, optional `target` and `max`; option `maxValue` when there is no max column.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function gaugeChart(ctx: ChartContext): void {
     const v = ctx.data.role('values')[0];
     if (!v || !ctx.data.rows) {
@@ -878,7 +948,12 @@ export function gaugeChart(ctx: ChartContext): void {
     ctx.el.innerHTML = `<svg class="sk-svg" width="${W}" height="${H}">${svg}</svg>`;
   }
 
-/** KPI card: roles `values`, optional `target` (comparison); `extra.trend` draws a sparkline. Options: `compare` (delta, value, none), `goodWhen` (up, down), `caption`. */
+/**
+ * KPI card: roles `values`, optional `target` (comparison); `extra.trend` draws a sparkline. Options: `compare` (delta, value, none), `goodWhen` (up, down), `caption`.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function kpiCard(ctx: ChartContext): void {
     const v = ctx.data.role('values')[0];
     if (!v) {
@@ -918,7 +993,12 @@ export function kpiCard(ctx: ChartContext): void {
     ctx.el.innerHTML = `<div class="sk-kpi"><div class="sk-kpi-value${cf.cls}">${cf.icon}${esc(v.fmt(val))}</div><div class="sk-kpi-caption">${esc(caption)}</div>${cmp}${spark}</div>`;
   }
 
-/** Scatter / bubble chart: roles `x`, `y`, optional `size` and `legend`; one point per row. */
+/**
+ * Scatter / bubble chart: roles `x`, `y`, optional `size` and `legend`; one point per row.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function scatterChart(ctx: ChartContext): void {
     const xc = ctx.data.role('x')[0];
     const yc = ctx.data.role('y')[0];
@@ -977,7 +1057,12 @@ export function scatterChart(ctx: ChartContext): void {
     ctx.el.innerHTML = `<div class="sk-chart">${legend}<svg class="sk-svg" width="${W}" height="${H}">${svg}</svg></div>`;
   }
 
-/** Heatmap: roles `rows`, `columns` and one measure, coloured along the sequential ramp. */
+/**
+ * Heatmap: roles `rows`, `columns` and one measure, coloured along the sequential ramp.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
+ */
 export function heatmapChart(ctx: ChartContext): void {
     const rc = ctx.data.role('rows')[0];
     const cc = ctx.data.role('columns')[0];

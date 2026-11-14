@@ -94,6 +94,9 @@ function topoFeatures(topo: Topology, object?: string): Feature[] {
 /**
  * Features from GeoJSON (a FeatureCollection, a Feature or a bare geometry) or TopoJSON (`object` names which of its
  * objects; else the first). Anything else gives no features.
+ * @param input Parsed GeoJSON or TopoJSON.
+ * @param object The TopoJSON object to read. Default: its first.
+ * @returns The features, with TopoJSON's arcs turned into coordinates.
  */
 export function toFeatures(input: unknown, object?: string): Feature[] {
   if (!input || typeof input !== 'object') return [];
@@ -143,7 +146,16 @@ function eachPosition(g: Geometry | null, fn: (p: Position) => void): void {
   }
 }
 
-/** A projection fitted to show every position (of the features and any extra points) inside width × height. */
+/**
+ * A projection fitted to show every position (of the features and any extra points) inside width × height.
+ * @param kind `'mercator'` or `'equirectangular'`.
+ * @param features The features to show.
+ * @param width The box's width.
+ * @param height The box's height.
+ * @param pad The margin inside the box. Default 8.
+ * @param extra More positions to keep in view, as `[longitude, latitude]`, such as points drawn over the shapes.
+ * @returns A function from `[longitude, latitude]` to `[x, y]` in the box.
+ */
 export function fitProjection(kind: ProjectionKind, features: Feature[], width: number, height: number, pad = 8, extra: Position[] = []): Projection {
   let x0 = Infinity;
   let y0 = Infinity;
@@ -174,7 +186,12 @@ export function fitProjection(kind: ProjectionKind, features: Feature[], width: 
   return f;
 }
 
-/** SVG path data for a geometry (polygons closed; points as nothing: draw those as circles). */
+/**
+ * SVG path data for a geometry (polygons closed; points as nothing: draw those as circles).
+ * @param g A geometry, or null.
+ * @param project A projection, from fitProjection.
+ * @returns The path's `d`; `''` for null or a point.
+ */
 export function geoPath(g: Geometry | null, project: Projection): string {
   if (!g) return '';
   const ring = (r: Position[], close: boolean) => {
@@ -228,6 +245,9 @@ function dim(ctx: ChartContext, row: number): string {
  *   (colour). Drawn over the shapes when there are any.
  *
  * Options: shapes, object, key, projection (mercator, equirectangular), legend (true by default for filled regions).
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
  */
 export function mapChart(ctx: ChartContext): void {
   const { data } = ctx;

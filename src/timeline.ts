@@ -90,6 +90,12 @@ interface Colors {
   mono: string;
 }
 
+/**
+ * A timeline of versions in `host`: a ruler with a tick per commit, a handle to drag, play, step and zoom.
+ * @param host The element to draw in; the timeline fills its width.
+ * @param options The commits, the version shown, the axis, the theme and `onChange`.
+ * @returns The timeline: set its value, commits, axis and theme, play and pause it, and destroy it.
+ */
 export function createTimeline(host: HTMLElement, options: TimelineOptions): Timeline {
   const doc = host.ownerDocument;
   const win = doc.defaultView ?? globalThis;

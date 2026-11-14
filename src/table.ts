@@ -55,6 +55,9 @@ const widthKey = (c: ChartColumn) => c.ref ?? c.label;
  * - widths: column widths in px, by field (`ref`) or label. Dragging a header's right edge resizes a column and
  *   calls ctx.setOption('widths', …) so the app can keep it.
  * - freeze: how many leading columns stay in view when the table scrolls sideways (0 by default).
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
  */
 export function tableView(ctx: ChartContext): void {
     const { data } = ctx;
@@ -242,6 +245,9 @@ function normalize(v: Value): unknown {
  *   Subtotals are queries of their own, so averages, distinct counts and ratios come out right.
  * - `collapsed` (stepped): start with every parent collapsed. Clicking a caret toggles a parent (when ctx.el is an
  *   element); the state lasts while the element does.
+ * @param ctx Where and what to draw: the element (or anything with `innerHTML`), its size, the options, the data as
+ *   columns by role, the palette and the selection.
+ * @returns Nothing: the chart is written into `ctx.el` in one `innerHTML` assignment.
  */
 export function matrixView(ctx: ChartContext): void {
   const { data } = ctx;

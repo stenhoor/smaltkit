@@ -28,11 +28,11 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### createTimeline {#createTimeline}
+Each has a page of its own.
 
-```ts
-function createTimeline(host: HTMLElement, options: TimelineOptions): Timeline;
-```
+| Function | |
+| --- | --- |
+| [`createTimeline`](./timeline/createTimeline) | A timeline of versions in `host`: a ruler with a tick per commit, a handle to drag, play, step and zoom. |
 
 ### Interfaces
 

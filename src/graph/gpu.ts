@@ -8,7 +8,10 @@ export class GpuUnavailableError extends Error {
   }
 }
 
-/** True when the browser exposes WebGPU and an adapter can be obtained. */
+/**
+ * True when the browser exposes WebGPU and an adapter can be obtained: whether createGraphView can work here.
+ * @returns A promise of whether WebGPU is there.
+ */
 export async function isWebGpuAvailable(): Promise<boolean> {
   try {
     if (typeof navigator === 'undefined' || !navigator.gpu) return false;
