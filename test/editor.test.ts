@@ -41,6 +41,22 @@ test('SQL in sql`…` and exec`…` templates is highlighted as SQL; ${} is Type
   assert.match(highlightTypeScript('await exec`DROP TABLE t`'), /sk-tk-k">DROP/);
 });
 
+test('Cypher in cypher`…` and cypher.run`…` templates is highlighted as Cypher; ${} is TypeScript; no other tag is', () => {
+  const html = highlightTypeScript('export const q = cypher`MATCH (p:Person) WHERE p.age > ${min} RETURN p`;');
+  assert.match(html, /<span class="sk-tk-k">MATCH<\/span>/);
+  assert.match(html, /<span class="sk-tk-k">RETURN<\/span>/);
+  assert.match(html, /<span class="sk-tk-interp">\$\{min\}<\/span>/);
+  assert.equal(shown(html), 'export const q = cypher`MATCH (p:Person) WHERE p.age > ${min} RETURN p`;\n');
+  const run = highlightTypeScript('await cypher.run`CREATE (:City {name: ${n}})`;');
+  assert.match(run, /<span class="sk-tk-k">CREATE<\/span>/);
+  // A method called run on anything else, or a tag that merely ends in "cypher", is a plain template.
+  for (const other of ['await db.run`CREATE (:A)`;', 'const x = notcypher`MATCH (n) RETURN n`;', 'const y = mycypher.run`MATCH (n) RETURN n`;']) {
+    assert.doesNotMatch(highlightTypeScript(other), /sk-tk-k">(CREATE|MATCH)/, other);
+  }
+  // SQL inside sql`…` is still SQL's, not Cypher's.
+  assert.match(highlightTypeScript('sql`SELECT 1`'), /sk-tk-k">SELECT/);
+});
+
 test('TypeScript keywords, types, calls, numbers, strings and comments', () => {
   const html = highlightTypeScript("export const n: Order = col('qty').gt(0); // done");
   assert.match(html, /sk-tk-k">export</);
