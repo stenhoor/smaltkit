@@ -2,13 +2,16 @@
 
 <a href="https://smaltworks.dev/stability"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress-on-dark.svg"><img alt="Work in progress. Come build with us." src="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress.svg" height="56"></picture></a>
 
-[smaltworks.dev](https://smaltworks.dev/products/kits)
+[Docs](https://stenhoor.github.io/smaltkit/) · [smaltworks.dev](https://smaltworks.dev/products/kits)
 
 Shared browser code for the smalt apps: [smaltui](https://github.com/stenhoor/smaltui) (the query workbench) and
 [smaltbi](https://github.com/stenhoor/smaltbi). Both run [smaltdb](https://github.com/stenhoor/smaltdb) in the browser
 and need the same pieces around it; smaltkit holds those pieces once, in strict TypeScript, with type definitions.
 
 ## Modules
+
+Each module has a page in the [reference](https://stenhoor.github.io/smaltkit/reference/): what it is for, examples and
+its API.
 
 | Import | What it does |
 | --- | --- |
@@ -110,6 +113,25 @@ npm test             # builds, then node --test against the built package
 ```bash
 npm run test:browser # builds, then the graph view and the timeline in Chromium (Playwright, installed globally)
 ```
+
+```bash
+npm run docs:dev     # the docs site (docs/, VitePress) with live reload
+```
+
+```bash
+npm run docs:api     # after changing an export or a doc comment: rewrites the generated API in docs/reference/
+```
+
+```bash
+npm run docs:examples # after changing an example: runs the examples and writes what they print under them
+```
+
+The docs site is deployed to stenhoor.github.io/smaltkit/ from `main` by `.github/workflows/docs.yml`. Its reference has
+a page per module: the top is written by hand (what the module is for, examples), the API under it is generated from
+`dist/*.d.ts` and the doc comments. An example followed by a `text` block is a test (`test/docs.test.ts`): it runs
+against the built package and must print that text. `npm run docs:build` fails if the generated API is out of date or
+an example doesn't type-check. The theme files in `docs/.vitepress/theme/` (all but `index.ts`) and the badges in
+`docs/public/` are copied from [smalt-brand](https://github.com/stenhoor/smalt-brand) unchanged.
 
 Sources are in `src/`; `dist/` is generated and not committed. TypeScript 7 checks the code (the `typescript7` dev
 dependency); TypeScript 6.0.3 (`typescript`, so `npx tsc`) still emits `dist/` and its `.d.ts` files. Tests import the

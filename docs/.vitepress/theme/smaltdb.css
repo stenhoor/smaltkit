@@ -1,0 +1,257 @@
+/* smaltdb — Kiln palette and Geist-forward type, from the smaltdb design system.
+   Contrast (WCAG 2): text >= 15:1, text-2 >= 8.7:1, text-3 >= 5.5:1, links >= 8.7:1, in both themes. */
+
+:root {
+  --vp-font-family-base: 'Geist', system-ui, sans-serif;
+  --vp-font-family-mono: 'Geist Mono', ui-monospace, monospace;
+  --smalt-brand-font: 'Martian Mono', ui-monospace, monospace;
+
+  --vp-c-bg: #FFFFFF;
+  --vp-c-bg-alt: #F5F6F8;
+  --vp-c-bg-elv: #FFFFFF;
+  --vp-c-bg-soft: #EEF1F6;
+  --vp-c-divider: #D6DBE4;
+  --vp-c-border: #D6DBE4;
+  --vp-c-gutter: #D6DBE4;
+
+  --vp-c-text-1: #151922;
+  --vp-c-text-2: #3F4656;
+  --vp-c-text-3: #5C6375;
+
+  --vp-c-brand-1: #003399;
+  --vp-c-brand-2: #001F66;
+  --vp-c-brand-3: #003399;
+  --vp-c-brand-soft: rgba(0, 51, 153, 0.10);
+
+  --vp-button-brand-bg: #003399;
+  --vp-button-brand-hover-bg: #001F66;
+  --vp-button-brand-active-bg: #001F66;
+  --vp-button-brand-text: #FFFFFF;
+  --vp-button-brand-hover-text: #FFFFFF;
+
+  --vp-code-block-bg: #EEF1F6;
+  --vp-code-bg: #EEF1F6;
+  --vp-code-color: #151922;
+  --vp-code-font-size: 0.9em;
+
+  --vp-c-tip-1: #1D6B3A;
+  --vp-c-warning-1: #8A5A12;
+  --vp-c-danger-1: #A3195B;
+  --vp-c-note-1: #003399;
+  --vp-c-important-1: #A33A12;
+
+  --vp-home-hero-name-color: #151922;
+}
+
+.dark {
+  --vp-c-bg: #14171F;
+  --vp-c-bg-alt: #1B1F29;
+  --vp-c-bg-elv: #1B1F29;
+  --vp-c-bg-soft: #11141B;
+  --vp-c-divider: #2C3240;
+  --vp-c-border: #2C3240;
+  --vp-c-gutter: #2C3240;
+
+  --vp-c-text-1: #E9EBF0;
+  --vp-c-text-2: #B9BEC9;
+  --vp-c-text-3: #9096A3;
+
+  --vp-c-brand-1: #9DB4F5;
+  --vp-c-brand-2: #D6E0F3;
+  --vp-c-brand-3: #9DB4F5;
+  --vp-c-brand-soft: rgba(157, 180, 245, 0.14);
+
+  --vp-button-brand-bg: #9DB4F5;
+  --vp-button-brand-hover-bg: #D6E0F3;
+  --vp-button-brand-active-bg: #D6E0F3;
+  --vp-button-brand-text: #14171F;
+  --vp-button-brand-hover-text: #14171F;
+
+  --vp-code-block-bg: #11141B;
+  --vp-code-bg: #11141B;
+  --vp-code-color: #E9EBF0;
+
+  --vp-c-tip-1: #6FD69A;
+  --vp-c-warning-1: #F2B356;
+  --vp-c-danger-1: #FF9EC4;
+  --vp-c-note-1: #9DB4F5;
+  --vp-c-important-1: #FF8A5C;
+
+  --vp-home-hero-name-color: #E9EBF0;
+}
+
+/* Headings: Geist 700, tight tracking. */
+.vp-doc h1, .vp-doc h2, .vp-doc h3, .VPHero .name, .VPHero .text {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Body: 17px / 1.6, readable measure. */
+.vp-doc p, .vp-doc li { font-size: 17px; line-height: 1.6; }
+.vp-doc p { max-width: 70ch; }
+
+/* Links are underlined in body copy. */
+.vp-doc a { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Code: 15px / 1.6, comments italic from the Shiki theme. */
+.vp-doc div[class*='language-'] code { font-size: 15px; line-height: 1.6; }
+
+/* Martian Mono for short labels: sidebar group titles. */
+.VPSidebarItem.level-0 > .item > .text,
+.VPSidebarItem.level-0 > .item .text {
+  font-family: var(--smalt-brand-font);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+/* Visible focus ring. */
+:focus-visible { outline: 2px solid var(--vp-c-brand-1); outline-offset: 2px; }
+.dark :focus-visible { outline-color: #FF8A5C; }
+
+/* Nav lockup a little larger than VitePress's 24px default. */
+.VPNavBarTitle .logo { height: 30px; }
+
+/* Keep the hero mark in proportion with the name. */
+.VPHero .image-src { max-width: 200px; max-height: 200px; }
+
+/* Hero wordmark: Martian Mono 600, "alt" in smalt (matches the logo files). */
+.VPHero .name {
+  font-family: var(--smalt-brand-font);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+.VPHero .name .alt {
+  color: var(--vp-c-brand-1);
+  -webkit-text-fill-color: var(--vp-c-brand-1);
+}
+
+/* The product suffix in the hero name takes its layer's text colour (BRAND.md, "Colour by layer"):
+   <span class="suffix language">ql</span>. smaltdb's suffix stays in ink, with no span. */
+.VPHero .name .suffix.language { color: #981C89; -webkit-text-fill-color: #981C89; }
+.VPHero .name .suffix.kit      { color: #086A65; -webkit-text-fill-color: #086A65; }
+.VPHero .name .suffix.tool     { color: #0B6A91; -webkit-text-fill-color: #0B6A91; }
+.VPHero .name .suffix.ai       { color: #6141AE; -webkit-text-fill-color: #6141AE; }
+.VPHero .name .suffix.family   { color: #A33A12; -webkit-text-fill-color: #A33A12; } /* kiln: smaltty */
+.dark .VPHero .name .suffix.language { color: #F57FE6; -webkit-text-fill-color: #F57FE6; }
+.dark .VPHero .name .suffix.kit      { color: #10C2B9; -webkit-text-fill-color: #10C2B9; }
+.dark .VPHero .name .suffix.tool     { color: #5CBDE8; -webkit-text-fill-color: #5CBDE8; }
+.dark .VPHero .name .suffix.ai       { color: #B8A1F2; -webkit-text-fill-color: #B8A1F2; }
+.dark .VPHero .name .suffix.family   { color: #FF8A5C; -webkit-text-fill-color: #FF8A5C; }
+
+/* Light and dark copies of a badge: show the one for the current theme. */
+.sw-dark { display: none; }
+.dark .sw-light { display: none; }
+.dark .sw-dark { display: inline-block; }
+img.sw-light { display: inline-block; }
+
+/* The stage badge (smaltworks.ts): under the hero's text on the home page, above the content on other pages. */
+.sw-stage { margin: 0 0 20px; line-height: 0; }
+.VPHero .sw-stage { margin: 24px 0 0; }
+.sw-stage a { display: inline-block; }
+.sw-stage img { max-width: none; }
+
+/* "A smaltworks project" at the foot of pages with a sidebar (stage.ts), and in the footer elsewhere. */
+.sw-project { display: flex; align-items: center; gap: 12px; margin: 0 0 24px; font-size: 13px; color: var(--vp-c-text-2); }
+.sw-project a { display: inline-block; line-height: 0; }
+.VPFooter .message a { display: inline-block; line-height: 0; }
+.VPFooter .message img { vertical-align: middle; }
+
+/* Tagline: "Small. Alternative." on one line and the product's word on the next, on every site. The break is in each
+   site's hero text ('Small. Alternative.<br>Fast.'), so it never depends on the word's length or the window's width. */
+.VPHero .text { text-wrap: balance; }
+@media (min-width: 640px) { .VPHero .text { font-size: 44px; line-height: 52px; } }
+@media (min-width: 960px) { .VPHero .text { font-size: 50px; line-height: 58px; } }
+
+/* Syntax diagrams (railroad.ts): keywords in rounded smalt boxes, rules in square boxes in the language layer's colour
+   that expand in place, lines in the third text colour. Box widths are measured for Martian Mono at 13px. */
+.sw-rr-figure { margin: 16px 0; }
+.sw-rr-rule, .sw-rr-expansion { margin: 0 0 8px; overflow-x: auto; }
+.sw-rr-expansion { margin: 4px 0 8px 16px; padding-left: 12px; border-left: 2px solid var(--vp-c-divider); }
+.sw-rr-name { font-family: var(--smalt-brand-font); font-size: 13px; color: var(--vp-c-text-2); }
+.vp-doc .sw-rr-name a { text-decoration: none; color: inherit; }
+svg.sw-rr { display: block; max-width: none; }
+.sw-rr text { font-family: var(--smalt-brand-font); font-size: 13px; text-anchor: middle; }
+.sw-rr .sw-rr-line { fill: none; stroke: var(--vp-c-text-3); stroke-width: 1.5; }
+.sw-rr .sw-rr-end { fill: var(--vp-c-text-3); }
+.sw-rr .sw-rr-term rect { fill: var(--vp-c-brand-soft); stroke: var(--vp-c-brand-1); stroke-width: 1.5; }
+.sw-rr .sw-rr-term text { fill: var(--vp-c-brand-1); font-weight: 600; }
+.sw-rr .sw-rr-ref rect { fill: var(--vp-c-bg); stroke: #981C89; stroke-width: 1.5; }
+.sw-rr .sw-rr-ref text { fill: #981C89; }
+.sw-rr .sw-rr-ref[data-rule] { cursor: pointer; }
+.sw-rr .sw-rr-ref[data-rule]:hover rect, .sw-rr .sw-rr-ref[aria-expanded='true'] rect { fill: rgba(152, 28, 137, 0.08); }
+.sw-rr .sw-rr-ref:focus-visible { outline: none; }
+.sw-rr .sw-rr-ref:focus-visible rect { stroke-width: 3; }
+.sw-rr .sw-rr-undefined rect { stroke-dasharray: 4 3; }
+.dark .sw-rr .sw-rr-ref rect { stroke: #F57FE6; }
+.dark .sw-rr .sw-rr-ref text { fill: #F57FE6; }
+.dark .sw-rr .sw-rr-ref[data-rule]:hover rect, .dark .sw-rr .sw-rr-ref[aria-expanded='true'] rect { fill: rgba(245, 127, 230, 0.12); }
+.sw-rr-ebnf summary { font-family: var(--smalt-brand-font); font-size: 13px; color: var(--vp-c-text-2); cursor: pointer; }
+.sw-rr-ebnf pre { margin: 8px 0 0; padding: 12px 16px; border-radius: 8px; background: var(--vp-code-block-bg); overflow-x: auto; }
+.sw-rr-ebnf code { font-size: 14px; }
+
+/* Playgrounds (playground.ts): the example, a toolbar, and its result. smaltkit's editor and grid read --sk-*, set here
+   from the theme's colours so they follow light and dark. */
+.sw-play {
+  margin: 16px 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  overflow: hidden;
+  --sk-font: var(--vp-font-family-base);
+  --sk-font-mono: var(--vp-font-family-mono);
+  --sk-text: var(--vp-c-text-1);
+  --sk-muted: var(--vp-c-text-3);
+  --sk-surface: var(--vp-c-bg);
+  --sk-border: var(--vp-c-divider);
+  --sk-panel: var(--vp-code-block-bg);
+  --sk-accent: var(--vp-c-brand-1);
+  --sk-focus: var(--vp-c-brand-1);
+  --sk-danger: var(--vp-c-danger-1);
+  --sk-tk-keyword: #003399; --sk-tk-function: #1F5F8B; --sk-tk-string: #A33A12; --sk-tk-number: #5B3FA8;
+  --sk-tk-comment: #5C6375; --sk-tk-punct: #3F4656; --sk-tk-ident: #3F4656; --sk-num: #5B3FA8;
+}
+.dark .sw-play {
+  --sk-tk-keyword: #9DB4F5; --sk-tk-function: #7FD1E8; --sk-tk-string: #FF8A5C; --sk-tk-number: #D3A6FF;
+  --sk-tk-comment: #9096A3; --sk-tk-punct: #B9BEC9; --sk-tk-ident: #B9BEC9; --sk-num: #D3A6FF;
+}
+.vp-doc .sw-play div[class*='language-'] { margin: 0; border-radius: 0; }
+.sw-play-editor { border-bottom: 1px solid var(--vp-c-divider); }
+.sw-play-editor .sk-editor { min-height: 80px; }
+.sw-play-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 12px;
+  background: var(--vp-c-bg-alt); border-top: 1px solid var(--vp-c-divider); border-bottom: 1px solid var(--vp-c-divider);
+}
+.sw-play:not(.sw-play-ready) .sw-play-bar button { visibility: hidden; }
+.sw-play-bar button, .sw-play-bar a {
+  font: 500 13px/1 var(--vp-font-family-base); padding: 7px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--vp-c-divider); background: var(--vp-c-bg); color: var(--vp-c-text-1); text-decoration: none;
+}
+.sw-play-bar button:hover, .sw-play-bar a:hover { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); }
+.sw-play-bar .sw-play-run { background: var(--vp-button-brand-bg); border-color: var(--vp-button-brand-bg); color: var(--vp-button-brand-text); }
+.sw-play-bar .sw-play-run:hover { background: var(--vp-button-brand-hover-bg); color: var(--vp-button-brand-hover-text); }
+.sw-play-bar [hidden] { display: none; }
+.sw-play-status { margin-left: auto; font-family: var(--smalt-brand-font); font-size: 12px; color: var(--vp-c-text-2); }
+.sw-play[aria-busy='true'] .sw-play-status::before { content: '● '; color: var(--vp-c-brand-1); }
+.sw-play-result { padding: 0 12px; }
+.sw-play-result[data-tested]::before {
+  content: 'Tested result'; display: block; padding-top: 10px;
+  font-family: var(--smalt-brand-font); font-size: 12px; color: var(--vp-c-text-3);
+}
+.vp-doc .sw-play-result[data-tested] table { margin: 8px 0 12px; }
+/* The grid is smaltkit's: keep VitePress's table styles off it. */
+.vp-doc .sw-play-grid table { display: table; margin: 0; overflow: visible; border-collapse: separate; }
+.vp-doc .sw-play-grid tr { border: 0; background: none; }
+.vp-doc .sw-play-grid :is(th, td) { border-top: 0; border-left: 0; font-size: inherit; line-height: normal; }
+.sw-play-grid { position: relative; display: flex; margin: 12px 0; border: 1px solid var(--vp-c-divider); }
+.sw-play-note { font-size: 15px; color: var(--vp-c-text-2); }
+.sw-play-error { margin: 12px 0; padding: 10px 12px; border-radius: 6px; font-size: 14px; color: var(--vp-c-danger-1); background: var(--vp-c-danger-soft); }
+.sw-play-error strong { font-family: var(--smalt-brand-font); font-size: 13px; }
+/* At rest, an example that runs in place looks like any example: its code, a small Run button and its tested result.
+   Run or Edit makes it live, with the toolbar and the frame above. */
+.sw-play:not(.sw-play-live) { border: 0; border-radius: 0; overflow: visible; }
+.vp-doc .sw-play:not(.sw-play-live) div[class*='language-'] { border-radius: 8px; }
+.sw-play:not(.sw-play-live) .sw-play-bar { padding: 6px 0 0; background: none; border: 0; }
+.sw-play:not(.sw-play-live) .sw-play-bar > :not(.sw-play-run):not(.sw-play-status) { display: none; }
+.sw-play:not(.sw-play-live) .sw-play-run { padding: 5px 10px; font-size: 12px; }
+.sw-play:not(.sw-play-live) .sw-play-run::before { content: '▶ '; font-size: 10px; }
+.sw-play:not(.sw-play-live) .sw-play-result { padding: 0; }
+.sw-play-fails { margin: 8px 0 12px; font-size: 14px; color: var(--vp-c-text-2); }
