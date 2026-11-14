@@ -2,7 +2,8 @@
 // toggling, bracket and quote pairing, and a completion popup. Styled by ui.css (.sk-editor).
 //
 // The language decides highlighting, comments, statement shading and completion: `sqlLanguage` (the default),
-// `typescriptLanguage`, which highlights SQL inside sql`…` and exec`…` templates as SQL, or `cypherLanguage`.
+// `typescriptLanguage`, which highlights SQL inside sql`…` and exec`…` templates as SQL and Cypher inside cypher`…`
+// and cypher.run`…` as Cypher, or `cypherLanguage`.
 
 import { aliasesIn, FUNCTIONS, highlight as highlightSql, KEYWORDS, statementAt, unquote, wordBefore, type Statement } from './sql.js';
 import { completeCypher, cypherStatementAt, cypherWordBefore, highlightCypher, type CypherVocabulary } from './cypher.js';
@@ -522,8 +523,11 @@ const TS_KEYWORDS = new Set(
 /** Tags whose templates hold SQL: their text is highlighted as SQL, their `${}` as TypeScript. */
 const SQL_TAGS = new Set(['sql', 'exec']);
 
-/** Whether the template starting at `tick` is tagged as SQL: `sql`…``, `sql<Row>`…``, `db.sql`…``. */
-function sqlTagged(text: string, tick: number): boolean {
+/**
+ * The language of the template starting at `tick`, from its tag: SQL for `sql`…``, `sql<Row>`…``, `db.sql`…`` and
+ * `exec`…``; Cypher for `cypher`…`` and `cypher.run`…``; null for any other template.
+ */
+function templateLanguage(text: string, tick: number): 'sql' | 'cypher' | null {
   let i = tick - 1;
   while (i >= 0 && /\s/.test(text[i]!)) i--;
   if (text[i] === '>') {
@@ -537,7 +541,10 @@ function sqlTagged(text: string, tick: number): boolean {
   }
   let j = i;
   while (j >= 0 && /[A-Za-z0-9_$]/.test(text[j]!)) j--;
-  return SQL_TAGS.has(text.slice(j + 1, i + 1));
+  const tag = text.slice(j + 1, i + 1);
+  if (SQL_TAGS.has(tag)) return 'sql';
+  if (tag === 'cypher' || (tag === 'run' && text[j] === '.' && /(?:^|[^A-Za-z0-9_$])cypher$/.test(text.slice(Math.max(0, j - 7), j)))) return 'cypher';
+  return null;
 }
 
 const span = (cls: string, s: string) => `<span class="sk-tk-${cls}">${esc(s)}</span>`;
@@ -572,7 +579,7 @@ function tsHtml(text: string, i: number, inInterpolation: boolean): { html: stri
       i = Math.min(n, i + 1);
       html += span('s', text.slice(start, i));
     } else if (c === '`') {
-      const t = templateHtml(text, i, sqlTagged(text, i));
+      const t = templateHtml(text, i, templateLanguage(text, i));
       html += t.html;
       i = t.end;
     } else if (/[0-9]/.test(c) || (c === '.' && /[0-9]/.test(text[i + 1] ?? ''))) {
@@ -596,15 +603,17 @@ function tsHtml(text: string, i: number, inInterpolation: boolean): { html: stri
   return { html, end: i };
 }
 
-/** A template literal from its opening backtick: text as a string (or as SQL), `${…}` as TypeScript. */
-function templateHtml(text: string, tick: number, asSql: boolean): { html: string; end: number } {
+/** A template literal from its opening backtick: text as a string (or as SQL or Cypher), `${…}` as TypeScript. */
+function templateHtml(text: string, tick: number, lang: 'sql' | 'cypher' | null): { html: string; end: number } {
+  const asSql = lang !== null;
+  const highlightText = lang === 'cypher' ? highlightCypher : highlightSql;
   let html = span(asSql ? 'tpl-sql' : 's', '`');
   let i = tick + 1;
   let chunk = i;
   const n = text.length;
   const flush = (to: number) => {
     const s = text.slice(chunk, to);
-    if (s) html += asSql ? highlightSql(s).slice(0, -1) : span('s', s);
+    if (s) html += asSql ? highlightText(s).slice(0, -1) : span('s', s);
   };
   while (i < n) {
     const c = text[i];
@@ -627,12 +636,15 @@ function templateHtml(text: string, tick: number, asSql: boolean): { html: strin
   return { html, end: n };
 }
 
-/** HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` templates highlighted as SQL. */
+/** HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` and Cypher in cypher`…` highlighted. */
 export function highlightTypeScript(text: string): string {
   return tsHtml(text, 0, false).html + '\n';
 }
 
-/** TypeScript: highlighting (SQL inside sql`…` and exec`…`), `//` comments. Completion comes from a language service. */
+/**
+ * TypeScript: highlighting (SQL inside sql`…` and exec`…`, Cypher inside cypher`…` and cypher.run`…`), `//` comments.
+ * Completion comes from a language service.
+ */
 export const typescriptLanguage: EditorLanguage = {
   name: 'TypeScript',
   highlight: highlightTypeScript,
