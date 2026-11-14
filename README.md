@@ -1,4 +1,11 @@
-# smaltkit
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/public/lockup-on-dark.svg">
+    <img alt="smaltkit" src="docs/public/lockup.svg" width="320">
+  </picture>
+</h1>
+
+**Small. Alternative. Reusable.** Shared UI code for the smalt apps.
 
 <a href="https://smaltworks.dev/stability"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress-on-dark.svg"><img alt="Work in progress. Come build with us." src="https://raw.githubusercontent.com/stenhoor/smalt-brand/main/badges/work-in-progress.svg" height="56"></picture></a>
 

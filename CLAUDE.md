@@ -15,6 +15,9 @@ copy here: lines and roles change, and a copy taken before the change is out of 
 
 - Copy brand files and the site kit (`themes/vitepress/`) unchanged. To change them, change smalt-brand first, then
   copy them again.
+- smaltkit's brand is set (smalt-brand's DECISIONS.md, "smaltkit: a brand", 2026-11-14): "Small. Alternative.
+  Reusable.", the kit layer's jade (the hero's `suffix kit`) and the **Case** mark. The logo files in `docs/public/` come
+  from smalt-brand's `logos/smaltkit/`, unchanged.
 - A change to this product's status or to what it does comes with a smalt-brand PR that updates smaltworks.dev (its
   status page and this product's page), linked with `Depends on:`.
 
