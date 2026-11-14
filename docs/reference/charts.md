@@ -34,159 +34,28 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### areaChart {#areaChart}
+Each has a page of its own.
 
-```ts
-function areaChart(ctx: ChartContext): void;
-```
-
-Areas. Roles as barChart. Options: stack, smooth, markers, labels, legend, and the axis options of columnChart.
-
-#### barChart {#barChart}
-
-```ts
-function barChart(ctx: ChartContext): void;
-```
-
-Horizontal bars. Roles: `category`, optional `series` and `multiples` (small multiples), measures. Options: stack
-(none, stacked, percent), labels, legend, and the value axis: yScale (linear, log), yMin, yMax, refLines, xTitle,
-yTitle.
-
-#### cellFormatHtml {#cellFormatHtml}
-
-```ts
-function cellFormatHtml(f: CellFormat | null | undefined): {
-    cls: string;
-    icon: string;
-};
-```
-
-The classes and icon markup for a value's conditional format ('' when there is none).
-
-#### chartData {#chartData}
-
-```ts
-function chartData(columns: ChartColumn[], rows: number): ChartData;
-```
-
-Build ChartData from columns.
-
-#### columnChart {#columnChart}
-
-```ts
-function columnChart(ctx: ChartContext): void;
-```
-
-Vertical columns. Same roles and options as barChart, and xAxis: category (default) or continuous (dates, numbers).
-
-#### comboChart {#comboChart}
-
-```ts
-function comboChart(ctx: ChartContext): void;
-```
-
-Columns and lines: measures in role `columns` are bars, in role `lines` are lines (option secondaryAxis puts them on
-a second axis, titled by y2Title). The axis options of columnChart apply.
-
-#### donutChart {#donutChart}
-
-```ts
-function donutChart(ctx: ChartContext): void;
-```
-
-Donut: as pieChart, with options `hole` (0–1), `center` (show the total) and `total`. Without `total`, the centre
-and the label percentages use the sum of the slices. With it (a number the app computed), they use that instead:
-for slices that overlap (a sale in two categories), the sum is more than the whole and `total` is the whole.
-
-#### funnelChart {#funnelChart}
-
-```ts
-function funnelChart(ctx: ChartContext): void;
-```
-
-Funnel: roles `category` (stage) and one measure.
-
-#### gaugeChart {#gaugeChart}
-
-```ts
-function gaugeChart(ctx: ChartContext): void;
-```
-
-Gauge: roles `values`, optional `target` and `max`; option `maxValue` when there is no max column.
-
-#### heatmapChart {#heatmapChart}
-
-```ts
-function heatmapChart(ctx: ChartContext): void;
-```
-
-Heatmap: roles `rows`, `columns` and one measure, coloured along the sequential ramp.
-
-#### kpiCard {#kpiCard}
-
-```ts
-function kpiCard(ctx: ChartContext): void;
-```
-
-KPI card: roles `values`, optional `target` (comparison); `extra.trend` draws a sparkline. Options: `compare` (delta, value, none), `goodWhen` (up, down), `caption`.
-
-#### legendHtml {#legendHtml}
-
-```ts
-function legendHtml(names: string[], palette: number, offset?: number): string;
-```
-
-A legend (HTML) for series names.
-
-#### lineChart {#lineChart}
-
-```ts
-function lineChart(ctx: ChartContext): void;
-```
-
-Lines. Roles as barChart. Options: smooth, markers, labels, legend, xAxis and the axis options of columnChart.
-
-#### pieChart {#pieChart}
-
-```ts
-function pieChart(ctx: ChartContext): void;
-```
-
-Pie. Roles: `category` and one measure. Options: labels, legend.
-
-#### scatterChart {#scatterChart}
-
-```ts
-function scatterChart(ctx: ChartContext): void;
-```
-
-Scatter / bubble chart: roles `x`, `y`, optional `size` and `legend`; one point per row.
-
-#### squarify {#squarify}
-
-```ts
-function squarify(nodes: TreeNode[], rect: Rect): (Rect & {
-    i: number;
-})[];
-```
-
-Squarified treemap layout (Bruls, Huizing, van Wijk).
-
-#### treemapChart {#treemapChart}
-
-```ts
-function treemapChart(ctx: ChartContext): void;
-```
-
-Treemap (squarified): role `category` and one measure.
-
-#### waterfallChart {#waterfallChart}
-
-```ts
-function waterfallChart(ctx: ChartContext): void;
-```
-
-Waterfall: role `category` and one measure (the change); option `total` adds a total bar.
+| Function | |
+| --- | --- |
+| [`areaChart`](./charts/areaChart) | Areas. |
+| [`barChart`](./charts/barChart) | Horizontal bars. |
+| [`cellFormatHtml`](./charts/cellFormatHtml) | The classes and icon markup for a value's conditional format ('' when there is none). |
+| [`chartData`](./charts/chartData) | Build ChartData from columns: the columns, the dimensions and the measures, and `role(name)` to find them. |
+| [`columnChart`](./charts/columnChart) | Vertical columns. |
+| [`comboChart`](./charts/comboChart) | Columns and lines: measures in role `columns` are bars, in role `lines` are lines (option secondaryAxis puts them on a second axis, titled by y2Title). |
+| [`donutChart`](./charts/donutChart) | Donut: as pieChart, with options `hole` (0–1), `center` (show the total) and `total`. |
+| [`funnelChart`](./charts/funnelChart) | Funnel: roles `category` (stage) and one measure. |
+| [`gaugeChart`](./charts/gaugeChart) | Gauge: roles `values`, optional `target` and `max`; option `maxValue` when there is no max column. |
+| [`heatmapChart`](./charts/heatmapChart) | Heatmap: roles `rows`, `columns` and one measure, coloured along the sequential ramp. |
+| [`kpiCard`](./charts/kpiCard) | KPI card: roles `values`, optional `target` (comparison); `extra.trend` draws a sparkline. |
+| [`legendHtml`](./charts/legendHtml) | A legend (HTML) for series names, each with its palette colour. |
+| [`lineChart`](./charts/lineChart) | Lines. |
+| [`pieChart`](./charts/pieChart) | Pie. |
+| [`scatterChart`](./charts/scatterChart) | Scatter / bubble chart: roles `x`, `y`, optional `size` and `legend`; one point per row. |
+| [`squarify`](./charts/squarify) | Squarified treemap layout (Bruls, Huizing, van Wijk): rectangles with areas in proportion to the values, as close to square as the layout allows. |
+| [`treemapChart`](./charts/treemapChart) | Treemap (squarified): role `category` and one measure. |
+| [`waterfallChart`](./charts/waterfallChart) | Waterfall: role `category` and one measure (the change); option `total` adds a total bar. |
 
 ### Interfaces
 

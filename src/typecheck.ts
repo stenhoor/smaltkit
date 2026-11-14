@@ -80,6 +80,10 @@ export interface TypeCheckWorker {
  * another). Throws where workers can't start; an app then does without warnings. With `warm`, the worker gets ready
  * as soon as it starts (it reads the prepared libraries and checks nothing): start it while the page is idle, before
  * the first check is wanted.
+ * @param setup The libraries the code can use, their import names and the page's globals.
+ * @param options `workerUrl`: the worker script. `warm`: get ready at once.
+ * @returns The checker: `check(code)` and `close()`.
+ * @throws Error where workers can't start.
  */
 export function typeCheckWorker(setup: TypeCheckSetup, options: { workerUrl?: string | URL; warm?: boolean } = {}): TypeCheckWorker {
   const worker = new Worker(options.workerUrl ?? new URL('./typecheck-worker.js', import.meta.url), { type: 'module' });

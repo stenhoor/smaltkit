@@ -33,19 +33,11 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### typeCheckWorker {#typeCheckWorker}
+Each has a page of its own.
 
-```ts
-function typeCheckWorker(setup: TypeCheckSetup, options?: {
-    workerUrl?: string | URL;
-    warm?: boolean;
-}): TypeCheckWorker;
-```
-
-A type checker for `setup` in a worker (`typecheck-worker.js`, beside this module, unless `workerUrl` names
-another). Throws where workers can't start; an app then does without warnings. With `warm`, the worker gets ready
-as soon as it starts (it reads the prepared libraries and checks nothing): start it while the page is idle, before
-the first check is wanted.
+| Function | |
+| --- | --- |
+| [`typeCheckWorker`](./typecheck/typeCheckWorker) | A type checker for `setup` in a worker (`typecheck-worker.js`, beside this module, unless `workerUrl` names another). |
 
 ### Interfaces
 

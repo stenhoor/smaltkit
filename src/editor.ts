@@ -81,6 +81,10 @@ interface Mark {
 /**
  * The highlight layer's HTML for `text` with `marks` wrapped in `<mark>`s, each part highlighted by `hl` (which ends
  * its HTML with a newline, as the languages' do). Marks are taken in order; one that overlaps an earlier one is left out.
+ * @param text The editor's text.
+ * @param marks Ranges to wrap, each with its class and an optional title.
+ * @param hl The language's highlighter.
+ * @returns The HTML, ending with a newline.
  */
 export function markedHtml(text: string, marks: readonly Mark[], hl: (s: string) => string): string {
   const sorted = [...marks].filter((m) => m.end > m.start && m.start >= 0 && m.end <= text.length).sort((a, b) => a.start - b.start);
@@ -95,7 +99,13 @@ export function markedHtml(text: string, marks: readonly Mark[], hl: (s: string)
   return html + hl(text.slice(at));
 }
 
-/** The gutter's HTML for `lines` lines, the lines with warnings marked and titled with their messages. */
+/**
+ * The gutter's HTML for `lines` lines, the lines with warnings marked and titled with their messages.
+ * @param text The editor's text, to find each warning's line.
+ * @param lines How many lines to number.
+ * @param warnings The warnings, by offset in `text`.
+ * @returns The line numbers' HTML.
+ */
 export function gutterHtml(text: string, lines: number, warnings: readonly EditorWarning[]): string {
   const byLine = new Map<number, string[]>();
   for (const w of warnings) {
@@ -474,7 +484,14 @@ function findTable(tables: Map<string, SchemaTable>, name: string): SchemaTable 
   return null;
 }
 
-/** SQL completion: columns of the tables in the statement (or of a qualifier's table), tables, functions, keywords. */
+/**
+ * SQL completion: columns of the tables in the statement (or of a qualifier's table), tables, functions, keywords.
+ * @param text The editor's text.
+ * @param pos The cursor's offset.
+ * @param schema The database's names and tables, with their columns.
+ * @param explicit Whether the user asked for completion (Ctrl+Space), so a list shows with nothing typed.
+ * @returns The candidates matching the word typed, best first, and where that word starts.
+ */
 export function completeSql(text: string, pos: number, schema: EditorSchema, explicit: boolean): { items: CompletionItem[]; start: number } {
   const { word, start, qualifier } = wordBefore(text, pos);
   const w = word.toLowerCase();
@@ -636,7 +653,11 @@ function templateHtml(text: string, tick: number, lang: 'sql' | 'cypher' | null)
   return { html, end: n };
 }
 
-/** HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` and Cypher in cypher`…` highlighted. */
+/**
+ * HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` and Cypher in cypher`…` highlighted.
+ * @param text TypeScript.
+ * @returns The HTML, with the text escaped, ending with a newline.
+ */
 export function highlightTypeScript(text: string): string {
   return tsHtml(text, 0, false).html + '\n';
 }

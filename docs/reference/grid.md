@@ -34,38 +34,14 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### exportRows {#exportRows}
+Each has a page of its own.
 
-```ts
-function exportRows(format: ExportFormat, columns: (string | GridColumn)[], rows: GridRow[], tableName?: string): string;
-```
-
-CSV / TSV / JSON / NDJSON / SQL INSERT text for rows.
-
-#### formatValue {#formatValue}
-
-```ts
-function formatValue(v: GridValue): string | null;
-```
-
-A value as the grid shows it; null for NULL.
-
-#### plainValue {#plainValue}
-
-```ts
-function plainValue(v: GridValue): string;
-```
-
-A value as text for copying and export.
-
-#### sortOrder {#sortOrder}
-
-```ts
-function sortOrder(rows: GridRow[], col: number, dir: SortDir): number[] | null;
-```
-
-The view order for sorting rows by a column: nulls first, then numbers, then strings, then everything else; equal
-values keep their order. Null when `dir` is null (unsorted).
+| Function | |
+| --- | --- |
+| [`exportRows`](./grid/exportRows) | CSV / TSV / JSON / NDJSON / SQL INSERT text for rows. |
+| [`formatValue`](./grid/formatValue) | A value as the grid shows it; null for NULL. |
+| [`plainValue`](./grid/plainValue) | A value as text for copying and export: everything, unlike formatValue's preview. |
+| [`sortOrder`](./grid/sortOrder) | The view order for sorting rows by a column: nulls first, then numbers, then strings, then everything else; equal values keep their order. |
 
 ### Classes
 

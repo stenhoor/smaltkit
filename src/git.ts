@@ -71,7 +71,11 @@ const encoder = new TextEncoder();
 const hex = (b: Uint8Array) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
 const SHA = /^[0-9a-f]{40}$/;
 
-/** A `GitDir` over a `.git` folder's FileSystemDirectoryHandle (the File System Access API). */
+/**
+ * A `GitDir` over a `.git` folder's FileSystemDirectoryHandle (the File System Access API).
+ * @param root The handle of the `.git` folder.
+ * @returns What openRepository reads from.
+ */
 export function gitDirFromHandle(root: FileSystemDirectoryHandle): GitDir {
   const dirOf = async (parts: string[]) => {
     let d = root;
@@ -101,18 +105,30 @@ export function gitDirFromHandle(root: FileSystemDirectoryHandle): GitDir {
   };
 }
 
-/** zlib-inflates `data` (the whole stream, no trailing bytes). */
+/**
+ * zlib-inflates `data` (the whole stream, no trailing bytes), with the platform's DecompressionStream.
+ * @param data zlib data, as git stores objects.
+ * @returns The inflated bytes.
+ */
 export async function inflate(data: Uint8Array): Promise<Uint8Array> {
   const stream = new Blob([data as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate'));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
-/** SHA-1, as hex. */
+/**
+ * SHA-1, as hex, with the platform's Web Crypto.
+ * @param data The bytes.
+ * @returns The hash, 40 hex digits.
+ */
 export async function sha1(data: Uint8Array): Promise<string> {
   return hex(new Uint8Array(await crypto.subtle.digest('SHA-1', data as BufferSource)));
 }
 
-/** The id git gives a file's contents (`git hash-object`): how a working file is compared with a commit's. */
+/**
+ * The id git gives a file's contents (`git hash-object`): how a working file is compared with a commit's.
+ * @param data The file's bytes.
+ * @returns The blob id, 40 hex digits.
+ */
 export async function blobId(data: Uint8Array): Promise<string> {
   const head = encoder.encode(`blob ${data.length}\0`);
   const all = new Uint8Array(head.length + data.length);
@@ -123,7 +139,13 @@ export async function blobId(data: Uint8Array): Promise<string> {
 
 const TYPES: Record<number, GitObjectType> = { 1: 'commit', 2: 'tree', 3: 'blob', 4: 'tag' };
 
-/** Applies a git delta to its base. */
+/**
+ * Applies a git delta to its base, as packs store most objects.
+ * @param base The base object's bytes.
+ * @param delta The delta.
+ * @returns The object the delta describes.
+ * @throws GitError for a delta that doesn't fit the base or is malformed.
+ */
 export function applyDelta(base: Uint8Array, delta: Uint8Array): Uint8Array {
   let p = 0;
   const varint = () => {
@@ -469,7 +491,12 @@ function bisect<T>(sorted: T[], value: T): number {
   return -1;
 }
 
-/** Opens a repository from its `.git` folder. A `.git` that is a file (a worktree's) isn't read. */
+/**
+ * Opens a repository from its `.git` folder. A `.git` that is a file (a worktree's) isn't read.
+ * @param dir The `.git` folder, from gitDirFromHandle or any GitDir.
+ * @returns The repository, to read its refs, commits, trees, files and history.
+ * @throws GitError when the folder has no HEAD (the promise rejects).
+ */
 export async function openRepository(dir: GitDir): Promise<Repository> {
   if (!(await dir.file('HEAD'))) throw new GitError('no HEAD here: pick the repository folder that holds .git, not a worktree');
   const packs: Pack[] = [];
@@ -487,7 +514,12 @@ export interface DiffLine {
   text: string;
 }
 
-/** A line diff of two texts (Myers' algorithm): the fewest lines removed and added to turn `a` into `b`. */
+/**
+ * A line diff of two texts (Myers' algorithm): the fewest lines removed and added to turn `a` into `b`.
+ * @param a The old text.
+ * @param b The new text.
+ * @returns Every line, in order, as kept, removed (from `a`) or added (from `b`).
+ */
 export function diffLines(a: string, b: string): DiffLine[] {
   const x = a === '' ? [] : a.split('\n');
   const y = b === '' ? [] : b.split('\n');

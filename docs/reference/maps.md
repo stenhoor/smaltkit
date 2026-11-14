@@ -27,46 +27,14 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### fitProjection {#fitProjection}
+Each has a page of its own.
 
-```ts
-function fitProjection(kind: ProjectionKind, features: Feature[], width: number, height: number, pad?: number, extra?: Position[]): Projection;
-```
-
-A projection fitted to show every position (of the features and any extra points) inside width × height.
-
-#### geoPath {#geoPath}
-
-```ts
-function geoPath(g: Geometry | null, project: Projection): string;
-```
-
-SVG path data for a geometry (polygons closed; points as nothing: draw those as circles).
-
-#### mapChart {#mapChart}
-
-```ts
-function mapChart(ctx: ChartContext): void;
-```
-
-Map. Shapes come in options.shapes (parsed GeoJSON or TopoJSON; options.object picks a TopoJSON object).
-
-- Filled regions: role `location` (a dimension whose values name regions: matched against options.key, default
-  `name`, then the feature's id and common name / ISO code properties) and `values` (one measure, coloured low to
-  high on the sequential ramp).
-- Points: roles `latitude` and `longitude` (numbers), optional `size` (a measure, area-scaled) and `values`
-  (colour). Drawn over the shapes when there are any.
-
-Options: shapes, object, key, projection (mercator, equirectangular), legend (true by default for filled regions).
-
-#### toFeatures {#toFeatures}
-
-```ts
-function toFeatures(input: unknown, object?: string): Feature[];
-```
-
-Features from GeoJSON (a FeatureCollection, a Feature or a bare geometry) or TopoJSON (`object` names which of its
-objects; else the first). Anything else gives no features.
+| Function | |
+| --- | --- |
+| [`fitProjection`](./maps/fitProjection) | A projection fitted to show every position (of the features and any extra points) inside width × height. |
+| [`geoPath`](./maps/geoPath) | SVG path data for a geometry (polygons closed; points as nothing: draw those as circles). |
+| [`mapChart`](./maps/mapChart) | Map. |
+| [`toFeatures`](./maps/toFeatures) | Features from GeoJSON (a FeatureCollection, a Feature or a bare geometry) or TopoJSON (`object` names which of its objects; else the first). |
 
 ### Constants
 

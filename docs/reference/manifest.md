@@ -49,56 +49,16 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### applySteps {#applySteps}
+Each has a page of its own.
 
-```ts
-function applySteps<D extends StepDatabase>(db: D, steps: readonly ManifestStep[], options: ApplyOptions<D>): Promise<void>;
-```
-
-Run steps against an open database, in order. Throws on the first step that fails, naming it.
-
-#### externalTableSql {#externalTableSql}
-
-```ts
-function externalTableSql({ table, location, format, options, connection, columns, ifNotExists }: ExternalTableSpec): string;
-```
-
-CREATE EXTERNAL TABLE text for a location (URL, `file:<name>`, or a path under a connection).
-
-#### formatFromName {#formatFromName}
-
-```ts
-function formatFromName(name: string): DataFormat;
-```
-
-The format a file name implies (by extension); CSV when it says nothing.
-
-#### importParquet {#importParquet}
-
-```ts
-function importParquet<D extends StepDatabase>(db: D, io: Pick<StepIO<D>, 'registerFile'>, table: string, blob: Blob): Promise<{
-    rows: number;
-}>;
-```
-
-Copy a Parquet file into a table, through a temporary external table (columns and types come from the file's
-footer) and INSERT … SELECT. A missing table is created with the file's column types.
-
-#### localFiles {#localFiles}
-
-```ts
-function localFiles(steps: readonly ManifestStep[]): string[];
-```
-
-Names of the `local:` files the steps read (files kept in this browser).
-
-#### referencedFiles {#referencedFiles}
-
-```ts
-function referencedFiles(steps: readonly ManifestStep[]): string[];
-```
-
-Relative paths of the files the steps read (to copy them when publishing a static site).
+| Function | |
+| --- | --- |
+| [`applySteps`](./manifest/applySteps) | Run steps against an open database, in order. |
+| [`externalTableSql`](./manifest/externalTableSql) | CREATE EXTERNAL TABLE text for a location (URL, `file:<name>`, or a path under a connection). |
+| [`formatFromName`](./manifest/formatFromName) | The format a file name implies (by extension); CSV when it says nothing. |
+| [`importParquet`](./manifest/importParquet) | Copy a Parquet file into a table, through a temporary external table (columns and types come from the file's footer) and INSERT … SELECT. |
+| [`localFiles`](./manifest/localFiles) | Names of the `local:` files the steps read (files kept in this browser). |
+| [`referencedFiles`](./manifest/referencedFiles) | Relative paths of the files the steps read (to copy them when publishing a static site). |
 
 ### Interfaces
 

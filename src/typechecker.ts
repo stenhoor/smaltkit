@@ -17,6 +17,8 @@ export interface TypeChecker {
 /**
  * A checker for `setup`, in this thread: call it with the code, get its warnings. Prepared libraries are read in place
  * of their text, where this smaltty can read them; else `files` is read (`fallback` isn't fetched here).
+ * @param setup The libraries the code can use, their import names and the page's globals.
+ * @returns The checker: call it with code for its warnings; `warm()` gets it ready.
  */
 export function typeChecker(setup: TypeCheckSetup): TypeChecker {
   const files = new Map(Object.entries(setup.files));
@@ -41,12 +43,18 @@ export function typeChecker(setup: TypeCheckSetup): TypeChecker {
 /**
  * Whether `setup`'s prepared libraries are ones this smaltty reads (true when it has none): where they aren't, a
  * worker fetches the setup's `fallback`.
+ * @param setup A setup with or without `prepared`.
+ * @returns True when there is nothing to fetch.
  */
 export function preparedReadable(setup: TypeCheckSetup): boolean {
   return setup.prepared === undefined || readPrepared(setup.prepared) !== undefined;
 }
 
-/** The worker's side: answers requests in order. Exported for typecheck-worker.ts and for tests. */
+/**
+ * The worker's side: answers requests in order. Exported for typecheck-worker.ts and for tests.
+ * @returns A handler: a `setup` request sets up the checker, `warm` gets it ready, and `check` returns the code's
+ *   warnings (or why it couldn't check); setup and warm return nothing.
+ */
 export function typeCheckHandler(): (request: TypeCheckRequest) => TypeCheckReply | undefined {
   let checker: TypeChecker | undefined;
   return (request) => {

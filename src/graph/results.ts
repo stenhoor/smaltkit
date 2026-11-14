@@ -38,6 +38,12 @@ export interface ResultsGraph {
 
 const CAPTION_KEYS = ['name', 'title', 'label', 'code'];
 
+/**
+ * A node's caption when nothing else is asked for: its `name`, `title`, `label` or `code` property, else its first
+ * label and its id.
+ * @param n A node, as a result holds it.
+ * @returns The caption.
+ */
 export function defaultCaption(n: ResultNodeLike): string {
   for (const k of CAPTION_KEYS) if (n.properties[k] !== undefined && n.properties[k] !== null) return String(n.properties[k]);
   return n.labels[0] ? `${n.labels[0]} ${n.id}` : String(n.id);
@@ -47,6 +53,9 @@ export function defaultCaption(n: ResultNodeLike): string {
  * Every node, relationship and path in the values (rows, lists, maps, nested at any depth), as a graph to draw.
  * Relationships whose ends aren't in the values bring their ends as bare nodes. Returns an empty graph when there are
  * none.
+ * @param values A query's rows, or any value holding graph values.
+ * @param options How to caption and group the nodes.
+ * @returns The graph for `setGraph`, and the nodes and relationships in drawing order.
  *
  * ```ts
  * const { graph, nodes } = resultsToGraph(db.run('MATCH p = (:Person)-[:KNOWS*1..2]->() RETURN p').rows);

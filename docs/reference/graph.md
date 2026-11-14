@@ -28,41 +28,14 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### createGraphView {#createGraphView}
+Each has a page of its own.
 
-```ts
-function createGraphView(canvas: HTMLCanvasElement, opts?: GraphViewOptions): Promise<GraphView>;
-```
-
-#### defaultCaption {#defaultCaption}
-
-```ts
-function defaultCaption(n: ResultNodeLike): string;
-```
-
-#### isWebGpuAvailable {#isWebGpuAvailable}
-
-```ts
-function isWebGpuAvailable(): Promise<boolean>;
-```
-
-True when the browser exposes WebGPU and an adapter can be obtained.
-
-#### resultsToGraph {#resultsToGraph}
-
-```ts
-function resultsToGraph(values: unknown, options?: ResultsGraphOptions): ResultsGraph;
-```
-
-Every node, relationship and path in the values (rows, lists, maps, nested at any depth), as a graph to draw.
-Relationships whose ends aren't in the values bring their ends as bare nodes. Returns an empty graph when there are
-none.
-
-```ts
-const { graph, nodes } = resultsToGraph(db.run('MATCH p = (:Person)-[:KNOWS*1..2]->() RETURN p').rows);
-view.setGraph(graph);
-view.onClick((hit) => hit?.kind === 'node' && console.log(nodes[hit.index]));
-```
+| Function | |
+| --- | --- |
+| [`createGraphView`](./graph/createGraphView) | A graph view on a canvas, drawn with WebGPU: call its `setGraph` with nodes and edges to show them. |
+| [`defaultCaption`](./graph/defaultCaption) | A node's caption when nothing else is asked for: its `name`, `title`, `label` or `code` property, else its first label and its id. |
+| [`isWebGpuAvailable`](./graph/isWebGpuAvailable) | True when the browser exposes WebGPU and an adapter can be obtained: whether createGraphView can work here. |
+| [`resultsToGraph`](./graph/resultsToGraph) | Every node, relationship and path in the values (rows, lists, maps, nested at any depth), as a graph to draw. |
 
 ### Classes
 

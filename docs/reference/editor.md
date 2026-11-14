@@ -23,41 +23,14 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### completeSql {#completeSql}
+Each has a page of its own.
 
-```ts
-function completeSql(text: string, pos: number, schema: EditorSchema, explicit: boolean): {
-    items: CompletionItem[];
-    start: number;
-};
-```
-
-SQL completion: columns of the tables in the statement (or of a qualifier's table), tables, functions, keywords.
-
-#### gutterHtml {#gutterHtml}
-
-```ts
-function gutterHtml(text: string, lines: number, warnings: readonly EditorWarning[]): string;
-```
-
-The gutter's HTML for `lines` lines, the lines with warnings marked and titled with their messages.
-
-#### highlightTypeScript {#highlightTypeScript}
-
-```ts
-function highlightTypeScript(text: string): string;
-```
-
-HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` and Cypher in cypher`…` highlighted.
-
-#### markedHtml {#markedHtml}
-
-```ts
-function markedHtml(text: string, marks: readonly Mark[], hl: (s: string) => string): string;
-```
-
-The highlight layer's HTML for `text` with `marks` wrapped in `<mark>`s, each part highlighted by `hl` (which ends
-its HTML with a newline, as the languages' do). Marks are taken in order; one that overlaps an earlier one is left out.
+| Function | |
+| --- | --- |
+| [`completeSql`](./editor/completeSql) | SQL completion: columns of the tables in the statement (or of a qualifier's table), tables, functions, keywords. |
+| [`gutterHtml`](./editor/gutterHtml) | The gutter's HTML for `lines` lines, the lines with warnings marked and titled with their messages. |
+| [`highlightTypeScript`](./editor/highlightTypeScript) | HTML for the editor's highlight layer: TypeScript, with SQL in sql`…` and exec`…` and Cypher in cypher`…` highlighted. |
+| [`markedHtml`](./editor/markedHtml) | The highlight layer's HTML for `text` with `marks` wrapped in `<mark>`s, each part highlighted by `hl` (which ends its HTML with a newline, as the languages' do). |
 
 ### Classes
 

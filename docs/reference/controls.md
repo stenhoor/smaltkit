@@ -22,39 +22,14 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### choiceControl {#choiceControl}
+Each has a page of its own.
 
-```ts
-function choiceControl(el: ControlElement, style: ChoiceStyle, o: ChoiceOptions): void;
-```
-
-Choose values from a list. `list`: checkboxes (radios when `single`); `dropdown`: the same in a &lt;details> menu, with
-"All" or "n selected" as its label; `buttons`: chips, Ctrl/Cmd-click to add to the selection. A "Clear" button
-appears while something is selected.
-
-#### rangeControl {#rangeControl}
-
-```ts
-function rangeControl(el: ControlElement, o: RangeOptions): void;
-```
-
-Two inputs, from and to.
-
-#### sameValue {#sameValue}
-
-```ts
-function sameValue(a: Value, b: Value): boolean;
-```
-
-Equal values, across number and bigint (an integer column can come back as either).
-
-#### searchControl {#searchControl}
-
-```ts
-function searchControl(el: ControlElement, o: SearchOptions): void;
-```
-
-A search box that reports its text after typing pauses.
+| Function | |
+| --- | --- |
+| [`choiceControl`](./controls/choiceControl) | Choose values from a list. |
+| [`rangeControl`](./controls/rangeControl) | Two inputs, from and to, for a range of numbers or dates. |
+| [`sameValue`](./controls/sameValue) | Equal values, across number and bigint (an integer column can come back as either). |
+| [`searchControl`](./controls/searchControl) | A search box that reports its text after typing pauses. |
 
 ### Interfaces
 
