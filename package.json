@@ -1,7 +1,7 @@
 {
   "name": "smaltkit",
   "version": "0.12.0",
-  "description": "Shared browser code for the smalt apps (smaltui, smaltbi)",
+  "description": "Reusable components for the smaltworks applications",
   "license": "MIT",
   "type": "module",
   "repository": {

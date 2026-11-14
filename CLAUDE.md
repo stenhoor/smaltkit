@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-smaltkit is shared browser code for the smalt apps, [smaltui](https://github.com/stenhoor/smaltui) and
+smaltkit is reusable components for the smaltworks applications (more than UI: the engine loader, data steps, file
+handling, formatting, text tools, TypeScript, and the UI), used by [smaltui](https://github.com/stenhoor/smaltui) and
 [smaltbi](https://github.com/stenhoor/smaltbi). Several Claude Code sessions work on the smalt repos in parallel and
 cannot see each other: this file is the shared starting point. smaltui and smaltdb have matching files; keep the working
 rules the same.
