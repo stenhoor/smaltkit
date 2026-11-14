@@ -41,61 +41,17 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### applyDelta {#applyDelta}
+Each has a page of its own.
 
-```ts
-function applyDelta(base: Uint8Array, delta: Uint8Array): Uint8Array;
-```
-
-Applies a git delta to its base.
-
-#### blobId {#blobId}
-
-```ts
-function blobId(data: Uint8Array): Promise<string>;
-```
-
-The id git gives a file's contents (`git hash-object`): how a working file is compared with a commit's.
-
-#### diffLines {#diffLines}
-
-```ts
-function diffLines(a: string, b: string): DiffLine[];
-```
-
-A line diff of two texts (Myers' algorithm): the fewest lines removed and added to turn `a` into `b`.
-
-#### gitDirFromHandle {#gitDirFromHandle}
-
-```ts
-function gitDirFromHandle(root: FileSystemDirectoryHandle): GitDir;
-```
-
-A `GitDir` over a `.git` folder's FileSystemDirectoryHandle (the File System Access API).
-
-#### inflate {#inflate}
-
-```ts
-function inflate(data: Uint8Array): Promise<Uint8Array>;
-```
-
-zlib-inflates `data` (the whole stream, no trailing bytes).
-
-#### openRepository {#openRepository}
-
-```ts
-function openRepository(dir: GitDir): Promise<Repository>;
-```
-
-Opens a repository from its `.git` folder. A `.git` that is a file (a worktree's) isn't read.
-
-#### sha1 {#sha1}
-
-```ts
-function sha1(data: Uint8Array): Promise<string>;
-```
-
-SHA-1, as hex.
+| Function | |
+| --- | --- |
+| [`applyDelta`](./git/applyDelta) | Applies a git delta to its base, as packs store most objects. |
+| [`blobId`](./git/blobId) | The id git gives a file's contents (`git hash-object`): how a working file is compared with a commit's. |
+| [`diffLines`](./git/diffLines) | A line diff of two texts (Myers' algorithm): the fewest lines removed and added to turn `a` into `b`. |
+| [`gitDirFromHandle`](./git/gitDirFromHandle) | A `GitDir` over a `.git` folder's FileSystemDirectoryHandle (the File System Access API). |
+| [`inflate`](./git/inflate) | zlib-inflates `data` (the whole stream, no trailing bytes), with the platform's DecompressionStream. |
+| [`openRepository`](./git/openRepository) | Opens a repository from its `.git` folder. |
+| [`sha1`](./git/sha1) | SHA-1, as hex, with the platform's Web Crypto. |
 
 ### Classes
 

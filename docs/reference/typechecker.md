@@ -31,31 +31,13 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### preparedReadable {#preparedReadable}
+Each has a page of its own.
 
-```ts
-function preparedReadable(setup: TypeCheckSetup): boolean;
-```
-
-Whether `setup`'s prepared libraries are ones this smaltty reads (true when it has none): where they aren't, a
-worker fetches the setup's `fallback`.
-
-#### typeChecker {#typeChecker}
-
-```ts
-function typeChecker(setup: TypeCheckSetup): TypeChecker;
-```
-
-A checker for `setup`, in this thread: call it with the code, get its warnings. Prepared libraries are read in place
-of their text, where this smaltty can read them; else `files` is read (`fallback` isn't fetched here).
-
-#### typeCheckHandler {#typeCheckHandler}
-
-```ts
-function typeCheckHandler(): (request: TypeCheckRequest) => TypeCheckReply | undefined;
-```
-
-The worker's side: answers requests in order. Exported for typecheck-worker.ts and for tests.
+| Function | |
+| --- | --- |
+| [`preparedReadable`](./typechecker/preparedReadable) | Whether `setup`'s prepared libraries are ones this smaltty reads (true when it has none): where they aren't, a worker fetches the setup's `fallback`. |
+| [`typeChecker`](./typechecker/typeChecker) | A checker for `setup`, in this thread: call it with the code, get its warnings. |
+| [`typeCheckHandler`](./typechecker/typeCheckHandler) | The worker's side: answers requests in order. |
 
 ### Interfaces
 

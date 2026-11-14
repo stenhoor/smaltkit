@@ -83,7 +83,15 @@ export interface ApplyOptions<D extends StepDatabase = StepDatabase> {
   fetch?: typeof fetch;
 }
 
-/** Run steps against an open database, in order. Throws on the first step that fails, naming it. */
+/**
+ * Run steps against an open database, in order. Throws on the first step that fails, naming it.
+ * @param db An open database.
+ * @param steps The manifest's data steps.
+ * @param options What relative paths resolve against (`base`), the engine plugins' helpers (`io`), a log, the browser's
+ *   files (`local:` names), and a fetch.
+ * @throws Error naming the step that failed and why: a file that can't be fetched, a `local:` file this browser
+ *   doesn't have, or the engine's error.
+ */
 export async function applySteps<D extends StepDatabase>(db: D, steps: readonly ManifestStep[], options: ApplyOptions<D>): Promise<void> {
   const { io, log = () => {}, files } = options;
   const doFetch = options.fetch ?? fetch;
@@ -150,7 +158,11 @@ function requireTable(step: { table?: string }): string {
   return step.table;
 }
 
-/** The format a file name implies (by extension); CSV when it says nothing. */
+/**
+ * The format a file name implies (by extension); CSV when it says nothing.
+ * @param name A file name, path or URL.
+ * @returns `csv`, `tsv`, `json`, `ndjson` or `parquet`.
+ */
 export function formatFromName(name: string): DataFormat {
   const m = /\.(csv|tsv|json|ndjson|jsonl|txt|parquet)(\?|#|$)/i.exec(name);
   const ext = (m?.[1] ?? 'csv').toLowerCase();
@@ -160,6 +172,11 @@ export function formatFromName(name: string): DataFormat {
 /**
  * Copy a Parquet file into a table, through a temporary external table (columns and types come from the file's
  * footer) and INSERT … SELECT. A missing table is created with the file's column types.
+ * @param db An open database.
+ * @param io The external-tables plugin's `registerFile`.
+ * @param table The table to copy into.
+ * @param blob The Parquet file.
+ * @returns How many rows were copied.
  */
 export async function importParquet<D extends StepDatabase>(db: D, io: Pick<StepIO<D>, 'registerFile'>, table: string, blob: Blob): Promise<{ rows: number }> {
   const tmp = `__import_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -190,7 +207,12 @@ export interface ExternalTableSpec {
   ifNotExists?: boolean;
 }
 
-/** CREATE EXTERNAL TABLE text for a location (URL, `file:<name>`, or a path under a connection). */
+/**
+ * CREATE EXTERNAL TABLE text for a location (URL, `file:<name>`, or a path under a connection).
+ * @param spec The table, the location, and optionally the format, reader options, a connection, column types and
+ *   `ifNotExists`.
+ * @returns The statement.
+ */
 export function externalTableSql({ table, location, format, options = {}, connection, columns, ifNotExists = false }: ExternalTableSpec): string {
   const withs = [`location = ${quoteLiteral(location)}`];
   if (connection) withs.push(`connection = ${quoteLiteral(connection)}`);
@@ -203,7 +225,12 @@ export function externalTableSql({ table, location, format, options = {}, connec
   return `CREATE EXTERNAL TABLE ${ifNotExists ? 'IF NOT EXISTS ' : ''}${quoteIdent(table)}${cols} WITH (${withs.join(', ')})`;
 }
 
-/** Relative paths of the files the steps read (to copy them when publishing a static site). */
+/**
+ * Relative paths of the files the steps read (to copy them when publishing a static site).
+ * @param steps The manifest's data steps.
+ * @returns The paths of SQL files, imports and linked files, once each; anything with a scheme (a URL, `local:`) is
+ *   left out.
+ */
 export function referencedFiles(steps: readonly ManifestStep[]): string[] {
   const out = new Set<string>();
   for (const s of steps) {
@@ -213,7 +240,11 @@ export function referencedFiles(steps: readonly ManifestStep[]): string[] {
   return [...out];
 }
 
-/** Names of the `local:` files the steps read (files kept in this browser). */
+/**
+ * Names of the `local:` files the steps read (files kept in this browser).
+ * @param steps The manifest's data steps.
+ * @returns The names, without `local:`, once each.
+ */
 export function localFiles(steps: readonly ManifestStep[]): string[] {
   const out = new Set<string>();
   for (const s of steps) {

@@ -74,7 +74,13 @@ function pageUrl(): string {
   return typeof document !== 'undefined' ? document.baseURI : location.href;
 }
 
-/** Where an engine spec loads from. Pure: no network, no globals beyond URL. */
+/**
+ * Where an engine spec loads from. Pure: no network, no globals beyond URL.
+ * @param spec `vendor` (or `''`), `npm`, `npm@<version>`, or a folder's URL.
+ * @param vendorUrl The app's vendor copy, for `vendor`.
+ * @param baseUrl What relative URLs resolve against.
+ * @returns The folder the client and worker load from (ending in `/`), and a label for the UI.
+ */
 export function resolveEngine(spec: string, vendorUrl: string | URL, baseUrl: string | URL): EngineLocation {
   const folder = (u: string | URL) => {
     const href = new URL(u, baseUrl).href;
@@ -92,6 +98,9 @@ export function resolveEngine(spec: string, vendorUrl: string | URL, baseUrl: st
 /**
  * The engine spec for this page: `?engine=` if present, else the one saved under `storageKey` (see setEngineSpec),
  * else 'vendor'.
+ * @param storageKey The localStorage key a choice is kept under, or none.
+ * @param search The page's query string. Default: the page's own.
+ * @returns The spec. Storage that can't be read (private mode) counts as nothing saved.
  */
 export function engineSpec(storageKey?: string, search: string = typeof location !== 'undefined' ? location.search : ''): string {
   const fromUrl = new URLSearchParams(search).get('engine');
@@ -104,7 +113,11 @@ export function engineSpec(storageKey?: string, search: string = typeof location
   }
 }
 
-/** Remember an engine spec for later page loads ('vendor' or '' clears it). */
+/**
+ * Remember an engine spec for later page loads ('vendor' or '' clears it). Where storage is blocked, nothing is kept.
+ * @param storageKey The localStorage key, as engineSpec reads it.
+ * @param spec The spec to keep.
+ */
 export function setEngineSpec(storageKey: string, spec: string): void {
   try {
     if (!spec || spec === 'vendor') localStorage.removeItem(storageKey);
@@ -114,7 +127,16 @@ export function setEngineSpec(storageKey: string, spec: string): void {
   }
 }
 
-/** Import the smaltdb client for `spec` and prepare its worker. */
+/**
+ * Import the smaltdb client for `spec` and prepare its worker. A missing vendor copy falls back to the latest npm
+ * release, unless `npm` is false.
+ * @param spec The engine spec, from engineSpec.
+ * @param options The app's vendor folder, what relative URLs resolve against, the worker's file name, the app's name for
+ *   console messages, and whether npm engines are allowed.
+ * @returns The engine: its spec, label and version, and `open()` for databases.
+ * @throws Error when the engine can't be imported; with `npm: false`, for an npm spec or a missing vendor copy, saying
+ *   what to do.
+ */
 export async function loadEngine(spec: string, options: LoadEngineOptions): Promise<Engine> {
   const baseUrl = options.baseUrl ?? pageUrl();
   const workerFile = options.workerFile ?? 'smaltdb-worker.js';
@@ -171,7 +193,10 @@ export interface OpfsDatabase {
   modified: number | null;
 }
 
-/** Whether this page can use OPFS (it needs a secure context). */
+/**
+ * Whether this page can use OPFS (it needs a secure context).
+ * @returns True where databases can be stored in OPFS.
+ */
 export function opfsAvailable(): boolean {
   return typeof navigator !== 'undefined' && !!navigator.storage?.getDirectory && typeof isSecureContext !== 'undefined' && isSecureContext;
 }
@@ -190,7 +215,11 @@ async function* entries(dir: FileSystemDirectoryHandle): AsyncGenerator<[string,
   yield* (dir as unknown as { entries(): AsyncIterable<[string, FileSystemHandle]> }).entries();
 }
 
-/** The databases smaltdb has stored in this origin's OPFS, sorted by name. */
+/**
+ * The databases smaltdb has stored in this origin's OPFS, sorted by name.
+ * @returns Each database's name, its size (with its write-ahead log) and when it last changed; size and time are null
+ *   while another tab holds the file open. Empty where OPFS isn't available.
+ */
 export async function listOpfsDatabases(): Promise<OpfsDatabase[]> {
   const dir = await opfsDir();
   if (!dir) return [];
@@ -215,7 +244,11 @@ export async function listOpfsDatabases(): Promise<OpfsDatabase[]> {
   return out.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** Delete a database and its side files. It must not be open in any tab. */
+/**
+ * Delete a database and its side files. It must not be open in any tab.
+ * @param name The database's name, as listOpfsDatabases gives it.
+ * @throws The browser's error when a file is open elsewhere (the promise rejects).
+ */
 export async function deleteOpfsDatabase(name: string): Promise<void> {
   const dir = await opfsDir();
   if (!dir) return;

@@ -46,62 +46,17 @@ Generated from the module's declarations and their doc comments.
 
 ### Functions
 
-#### deleteOpfsDatabase {#deleteOpfsDatabase}
+Each has a page of its own.
 
-```ts
-function deleteOpfsDatabase(name: string): Promise<void>;
-```
-
-Delete a database and its side files. It must not be open in any tab.
-
-#### engineSpec {#engineSpec}
-
-```ts
-function engineSpec(storageKey?: string, search?: string): string;
-```
-
-The engine spec for this page: `?engine=` if present, else the one saved under `storageKey` (see setEngineSpec),
-else 'vendor'.
-
-#### listOpfsDatabases {#listOpfsDatabases}
-
-```ts
-function listOpfsDatabases(): Promise<OpfsDatabase[]>;
-```
-
-The databases smaltdb has stored in this origin's OPFS, sorted by name.
-
-#### loadEngine {#loadEngine}
-
-```ts
-function loadEngine(spec: string, options: LoadEngineOptions): Promise<Engine>;
-```
-
-Import the smaltdb client for `spec` and prepare its worker.
-
-#### opfsAvailable {#opfsAvailable}
-
-```ts
-function opfsAvailable(): boolean;
-```
-
-Whether this page can use OPFS (it needs a secure context).
-
-#### resolveEngine {#resolveEngine}
-
-```ts
-function resolveEngine(spec: string, vendorUrl: string | URL, baseUrl: string | URL): EngineLocation;
-```
-
-Where an engine spec loads from. Pure: no network, no globals beyond URL.
-
-#### setEngineSpec {#setEngineSpec}
-
-```ts
-function setEngineSpec(storageKey: string, spec: string): void;
-```
-
-Remember an engine spec for later page loads ('vendor' or '' clears it).
+| Function | |
+| --- | --- |
+| [`deleteOpfsDatabase`](./engine/deleteOpfsDatabase) | Delete a database and its side files. |
+| [`engineSpec`](./engine/engineSpec) | The engine spec for this page: `?engine=` if present, else the one saved under `storageKey` (see setEngineSpec), else 'vendor'. |
+| [`listOpfsDatabases`](./engine/listOpfsDatabases) | The databases smaltdb has stored in this origin's OPFS, sorted by name. |
+| [`loadEngine`](./engine/loadEngine) | Import the smaltdb client for `spec` and prepare its worker. |
+| [`opfsAvailable`](./engine/opfsAvailable) | Whether this page can use OPFS (it needs a secure context). |
+| [`resolveEngine`](./engine/resolveEngine) | Where an engine spec loads from. |
+| [`setEngineSpec`](./engine/setEngineSpec) | Remember an engine spec for later page loads ('vendor' or '' clears it). |
 
 ### Interfaces
 
