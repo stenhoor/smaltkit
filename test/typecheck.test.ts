@@ -40,6 +40,14 @@ test("syntax: 'tolerant' sets aside the broken statement and checks the rest; st
   );
 });
 
+test('a type guard: no warning where it narrows; the same call unguarded still warns', () => {
+  const check = typeChecker(setup);
+  const guard = 'function isFrame(v: unknown): v is Frame { return true; }\n';
+  const code = (body: string) => `import { type Expr, type Frame } from '@smaltdb/df';\n${guard}declare const v: Expr;\n${body}`;
+  assert.deepEqual(check(code('if (isFrame(v)) v.head(1);\n')), []);
+  assert.deepEqual(check(code('v.head(1);\n')).map((w) => w.code), [2339]);
+});
+
 test('imports: the same library imported by name', () => {
   const check = typeChecker(setup);
   assert.deepEqual(check("import { table } from '@smaltdb/df';\ntable('a').fliter(1);\n").map((w) => [w.line, w.code]), [[2, 2551]]);
