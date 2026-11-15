@@ -129,7 +129,7 @@
     "test:playgrounds": "npm run docs:build && node test/browser/playgrounds.mjs"
   },
   "dependencies": {
-    "smaltty": "github:stenhoor/smaltty#v0.14.0"
+    "smaltty": "github:stenhoor/smaltty#v0.14.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
