@@ -1,7 +1,8 @@
 // The docs' examples are tests (BRAND.md, Documentation, rule 5). In docs/**/*.md, a ```ts fence followed by a ```text
 // fence is an example and what it prints: the code is stripped of its types by smaltkit's own stripTypes, run by Node
-// against the built package, and its output must be the text fence's. A ```ts fence without a ```text fence after it
-// (code for a page, which needs a DOM) is shown, not run.
+// against the built package with console.log printing through smaltkit's formatLog (as the docs' playgrounds do in a
+// page), and its output must be the text fence's. A ```ts fence without a ```text fence after it (code for a page, which
+// needs a DOM) is shown, not run.
 //
 //   node scripts/docs-examples.mjs           check every example (test/docs.test.ts runs this)
 //   node scripts/docs-examples.mjs --write   run them and write what they print into the text fences
@@ -40,7 +41,10 @@ export function run(code) {
   const dir = path.join(root, 'docs', '.vitepress', 'cache', 'examples');
   mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `example-${process.pid}-${Math.random().toString(36).slice(2)}.mjs`);
-  writeFileSync(file, stripTypes(code));
+  // console.log prints through smaltkit's formatLog, as the docs' playgrounds do in a page, so a printed result reads
+  // the same in both. On the first line, so the example's lines keep their numbers.
+  const log = "import { formatLog as __log } from 'smaltkit/pretty'; console.log = (...a) => process.stdout.write(__log(a) + '\\n'); ";
+  writeFileSync(file, log + stripTypes(code));
   try {
     return execFileSync(process.execPath, [file], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).replace(/\n$/, '');
   } catch (e) {

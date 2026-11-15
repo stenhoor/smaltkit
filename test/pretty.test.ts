@@ -84,3 +84,22 @@ test('re-exported from smaltkit', () => {
   assert.equal(kit.formatJson, formatJson);
   assert.equal(kit.formatTypeScript, formatTypeScript);
 });
+
+test('inspect: values as a console shows them, the same in every runtime', async () => {
+  const { inspect, formatLog } = await import('smaltkit/pretty');
+  assert.equal(inspect('a'), "'a'");
+  assert.equal(inspect("it's"), '"it\'s"');
+  assert.equal(inspect([1, 12n, null, undefined, -0, true]), '[ 1, 12n, null, undefined, -0, true ]');
+  assert.equal(inspect({ a: 1, 'b c': [] }), "{ a: 1, 'b c': [] }");
+  assert.equal(inspect(new Map([['k', { v: 1 }]])), "Map(1) { 'k' => { v: 1 } }");
+  assert.equal(inspect(new Set([1])), 'Set(1) { 1 }');
+  assert.equal(inspect(new Uint8Array([1, 2])), 'Uint8Array(2) [ 1, 2 ]');
+  assert.equal(inspect(new Error('boom')), 'Error: boom');
+  const c: Record<string, unknown> = {};
+  c.self = c;
+  assert.equal(inspect(c), '{ self: [Circular] }');
+  const shared = { x: 1 };
+  assert.equal(inspect([shared, shared]), '[ { x: 1 }, { x: 1 } ]', 'a value seen twice is not circular');
+  assert.equal(inspect([{ a: 'xxxxxxxxxx' }, { a: 'yyyyyyyyyy' }], { width: 24 }), "[\n  { a: 'xxxxxxxxxx' },\n  { a: 'yyyyyyyyyy' }\n]");
+  assert.equal(formatLog(['n =', 3, 'text', { a: 'b' }]), "n = 3 text { a: 'b' }");
+});
