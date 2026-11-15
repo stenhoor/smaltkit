@@ -7,15 +7,14 @@ import { loadEngine } from 'smaltkit/engine';
 function loadEngine(spec: string, options: LoadEngineOptions): Promise<Engine>;
 ```
 
-Import the smaltdb client for `spec` and prepare its worker. A missing vendor copy falls back to the latest npm
-release, unless `npm` is false.
+Import the smaltdb client for `spec` and prepare its worker.
 
 ## Parameters
 
 | Parameter | Type | |
 | --- | --- | --- |
 | `spec` | `string` | The engine spec, from engineSpec. |
-| `options` | `LoadEngineOptions` | The app's vendor folder, what relative URLs resolve against, the worker's file name, the app's name for console messages, and whether npm engines are allowed. |
+| `options` | `LoadEngineOptions` | The app's vendor folder, what relative URLs resolve against, the worker's file name, and the app's name for console messages. |
 
 ## Returns
 
@@ -23,7 +22,7 @@ release, unless `npm` is false.
 
 ## Errors
 
-- Error when the engine can't be imported; with `npm: false`, for an npm spec or a missing vendor copy, saying what to do.
+- Error when the engine can't be imported; for an `npm` spec or a missing vendor copy, saying what to do.
 
 <!-- api:end -->
 
@@ -40,13 +39,13 @@ const db = await engine.open('sales', { storage: 'opfs' });
 ```
 
 
-An app whose engine has its language and plugins built in turns npm engines off:
+A missing vendor copy is an error that says how to build it:
 
 ```ts
 import { loadEngine } from 'smaltkit/engine';
 
 try {
-  await loadEngine('vendor', { vendorUrl: 'vendor/smaltdb/', npm: false });
+  await loadEngine('vendor', { vendorUrl: 'vendor/smaltdb/' });
 } catch (e) {
   console.log((e as Error).message); // the vendor copy is missing at …: build it with `npm install`
 }
