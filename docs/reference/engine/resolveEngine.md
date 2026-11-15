@@ -35,10 +35,7 @@ for (const spec of ['vendor', 'npm', 'npm@0.8.3', 'https://cdn.example.com/smalt
 ```
 
 ```text
-{
-  base: 'https://example.com/app/vendor/smaltdb/',
-  label: 'bundled smaltdb'
-}
+{ base: 'https://example.com/app/vendor/smaltdb/', label: 'bundled smaltdb' }
 {
   base: 'https://cdn.jsdelivr.net/npm/smaltdb@latest/dist/',
   label: 'smaltdb@latest (npm)'

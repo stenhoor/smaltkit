@@ -1,6 +1,6 @@
 {
   "name": "smaltkit",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Components for the smaltworks applications, built to be reused.",
   "license": "MIT",
   "type": "module",

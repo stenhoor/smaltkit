@@ -6,6 +6,9 @@
 // formatTypeScript(code) re-indents code by bracket depth, indents a continued method chain or operator one level,
 // trims trailing spaces and collapses runs of blank lines. It never changes the text within a line, so it can't change
 // what the code does; strings, template literals, comments and regular expressions are left exactly as they are.
+//
+// inspect(value) and formatLog(values) print values as a console does, the same in Node and in a page, so a printed
+// result can be checked in one and shown in the other.
 
 export interface JsonFormatOptions {
   /** The widest line to aim for. Default 100. */
@@ -237,4 +240,94 @@ export function formatTypeScript(code: string, options: TsFormatOptions = {}): s
   }
   while (out.length && !out[out.length - 1]) out.pop();
   return out.length ? out.join('\n') + '\n' : '';
+}
+
+export interface InspectOptions {
+  /** The widest line to aim for: a value that doesn't fit has one item per line. Default 80. */
+  width?: number;
+}
+
+const IDENT = /^[A-Za-z_$][\w$]*$/;
+
+/** A string in quotes, as a console shows it: single quotes, or double or back quotes when the text holds single ones. */
+function quote(s: string): string {
+  const q = !s.includes("'") ? "'" : !s.includes('"') ? '"' : !s.includes('`') ? '`' : "'";
+  const body = s.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+  return q + (q === "'" ? body.replace(/'/g, "\\'") : body) + q;
+}
+
+/**
+ * A value as a console shows it, the same in every runtime: `'text'`, `12n`, `[ 1, 2 ]`, `{ a: 1 }`,
+ * `Map(1) { 'a' => 1 }`, `Uint8Array(2) [ 1, 2 ]`. A value that fits the width stays on one line; one that doesn't
+ * has an item per line, indented two spaces. Circular references are `[Circular]`.
+ * @param value Anything.
+ * @param options `width`: the widest line to aim for (default 80).
+ * @returns The text.
+ */
+export function inspect(value: unknown, options: InspectOptions = {}): string {
+  const width = options.width ?? 80;
+  const seen = new Set<object>();
+
+  /** The value's parts: a scalar's text, or an opening, items and a closing for something with items. */
+  type Shape = string | { open: string; items: Shape[]; close: string };
+
+  const shape = (v: unknown): Shape => {
+    if (v === null) return 'null';
+    if (v === undefined) return 'undefined';
+    if (typeof v === 'string') return quote(v);
+    if (typeof v === 'number') return Object.is(v, -0) ? '-0' : String(v);
+    if (typeof v === 'bigint') return `${v}n`;
+    if (typeof v === 'boolean' || typeof v === 'symbol') return String(v);
+    if (typeof v === 'function') return `[Function: ${v.name || '(anonymous)'}]`;
+    const o = v as object;
+    if (seen.has(o)) return '[Circular]';
+    if (o instanceof Date) return isNaN(o.getTime()) ? 'Invalid Date' : o.toISOString();
+    if (o instanceof RegExp) return String(o);
+    if (o instanceof Error) return `${o.name}: ${o.message}`;
+    seen.add(o);
+    try {
+      if (Array.isArray(o)) return { open: '[', items: o.map(shape), close: ']' };
+      if (ArrayBuffer.isView(o) && !(o instanceof DataView)) {
+        const a = o as unknown as ArrayLike<number | bigint>;
+        return { open: `${o.constructor.name}(${a.length}) [`, items: Array.from(a, shape), close: ']' };
+      }
+      if (o instanceof Map) {
+        const items = [...o].map(([k, val]) => join(flat(shape(k)), ' => ', shape(val)));
+        return { open: `Map(${o.size}) {`, items, close: '}' };
+      }
+      if (o instanceof Set) return { open: `Set(${o.size}) {`, items: [...o].map(shape), close: '}' };
+      const name = o.constructor && o.constructor !== Object ? `${o.constructor.name} ` : '';
+      const items = Object.entries(o).map(([k, val]) => join(IDENT.test(k) ? k : quote(k), ': ', shape(val)));
+      return { open: `${name}{`, items, close: '}' };
+    } finally {
+      seen.delete(o);
+    }
+  };
+
+  /** A key and a value: one line when the value is, else the key before the value's opening. */
+  const join = (key: string, sep: string, val: Shape): Shape =>
+    typeof val === 'string' ? key + sep + val : { open: key + sep + val.open, items: val.items, close: val.close };
+
+  const flat = (s: Shape): string =>
+    typeof s === 'string' ? s : s.items.length ? `${s.open} ${s.items.map(flat).join(', ')} ${s.close}` : `${s.open}${s.close}`;
+
+  const lay = (s: Shape, indent: string): string => {
+    const one = flat(s);
+    if (typeof s === 'string' || indent.length + one.length <= width || !s.items.length) return one;
+    const inner = indent + '  ';
+    return `${s.open}\n${s.items.map((i) => inner + lay(i, inner)).join(',\n')}\n${indent}${s.close}`;
+  };
+
+  return lay(shape(value), '');
+}
+
+/**
+ * What `console.log(...values)` prints, the same in every runtime: strings as they are, everything else as inspect
+ * shows it, joined by spaces.
+ * @param values The values logged.
+ * @param options As for inspect.
+ * @returns The line (or lines, for a value laid out over several).
+ */
+export function formatLog(values: readonly unknown[], options: InspectOptions = {}): string {
+  return values.map((v) => (typeof v === 'string' ? v : inspect(v, options))).join(' ');
 }
