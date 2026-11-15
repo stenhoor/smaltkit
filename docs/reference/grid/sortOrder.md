@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { sortOrder } from 'smaltkit/grid';
 function sortOrder(rows: GridRow[], col: number, dir: SortDir): number[] | null;
 ```

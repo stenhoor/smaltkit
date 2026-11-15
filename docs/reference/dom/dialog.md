@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { dialog } from 'smaltkit/dom';
 function dialog<T = unknown>(title: string, body: Node, buttons?: {
     label: string;

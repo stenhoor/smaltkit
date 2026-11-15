@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { quoteLiteral } from 'smaltkit/sql';
 function quoteLiteral(v: SqlValue | boolean | undefined): string;
 ```

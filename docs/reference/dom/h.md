@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { h } from 'smaltkit/dom';
 function h<K extends keyof HTMLElementTagNameMap>(sel: K, attrs?: Attrs, ...children: (Child | Child[])[]): HTMLElementTagNameMap[K];
 function h(sel: string, attrs?: Attrs, ...children: (Child | Child[])[]): HTMLElement;

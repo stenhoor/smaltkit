@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { inflate } from 'smaltkit/git';
 function inflate(data: Uint8Array): Promise<Uint8Array>;
 ```

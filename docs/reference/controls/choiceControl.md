@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { choiceControl } from 'smaltkit/controls';
 function choiceControl(el: ControlElement, style: ChoiceStyle, o: ChoiceOptions): void;
 ```

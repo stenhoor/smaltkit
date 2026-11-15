@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { cellFormatHtml } from 'smaltkit/charts';
 function cellFormatHtml(f: CellFormat | null | undefined): {
     cls: string;

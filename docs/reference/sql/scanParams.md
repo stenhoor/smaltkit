@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { scanParams } from 'smaltkit/sql';
 function scanParams(sql: string): ParamSlot[];
 ```

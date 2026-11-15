@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { download } from 'smaltkit/dom';
 function download(name: string, data: BlobPart, type?: string): void;
 ```

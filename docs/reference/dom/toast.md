@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { toast } from 'smaltkit/dom';
 function toast(text: string, kind?: 'info' | 'error' | 'ok', ms?: number): void;
 ```

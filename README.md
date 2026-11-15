@@ -139,8 +139,11 @@ a page per module: the top is written by hand (what the module is for, examples)
 signature, parameters, returns and errors generated (from `@param`, `@returns` and `@throws`), then examples, a demo and
 see also, written by hand. An example followed by a `text` block is a test (`test/docs.test.ts`): it runs
 against the built package and must print that text. `npm run docs:build` fails if the generated API is out of date or
-an example doesn't type-check. The theme files in `docs/.vitepress/theme/` (all but `index.ts`) and the badges in
-`docs/public/` are copied from [smalt-brand](https://github.com/stenhoor/smalt-brand) unchanged.
+an example doesn't type-check. On the site, every tested example is a playground: Run (or edit, then Run) strips its
+types and runs it in a worker against the site's own copy of `dist/`, printing as the tests do;
+`npm run test:playgrounds` presses Run on every one in Chromium (CI runs it). The theme files in
+`docs/.vitepress/theme/` (all but `index.ts`) and the badges in `docs/public/` are copied from
+[smalt-brand](https://github.com/stenhoor/smalt-brand) unchanged.
 
 Sources are in `src/`; `dist/` is generated and not committed. TypeScript 7 checks the code (the `typescript7` dev
 dependency); TypeScript 6.0.3 (`typescript`, so `npx tsc`) still emits `dist/` and its `.d.ts` files. Tests import the

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { normalizeDataUrl } from 'smaltkit/urls';
 function normalizeDataUrl(input: string | null | undefined): NormalizedUrl;
 ```

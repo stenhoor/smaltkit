@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { heatmapChart } from 'smaltkit/charts';
 function heatmapChart(ctx: ChartContext): void;
 ```

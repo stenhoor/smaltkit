@@ -52,7 +52,7 @@ Each has a page of its own.
 
 #### NormalizedUrl {#NormalizedUrl}
 
-```ts
+```ts noplay
 interface NormalizedUrl {
     url: string;
     changed: boolean;

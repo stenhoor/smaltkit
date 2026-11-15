@@ -62,7 +62,7 @@ Each has a page of its own.
 
 #### Engine {#Engine}
 
-```ts
+```ts noplay
 interface Engine {
     spec: string;
     label: string;
@@ -82,7 +82,7 @@ interface Engine {
 
 #### EngineLocation {#EngineLocation}
 
-```ts
+```ts noplay
 interface EngineLocation {
     base: string;
     label: string;
@@ -95,7 +95,7 @@ interface EngineLocation {
 
 #### EngineVersion {#EngineVersion}
 
-```ts
+```ts noplay
 interface EngineVersion {
     source: string;
     version?: string;
@@ -112,7 +112,7 @@ What the loaded engine says about its version: VERSION.json in the vendor folder
 
 #### LoadEngineOptions {#LoadEngineOptions}
 
-```ts
+```ts noplay
 interface LoadEngineOptions {
     vendorUrl: string | URL;
     baseUrl?: string | URL;
@@ -132,7 +132,7 @@ interface LoadEngineOptions {
 
 #### OpfsDatabase {#OpfsDatabase}
 
-```ts
+```ts noplay
 interface OpfsDatabase {
     name: string;
     size: number | null;
@@ -149,19 +149,19 @@ interface OpfsDatabase {
 
 #### Database {#Database}
 
-```ts
+```ts noplay
 type Database = Smaltdb.Database;
 ```
 
 #### OpenOptions {#OpenOptions}
 
-```ts
+```ts noplay
 type OpenOptions = Smaltdb.OpenOptions;
 ```
 
 #### SmaltdbModule {#SmaltdbModule}
 
-```ts
+```ts noplay
 type SmaltdbModule = typeof Smaltdb;
 ```
 

@@ -57,7 +57,7 @@ Each has a page of its own.
 
 #### GitError {#GitError}
 
-```ts
+```ts noplay
 class GitError extends Error {
     constructor(message: string);
 }
@@ -67,7 +67,7 @@ A problem reading the repository: what isn't there, or what this reader doesn't 
 
 #### Repository {#Repository}
 
-```ts
+```ts noplay
 class Repository {
     #private;
     constructor(dir: GitDir, packs: Pack[]);
@@ -95,7 +95,7 @@ A git repository, read from its `.git` folder.
 
 #### DiffLine {#DiffLine}
 
-```ts
+```ts noplay
 interface DiffLine {
     op: 'keep' | 'remove' | 'add';
     text: string;
@@ -106,7 +106,7 @@ One step of a line diff: a line kept, removed (from `a`) or added (from `b`).
 
 #### GitCommit {#GitCommit}
 
-```ts
+```ts noplay
 interface GitCommit {
     id: string;
     tree: string;
@@ -119,7 +119,7 @@ interface GitCommit {
 
 #### GitDir {#GitDir}
 
-```ts
+```ts noplay
 interface GitDir {
     file(path: string): Promise<GitFile | null>;
     list(path: string): Promise<string[] | null>;
@@ -135,7 +135,7 @@ The `.git` folder, by paths relative to it (`objects/pack`, `refs/heads/main`).
 
 #### GitFile {#GitFile}
 
-```ts
+```ts noplay
 interface GitFile {
     readonly size: number;
     read(start: number, end: number): Promise<Uint8Array>;
@@ -146,7 +146,7 @@ A file in `.git`, read in ranges so a large pack is never read whole.
 
 #### GitObject {#GitObject}
 
-```ts
+```ts noplay
 interface GitObject {
     type: GitObjectType;
     data: Uint8Array;
@@ -155,7 +155,7 @@ interface GitObject {
 
 #### GitPerson {#GitPerson}
 
-```ts
+```ts noplay
 interface GitPerson {
     name: string;
     email: string;
@@ -171,7 +171,7 @@ interface GitPerson {
 
 #### GitTreeEntry {#GitTreeEntry}
 
-```ts
+```ts noplay
 interface GitTreeEntry {
     mode: string;
     name: string;
@@ -188,7 +188,7 @@ interface GitTreeEntry {
 
 #### GitObjectType {#GitObjectType}
 
-```ts
+```ts noplay
 type GitObjectType = 'commit' | 'tree' | 'blob' | 'tag';
 ```
 

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { columnChart } from 'smaltkit/charts';
 function columnChart(ctx: ChartContext): void;
 ```

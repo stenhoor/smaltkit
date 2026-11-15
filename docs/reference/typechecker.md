@@ -43,7 +43,7 @@ Each has a page of its own.
 
 #### TypeChecker {#TypeChecker}
 
-```ts
+```ts noplay
 interface TypeChecker {
     (code: string): TypeWarning[];
     warm(): void;

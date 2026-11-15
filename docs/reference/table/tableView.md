@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { tableView } from 'smaltkit/table';
 function tableView(ctx: ChartContext): void;
 ```

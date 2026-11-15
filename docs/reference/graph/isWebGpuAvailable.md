@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { isWebGpuAvailable } from 'smaltkit/graph';
 function isWebGpuAvailable(): Promise<boolean>;
 ```

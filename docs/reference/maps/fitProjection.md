@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { fitProjection } from 'smaltkit/maps';
 function fitProjection(kind: ProjectionKind, features: Feature[], width: number, height: number, pad?: number, extra?: Position[]): Projection;
 ```

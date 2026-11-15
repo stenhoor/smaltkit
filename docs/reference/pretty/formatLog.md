@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatLog } from 'smaltkit/pretty';
 function formatLog(values: readonly unknown[], options?: InspectOptions): string;
 ```

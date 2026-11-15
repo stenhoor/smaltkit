@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { rescale } from 'smaltkit/svg';
 function rescale(s: Linear, r0: number, r1: number): Linear;
 ```

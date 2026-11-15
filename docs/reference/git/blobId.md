@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { blobId } from 'smaltkit/git';
 function blobId(data: Uint8Array): Promise<string>;
 ```

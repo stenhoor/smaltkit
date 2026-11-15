@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { kpiCard } from 'smaltkit/charts';
 function kpiCard(ctx: ChartContext): void;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { markedHtml } from 'smaltkit/editor';
 function markedHtml(text: string, marks: readonly Mark[], hl: (s: string) => string): string;
 ```

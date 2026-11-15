@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { sha1 } from 'smaltkit/git';
 function sha1(data: Uint8Array): Promise<string>;
 ```

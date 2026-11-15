@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { textWidth } from 'smaltkit/svg';
 function textWidth(s: string, fontPx: number): number;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { deleteOpfsDatabase } from 'smaltkit/engine';
 function deleteOpfsDatabase(name: string): Promise<void>;
 ```

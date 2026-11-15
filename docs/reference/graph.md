@@ -41,7 +41,7 @@ Each has a page of its own.
 
 #### GpuUnavailableError {#GpuUnavailableError}
 
-```ts
+```ts noplay
 class GpuUnavailableError extends Error {
     constructor(message?: string);
 }
@@ -51,13 +51,13 @@ class GpuUnavailableError extends Error {
 
 #### FAMILY_PALETTE_DARK {#FAMILY_PALETTE_DARK}
 
-```ts
+```ts noplay
 const FAMILY_PALETTE_DARK: string[];
 ```
 
 #### FAMILY_PALETTE_LIGHT {#FAMILY_PALETTE_LIGHT}
 
-```ts
+```ts noplay
 const FAMILY_PALETTE_LIGHT: string[];
 ```
 
@@ -67,7 +67,7 @@ The family product colours, in order: smalt, ui, bi, df, nb, ql, smalt-500, kiln
 
 #### GraphView {#GraphView}
 
-```ts
+```ts noplay
 interface GraphView {
     setGraph(g: RenderGraph, opts?: SetGraphOptions): void;
     setMode(mode: ViewMode): void;
@@ -114,7 +114,7 @@ interface GraphView {
 
 #### GraphViewOptions {#GraphViewOptions}
 
-```ts
+```ts noplay
 interface GraphViewOptions {
     mode?: ViewMode;
     theme?: Theme;
@@ -137,7 +137,7 @@ interface GraphViewOptions {
 
 #### GraphViewStats {#GraphViewStats}
 
-```ts
+```ts noplay
 interface GraphViewStats {
     nodes: number;
     edges: number;
@@ -148,7 +148,7 @@ interface GraphViewStats {
 
 #### Hit {#Hit}
 
-```ts
+```ts noplay
 interface Hit {
     kind: 'node' | 'edge';
     index: number;
@@ -157,7 +157,7 @@ interface Hit {
 
 #### LayoutControl {#LayoutControl}
 
-```ts
+```ts noplay
 interface LayoutControl {
     start(): void;
     stop(): void;
@@ -174,7 +174,7 @@ interface LayoutControl {
 
 #### RenderEdge {#RenderEdge}
 
-```ts
+```ts noplay
 interface RenderEdge {
     id?: string | number;
     source: number;
@@ -192,7 +192,7 @@ interface RenderEdge {
 
 #### RenderGraph {#RenderGraph}
 
-```ts
+```ts noplay
 interface RenderGraph {
     nodes: RenderNode[];
     edges: RenderEdge[];
@@ -201,7 +201,7 @@ interface RenderGraph {
 
 #### RenderNode {#RenderNode}
 
-```ts
+```ts noplay
 interface RenderNode {
     id: string | number;
     label?: string;
@@ -218,7 +218,7 @@ Public data types of the graph renderer.
 
 #### ResultNodeLike {#ResultNodeLike}
 
-```ts
+```ts noplay
 interface ResultNodeLike {
     readonly kind: 'node';
     readonly id: number | string;
@@ -229,7 +229,7 @@ interface ResultNodeLike {
 
 #### ResultRelLike {#ResultRelLike}
 
-```ts
+```ts noplay
 interface ResultRelLike {
     readonly kind: 'relationship';
     readonly id: number | string;
@@ -242,7 +242,7 @@ interface ResultRelLike {
 
 #### ResultsGraph {#ResultsGraph}
 
-```ts
+```ts noplay
 interface ResultsGraph {
     readonly graph: RenderGraph;
     readonly nodes: readonly ResultNodeLike[];
@@ -258,7 +258,7 @@ interface ResultsGraph {
 
 #### ResultsGraphOptions {#ResultsGraphOptions}
 
-```ts
+```ts noplay
 interface ResultsGraphOptions {
     readonly caption?: (node: ResultNodeLike) => string;
     readonly group?: (node: ResultNodeLike) => string;
@@ -272,7 +272,7 @@ interface ResultsGraphOptions {
 
 #### SetGraphOptions {#SetGraphOptions}
 
-```ts
+```ts noplay
 interface SetGraphOptions {
     keepPositions?: boolean;
     animate?: boolean;
@@ -290,7 +290,7 @@ interface SetGraphOptions {
 
 #### LayoutMode {#LayoutMode}
 
-```ts
+```ts noplay
 type LayoutMode = 'force' | 'fixed';
 ```
 
@@ -299,7 +299,7 @@ slot of its group's cluster, spread out so each one can be seen.
 
 #### Theme {#Theme}
 
-```ts
+```ts noplay
 type Theme = 'light' | 'dark' | 'css';
 ```
 
@@ -311,7 +311,7 @@ after changing them.
 
 #### ViewMode {#ViewMode}
 
-```ts
+```ts noplay
 type ViewMode = '2d' | '3d';
 ```
 

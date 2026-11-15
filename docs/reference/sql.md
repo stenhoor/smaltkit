@@ -83,19 +83,19 @@ Each has a page of its own.
 
 #### FUNCTIONS {#FUNCTIONS}
 
-```ts
+```ts noplay
 const FUNCTIONS: Set<string>;
 ```
 
 #### KEYWORDS {#KEYWORDS}
 
-```ts
+```ts noplay
 const KEYWORDS: Set<string>;
 ```
 
 #### TYPES {#TYPES}
 
-```ts
+```ts noplay
 const TYPES: Set<string>;
 ```
 
@@ -103,7 +103,7 @@ const TYPES: Set<string>;
 
 #### ParamSlot {#ParamSlot}
 
-```ts
+```ts noplay
 interface ParamSlot {
     label: string;
     index: number;
@@ -114,7 +114,7 @@ A bind parameter slot, numbered as the engine numbers them.
 
 #### Statement {#Statement}
 
-```ts
+```ts noplay
 interface Statement {
     sql: string;
     start: number;
@@ -126,7 +126,7 @@ A statement in a script: its text and its offsets in the script.
 
 #### Token {#Token}
 
-```ts
+```ts noplay
 interface Token {
     type: TokenType;
     start: number;
@@ -139,7 +139,7 @@ interface Token {
 
 #### SqlValue {#SqlValue}
 
-```ts
+```ts noplay
 type SqlValue = string | number | bigint | Uint8Array | null;
 ```
 
@@ -147,7 +147,7 @@ A SQL value as smaltdb returns or accepts it.
 
 #### TokenType {#TokenType}
 
-```ts
+```ts noplay
 type TokenType = 'ws' | 'comment' | 'string' | 'ident' | 'word' | 'number' | 'param' | 'op' | 'punct';
 ```
 

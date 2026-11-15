@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { stripTypes } from 'smaltkit/typescript';
 function stripTypes(code: string, options?: {
     filename?: string;

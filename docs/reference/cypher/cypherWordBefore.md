@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { cypherWordBefore } from 'smaltkit/cypher';
 function cypherWordBefore(text: string, pos: number): {
     word: string;

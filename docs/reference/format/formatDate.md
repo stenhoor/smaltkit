@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatDate } from 'smaltkit/format';
 function formatDate(v: Value, pattern: string): string;
 ```

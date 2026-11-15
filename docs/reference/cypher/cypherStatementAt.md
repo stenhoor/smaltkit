@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { cypherStatementAt } from 'smaltkit/cypher';
 function cypherStatementAt(text: string, pos: number): CypherStatement | null;
 ```

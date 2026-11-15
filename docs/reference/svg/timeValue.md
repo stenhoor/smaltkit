@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { timeValue } from 'smaltkit/svg';
 function timeValue(v: unknown): number;
 ```

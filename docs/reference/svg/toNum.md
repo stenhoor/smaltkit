@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { toNum } from 'smaltkit/svg';
 function toNum(v: unknown): number;
 ```

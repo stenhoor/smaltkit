@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { splitCypher } from 'smaltkit/cypher';
 function splitCypher(text: string): CypherStatement[];
 ```

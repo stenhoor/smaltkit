@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { divColor } from 'smaltkit/svg';
 function divColor(t: number): string;
 ```

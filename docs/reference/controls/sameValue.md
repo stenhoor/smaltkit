@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { sameValue } from 'smaltkit/controls';
 function sameValue(a: Value, b: Value): boolean;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { quoteIdent } from 'smaltkit/sql';
 function quoteIdent(name: string): string;
 ```

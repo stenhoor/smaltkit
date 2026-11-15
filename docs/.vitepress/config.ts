@@ -4,6 +4,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { smaltLight, smaltDark } from './theme/shiki'
 import { smaltworksMenu, smaltworksFooter } from './theme/smaltworks'
 import { agentDocs, packageVersion } from './theme/agents'
+import { playgroundPlugin } from './theme/playground'
 
 const REPO = 'https://github.com/stenhoor/smaltkit'
 // Served at stenhoor.github.io/smaltkit/; DOCS_BASE overrides it.
@@ -40,6 +41,8 @@ export default defineConfig({
   markdown: {
     theme: { light: smaltLight, dark: smaltDark },
     config(md) {
+      // Every tested example (a ts fence with its printed result under it) runs in place.
+      md.use(playgroundPlugin, { languages: ['ts'], onlyWithResult: ['ts'] })
       // Links that leave docs/ (sources, tests) point at the file on GitHub.
       const fallback = md.renderer.rules.link_open ?? ((t, i, o, _e, s) => s.renderToken(t, i, o))
       md.renderer.rules.link_open = (tokens, idx, options, env, self) => {

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatFromName } from 'smaltkit/manifest';
 function formatFromName(name: string): DataFormat;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { plainValue } from 'smaltkit/grid';
 function plainValue(v: GridValue): string;
 ```

@@ -48,7 +48,7 @@ Each has a page of its own.
 
 #### FormatSpec {#FormatSpec}
 
-```ts
+```ts noplay
 interface FormatSpec {
     preset?: string;
     decimals?: number;
@@ -70,7 +70,7 @@ interface FormatSpec {
 
 #### Formatter {#Formatter}
 
-```ts
+```ts noplay
 interface Formatter {
     (v: Value): string;
 }
@@ -80,7 +80,7 @@ interface Formatter {
 
 #### ColumnType {#ColumnType}
 
-```ts
+```ts noplay
 type ColumnType = 'number' | 'text' | 'date' | 'datetime' | 'bool' | 'any';
 ```
 
@@ -88,7 +88,7 @@ What a column holds, for choosing a formatter.
 
 #### Format {#Format}
 
-```ts
+```ts noplay
 type Format = string | FormatSpec;
 ```
 
@@ -98,7 +98,7 @@ or an object.
 
 #### Value {#Value}
 
-```ts
+```ts noplay
 type Value = null | number | bigint | string | Uint8Array;
 ```
 

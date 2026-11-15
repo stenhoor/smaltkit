@@ -58,7 +58,7 @@ Each has a page of its own.
 
 #### TypeScriptSyntaxError {#TypeScriptSyntaxError}
 
-```ts
+```ts noplay
 const TypeScriptSyntaxError: typeof ParseError;
 ```
 
@@ -66,7 +66,7 @@ A SyntaxError in TypeScript, or code that can't be stripped: `line` and `column`
 
 #### typescriptTranspiler {#typescriptTranspiler}
 
-```ts
+```ts noplay
 const typescriptTranspiler: Transpiler;
 ```
 
@@ -86,7 +86,7 @@ smaltty but its checker, which is smaltkit/typecheck's. A namespace, so its name
 
 #### TranspileOptions {#TranspileOptions}
 
-```ts
+```ts noplay
 interface TranspileOptions {
     filename?: string;
     jsx?: boolean;
@@ -100,7 +100,7 @@ interface TranspileOptions {
 
 #### Transpiler {#Transpiler}
 
-```ts
+```ts noplay
 interface Transpiler {
     name: string;
     version: string;

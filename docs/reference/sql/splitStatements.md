@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { splitStatements } from 'smaltkit/sql';
 function splitStatements(text: string): Statement[];
 ```

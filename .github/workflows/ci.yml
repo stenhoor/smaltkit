@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [graph, timeline]
+        suite: [graph, timeline, playgrounds]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,4 +40,7 @@ jobs:
           node-version: 22
       - run: npm ci          # also builds dist/ (prepare)
       - run: npm install -g playwright@1.64.1
+      # The playgrounds run against the built docs site: every Run must print its tested result.
+      - if: matrix.suite == 'playgrounds'
+        run: npm run docs:build
       - run: node test/browser/${{ matrix.suite }}.mjs --quick

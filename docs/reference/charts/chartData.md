@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { chartData } from 'smaltkit/charts';
 function chartData(columns: ChartColumn[], rows: number): ChartData;
 ```

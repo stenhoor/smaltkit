@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { esc } from 'smaltkit/dom';
 function esc(s: unknown): string;
 ```

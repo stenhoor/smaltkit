@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { scatterChart } from 'smaltkit/charts';
 function scatterChart(ctx: ChartContext): void;
 ```

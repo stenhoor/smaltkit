@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { linePath } from 'smaltkit/svg';
 function linePath(pts: [
     number,

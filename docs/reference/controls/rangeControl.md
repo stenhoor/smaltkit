@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { rangeControl } from 'smaltkit/controls';
 function rangeControl(el: ControlElement, o: RangeOptions): void;
 ```

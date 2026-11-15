@@ -123,9 +123,10 @@
     "test:browser": "npm run build && node test/browser/graph.mjs --quick && node test/browser/timeline.mjs",
     "docs:api": "node scripts/docs-api.mjs",
     "docs:examples": "node scripts/docs-examples.mjs --write",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "node scripts/docs-api.mjs --check && node scripts/docs-examples.mjs --types && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:dev": "node scripts/docs-kit.mjs && vitepress dev docs",
+    "docs:build": "node scripts/docs-api.mjs --check && node scripts/docs-examples.mjs --types && node scripts/docs-kit.mjs && vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "test:playgrounds": "npm run docs:build && node test/browser/playgrounds.mjs"
   },
   "dependencies": {
     "smaltty": "github:stenhoor/smaltty#v0.14.0"

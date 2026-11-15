@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { squarify } from 'smaltkit/charts';
 function squarify(nodes: TreeNode[], rect: Rect): (Rect & {
     i: number;

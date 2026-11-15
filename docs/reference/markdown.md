@@ -37,7 +37,7 @@ Each has a page of its own.
 
 #### MarkdownOptions {#MarkdownOptions}
 
-```ts
+```ts noplay
 interface MarkdownOptions {
     headingOffset?: number;
 }

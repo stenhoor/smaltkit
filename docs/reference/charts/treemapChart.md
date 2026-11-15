@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { treemapChart } from 'smaltkit/charts';
 function treemapChart(ctx: ChartContext): void;
 ```

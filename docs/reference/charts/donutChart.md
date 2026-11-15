@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { donutChart } from 'smaltkit/charts';
 function donutChart(ctx: ChartContext): void;
 ```

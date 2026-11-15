@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { applyDelta } from 'smaltkit/git';
 function applyDelta(base: Uint8Array, delta: Uint8Array): Uint8Array;
 ```

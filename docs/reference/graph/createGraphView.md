@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { createGraphView } from 'smaltkit/graph';
 function createGraphView(canvas: HTMLCanvasElement, opts?: GraphViewOptions): Promise<GraphView>;
 ```

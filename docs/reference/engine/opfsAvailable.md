@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { opfsAvailable } from 'smaltkit/engine';
 function opfsAvailable(): boolean;
 ```

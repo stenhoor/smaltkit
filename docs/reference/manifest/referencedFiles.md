@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { referencedFiles } from 'smaltkit/manifest';
 function referencedFiles(steps: readonly ManifestStep[]): string[];
 ```

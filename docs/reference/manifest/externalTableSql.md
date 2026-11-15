@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { externalTableSql } from 'smaltkit/manifest';
 function externalTableSql({ table, location, format, options, connection, columns, ifNotExists }: ExternalTableSpec): string;
 ```

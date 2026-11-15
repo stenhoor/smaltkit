@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { loadEngine } from 'smaltkit/engine';
 function loadEngine(spec: string, options: LoadEngineOptions): Promise<Engine>;
 ```

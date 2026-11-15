@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { comboChart } from 'smaltkit/charts';
 function comboChart(ctx: ChartContext): void;
 ```

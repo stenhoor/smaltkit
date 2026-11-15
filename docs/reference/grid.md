@@ -47,7 +47,7 @@ Each has a page of its own.
 
 #### Grid {#Grid}
 
-```ts
+```ts noplay
 class Grid {
     #private;
     opts: GridOptions;
@@ -123,7 +123,7 @@ class Grid {
 
 #### GridColumn {#GridColumn}
 
-```ts
+```ts noplay
 interface GridColumn {
     name: string;
     type?: string | null;
@@ -135,7 +135,7 @@ A grid column: a name, plus an optional type and primary-key flag for the header
 
 #### GridOptions {#GridOptions}
 
-```ts
+```ts noplay
 interface GridOptions {
     onSort?: (col: number, dir: SortDir) => void;
     editable?: (row: number, col: number) => boolean;
@@ -154,7 +154,7 @@ interface GridOptions {
 
 #### RowSource {#RowSource}
 
-```ts
+```ts noplay
 interface RowSource {
     columns: (string | GridColumn)[];
     rowCount: number;
@@ -174,25 +174,25 @@ Rows fetched on demand: the grid asks for blocks of rows as they scroll into vie
 
 #### ExportFormat {#ExportFormat}
 
-```ts
+```ts noplay
 type ExportFormat = 'csv' | 'tsv' | 'json' | 'ndjson' | 'sql';
 ```
 
 #### GridRow {#GridRow}
 
-```ts
+```ts noplay
 type GridRow = GridValue[];
 ```
 
 #### GridValue {#GridValue}
 
-```ts
+```ts noplay
 type GridValue = string | number | bigint | boolean | Uint8Array | null | undefined;
 ```
 
 #### SortDir {#SortDir}
 
-```ts
+```ts noplay
 type SortDir = 'asc' | 'desc' | null;
 ```
 

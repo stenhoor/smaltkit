@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { exportRows } from 'smaltkit/grid';
 function exportRows(format: ExportFormat, columns: (string | GridColumn)[], rows: GridRow[], tableName?: string): string;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { debounce } from 'smaltkit/dom';
 function debounce<A extends unknown[]>(fn: (...a: A) => void, ms: number): (...a: A) => void;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { gaugeChart } from 'smaltkit/charts';
 function gaugeChart(ctx: ChartContext): void;
 ```

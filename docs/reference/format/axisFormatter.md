@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { axisFormatter } from 'smaltkit/format';
 function axisFormatter(f: Format | undefined, locale?: string): Formatter;
 ```
