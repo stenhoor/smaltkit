@@ -7,15 +7,13 @@ An app picks the engine with a spec, usually from the page's `?engine=` paramete
 | Spec | Engine |
 | --- | --- |
 | `vendor` (default) | The app's own copy, such as `vendor/smaltdb/`, copied from the package by `npm install`. |
-| `npm` | The latest smaltdb on npm, from jsDelivr. |
-| `npm@0.8.3` | A given npm version, from jsDelivr. |
 | `https://…/dist/` | Any folder that serves `smaltdb.js` and `smaltdb-worker.js`. |
 
-The client is imported when the page asks for it, not bundled, so a page switches engines without a rebuild. If the
-vendor copy is missing, the latest npm release is loaded instead. A worker script must come from the page's own origin,
-so an engine from another origin is started through a small blob module that imports it. `npm: false` turns npm
-engines off, for an app whose engine has smaltql and plugins built in: such an app builds its own worker and puts it in
-the vendor folder as `smaltdb-worker.js` (or names it with `workerFile`).
+The client is imported when the page asks for it, not bundled, so a page switches engines without a rebuild. Engines
+are never loaded from a CDN: the specs `npm` and `npm@<version>` are refused, and a missing vendor copy is an error
+that says how to build it. A worker script must come from the page's own origin, so an engine from another origin is
+started through a small blob module that imports it. An app whose engine has smaltql and plugins built in builds its
+own worker and puts it in the vendor folder as `smaltdb-worker.js` (or names it with `workerFile`).
 
 `smaltkit/engine` uses smaltdb's types only (`import type`), so `smaltdb` is an optional peer dependency.
 
@@ -75,8 +73,8 @@ interface Engine {
 
 | Member | |
 | --- | --- |
-| `spec` | The spec the engine was loaded from; 'npm' when a missing vendor copy fell back to npm. |
-| `label` | A short description for the UI, such as "bundled smaltdb" or "smaltdb@0.8.3 (npm)". |
+| `spec` | The spec the engine was loaded from. |
+| `label` | A short description for the UI, such as "bundled smaltdb" or the engine folder's URL. |
 | `workerUrl` | The worker script open() starts: the engine's own URL, or a blob: URL for a cross-origin engine. |
 | `open` | Open a database with this engine's worker. |
 
@@ -128,7 +126,7 @@ interface LoadEngineOptions {
 | `baseUrl?` | What relative URLs (vendorUrl, a custom engine folder) resolve against. Default: the page (document.baseURI). |
 | `workerFile?` | The worker's file name in the engine folder. Default: smaltdb-worker.js. |
 | `appName?` | The app's name, used in console messages. |
-| `npm?` | Whether npm engines are offered: `?engine=npm`, and loading from jsDelivr when the vendor copy is missing. Default true. Set false when the app's engine is built from packages npm does not have (smaltdb 0.9 with smaltql and plugins): an npm spec is then refused, and a missing vendor copy is an error naming the fix. |
+| `npm?` | - `@deprecated` Ignored. Engines are no longer loaded from a CDN, so `npm` specs are always refused and a missing vendor copy is always an error. Kept so that apps passing `npm: false` still compile. |
 
 #### OpfsDatabase {#OpfsDatabase}
 

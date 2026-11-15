@@ -22,7 +22,7 @@ its API.
 
 | Import | What it does |
 | --- | --- |
-| `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy, npm (jsDelivr) or a URL, starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. `npm: false` turns npm engines off, for an app whose engine has smaltql and plugins built in. |
+| `smaltkit/engine` | Loads the smaltdb client at run time from the app's vendor copy or a URL (never a CDN), starts its worker (through a blob module when cross-origin), reports its version; lists and deletes the databases in OPFS. `npm: false` turns npm engines off, for an app whose engine has smaltql and plugins built in. |
 | `smaltkit/urls` | Rewrites pasted data URLs (GitHub, Hugging Face file pages) to raw-file URLs a page can fetch, and explains CORS errors. |
 | `smaltkit/format` | Number and date formatting: presets (`currency0`, `percent`, `month`, …), format objects and patterns, compact axis labels. Dates never shift time zones. |
 | `smaltkit/svg` | SVG helpers for charts: nice ticks, linear, log and band scales, calendar ticks, arcs, line paths, text measuring, colour ramps. |
@@ -72,7 +72,7 @@ const db = await engine.open('sales', { storage: 'opfs' });
 `smaltkit/engine` uses smaltdb's types (`import type`, nothing at run time), so `smaltdb` is an optional peer
 dependency: an app that imports the engine module has smaltdb installed already. From smaltdb 0.9, an app that builds
 its own worker entry with plugins puts it in its vendor folder (as `smaltdb-worker.js`, or names it with
-`workerFile`); engines from npm or a URL run smaltdb's stock worker, without the app's plugins.
+`workerFile`); an engine from another folder's URL runs that folder's worker.
 
 ### Charts and tables
 

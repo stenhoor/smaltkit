@@ -4,17 +4,16 @@
 // An app picks the engine with a spec, usually from the page's `?engine=` parameter:
 //
 //   vendor (default)     the app's own copy, e.g. vendor/smaltdb/ copied from the npm package by `npm install`
-//   npm                  the latest smaltdb on npm, from jsDelivr
-//   npm@0.8.3            a specific npm version, from jsDelivr
 //   https://…/dist/      any folder that serves smaltdb.js and smaltdb-worker.js
 //
-// The client is imported dynamically, not bundled, so a page can switch engines without a rebuild. If the vendor copy
-// is missing (the folder is served without `npm install`), the latest npm release is loaded instead. A worker script
-// must be same-origin, so a cross-origin engine is started through a small blob module that imports it.
+// The client is imported dynamically, not bundled, so a page can switch engines without a rebuild. Engines are never
+// loaded from a CDN: the specs `npm` and `npm@<version>`, which loaded smaltdb from jsDelivr, are refused, and a
+// missing vendor copy is an error that says how to build it. A worker script must be same-origin, so a cross-origin
+// engine is started through a small blob module that imports it.
 //
 // From smaltdb 0.9, optional features (external tables, CSV/JSON import, Parquet) are plugins that the app builds into
 // its own worker entry. An app that does that puts its worker in the vendor folder as smaltdb-worker.js (or names it
-// with `workerFile`); engines loaded from npm or a URL run the stock worker, without the app's plugins.
+// with `workerFile`); an engine loaded from another folder's URL runs that folder's worker.
 
 import type * as Smaltdb from 'smaltdb';
 
@@ -33,9 +32,9 @@ export interface EngineVersion {
 }
 
 export interface Engine {
-  /** The spec the engine was loaded from; 'npm' when a missing vendor copy fell back to npm. */
+  /** The spec the engine was loaded from. */
   spec: string;
-  /** A short description for the UI, such as "bundled smaltdb" or "smaltdb@0.8.3 (npm)". */
+  /** A short description for the UI, such as "bundled smaltdb" or the engine folder's URL. */
   label: string;
   version: EngineVersion | null;
   /** The worker script open() starts: the engine's own URL, or a blob: URL for a cross-origin engine. */
@@ -61,14 +60,11 @@ export interface LoadEngineOptions {
   /** The app's name, used in console messages. */
   appName?: string;
   /**
-   * Whether npm engines are offered: `?engine=npm`, and loading from jsDelivr when the vendor copy is missing.
-   * Default true. Set false when the app's engine is built from packages npm does not have (smaltdb 0.9 with smaltql
-   * and plugins): an npm spec is then refused, and a missing vendor copy is an error naming the fix.
+   * @deprecated Ignored. Engines are no longer loaded from a CDN, so `npm` specs are always refused and a missing
+   * vendor copy is always an error. Kept so that apps passing `npm: false` still compile.
    */
   npm?: boolean;
 }
-
-const CDN = 'https://cdn.jsdelivr.net/npm/smaltdb@';
 
 function pageUrl(): string {
   return typeof document !== 'undefined' ? document.baseURI : location.href;
@@ -76,10 +72,11 @@ function pageUrl(): string {
 
 /**
  * Where an engine spec loads from. Pure: no network, no globals beyond URL.
- * @param spec `vendor` (or `''`), `npm`, `npm@<version>`, or a folder's URL.
+ * @param spec `vendor` (or `''`), or a folder's URL.
  * @param vendorUrl The app's vendor copy, for `vendor`.
  * @param baseUrl What relative URLs resolve against.
  * @returns The folder the client and worker load from (ending in `/`), and a label for the UI.
+ * @throws Error for `npm` and `npm@<version>`: engines are not loaded from a CDN.
  */
 export function resolveEngine(spec: string, vendorUrl: string | URL, baseUrl: string | URL): EngineLocation {
   const folder = (u: string | URL) => {
@@ -88,8 +85,7 @@ export function resolveEngine(spec: string, vendorUrl: string | URL, baseUrl: st
   };
   if (!spec || spec === 'vendor') return { base: folder(vendorUrl), label: 'bundled smaltdb' };
   if (spec === 'npm' || spec.startsWith('npm@')) {
-    const version = spec === 'npm' ? 'latest' : spec.slice(4);
-    return { base: `${CDN}${version}/dist/`, label: `smaltdb@${version} (npm)` };
+    throw new Error(`the engine "${spec}" is not available: engines are not loaded from a CDN; use the app's bundled engine or an engine folder's URL`);
   }
   const base = folder(spec);
   return { base, label: base };
@@ -128,56 +124,43 @@ export function setEngineSpec(storageKey: string, spec: string): void {
 }
 
 /**
- * Import the smaltdb client for `spec` and prepare its worker. A missing vendor copy falls back to the latest npm
- * release, unless `npm` is false.
+ * Import the smaltdb client for `spec` and prepare its worker.
  * @param spec The engine spec, from engineSpec.
- * @param options The app's vendor folder, what relative URLs resolve against, the worker's file name, the app's name for
- *   console messages, and whether npm engines are allowed.
+ * @param options The app's vendor folder, what relative URLs resolve against, the worker's file name, and the app's
+ *   name for console messages.
  * @returns The engine: its spec, label and version, and `open()` for databases.
- * @throws Error when the engine can't be imported; with `npm: false`, for an npm spec or a missing vendor copy, saying
- *   what to do.
+ * @throws Error when the engine can't be imported; for an `npm` spec or a missing vendor copy, saying what to do.
  */
 export async function loadEngine(spec: string, options: LoadEngineOptions): Promise<Engine> {
   const baseUrl = options.baseUrl ?? pageUrl();
   const workerFile = options.workerFile ?? 'smaltdb-worker.js';
-  const npmAllowed = options.npm ?? true;
-  if (!npmAllowed && spec.startsWith('npm')) throw new Error(`the engine "${spec}" is not available: npm does not have this app's engine (smaltdb with its language and plugins)`);
-  let { base, label } = resolveEngine(spec, options.vendorUrl, baseUrl);
+  const { base, label } = resolveEngine(spec, options.vendorUrl, baseUrl);
   let mod: SmaltdbModule;
   try {
     mod = await import(/* @vite-ignore */ base + 'smaltdb.js');
   } catch (e) {
     if (spec && spec !== 'vendor') throw e;
-    if (!npmAllowed) throw new Error(`the vendor copy of the engine is missing at ${base} (build it with \`npm install\`)`, { cause: e });
-    console.warn(`${options.appName ?? 'smaltdb'}: the vendor copy of smaltdb is missing (run \`npm install\`); loading smaltdb@latest from jsDelivr.`, e);
-    spec = 'npm';
-    ({ base, label } = resolveEngine(spec, options.vendorUrl, baseUrl));
-    label += ' (vendor copy missing)';
-    mod = await import(/* @vite-ignore */ base + 'smaltdb.js');
+    throw new Error(`the vendor copy of the engine is missing at ${base} (build it with \`npm install\`)`, { cause: e });
   }
-  // The npm worker is always the stock one; a vendor folder or a custom URL may hold the app's own worker entry.
-  let workerUrl = base + (spec.startsWith('npm') ? 'smaltdb-worker.js' : workerFile);
+  // A vendor folder or a custom URL may hold the app's own worker entry.
+  let workerUrl = base + workerFile;
   if (new URL(workerUrl).origin !== new URL(pageUrl()).origin) {
     workerUrl = URL.createObjectURL(new Blob([`import ${JSON.stringify(workerUrl)};`], { type: 'text/javascript' }));
   }
   return { spec: spec || 'vendor', label, version: await engineVersion(spec, base), workerUrl, module: mod, open: (name, o = {}) => mod.open(name, { ...o, worker: workerUrl }) };
 }
 
-/** VERSION.json in a vendor folder, or package.json beside an npm dist/ folder. A custom URL is not probed. */
+/** VERSION.json in a vendor folder. A custom URL is not probed. */
 async function engineVersion(spec: string, base: string): Promise<EngineVersion | null> {
-  const npm = spec.startsWith('npm');
   try {
     if (!spec || spec === 'vendor') {
       const r = await fetch(base + 'VERSION.json', { cache: 'no-cache' });
       if (r.ok) return (await r.json()) as EngineVersion;
-    } else if (npm) {
-      const r = await fetch(base + '../package.json');
-      if (r.ok) return { source: 'npm', version: ((await r.json()) as { version: string }).version };
     }
   } catch {
     // Offline, or the file is not served: the version is unknown.
   }
-  return npm ? { source: 'npm', version: spec.slice(4) || 'latest' } : null;
+  return null;
 }
 
 // ---------------------------------------------------------------- OPFS catalog

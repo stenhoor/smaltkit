@@ -10,11 +10,11 @@ import { deleteOpfsDatabase, engineSpec, listOpfsDatabases, loadEngine, opfsAvai
 const g = globalThis as Record<string, unknown>;
 const page = 'https://example.org/app/index.html';
 
-test('resolveEngine: vendor, npm, npm@version and a custom folder', () => {
+test('resolveEngine: vendor and a custom folder; npm specs are refused', () => {
   assert.deepEqual(resolveEngine('vendor', 'vendor/smaltdb', page), { base: 'https://example.org/app/vendor/smaltdb/', label: 'bundled smaltdb' });
   assert.equal(resolveEngine('', '../vendor/smaltdb/', 'https://example.org/app/js/main.js').base, 'https://example.org/app/vendor/smaltdb/');
-  assert.deepEqual(resolveEngine('npm', 'vendor/smaltdb/', page), { base: 'https://cdn.jsdelivr.net/npm/smaltdb@latest/dist/', label: 'smaltdb@latest (npm)' });
-  assert.equal(resolveEngine('npm@0.8.3', 'vendor/smaltdb/', page).base, 'https://cdn.jsdelivr.net/npm/smaltdb@0.8.3/dist/');
+  assert.throws(() => resolveEngine('npm', 'vendor/smaltdb/', page), /not loaded from a CDN/);
+  assert.throws(() => resolveEngine('npm@0.8.3', 'vendor/smaltdb/', page), /the engine "npm@0\.8\.3" is not available/);
   assert.deepEqual(resolveEngine('https://cdn.example.com/smaltdb/dist', 'vendor/smaltdb/', page), {
     base: 'https://cdn.example.com/smaltdb/dist/',
     label: 'https://cdn.example.com/smaltdb/dist/',
@@ -160,6 +160,15 @@ test('deleteOpfsDatabase removes the database and its side files only', async ()
   assert.deepEqual([...names.keys()], ['sales2.db']);
 });
 
-test('npm: false refuses npm engines before loading anything', async () => {
-  await assert.rejects(loadEngine('npm@0.8.3', { vendorUrl: 'https://example.com/vendor/smaltdb/', baseUrl: 'https://example.com/', npm: false }), /the engine "npm@0\.8\.3" is not available/);
+test('npm engines are refused before loading anything, whatever the npm option says', async () => {
+  for (const npm of [undefined, true, false]) {
+    await assert.rejects(loadEngine('npm@0.8.3', { vendorUrl: 'https://example.com/vendor/smaltdb/', baseUrl: 'https://example.com/', npm }), /the engine "npm@0\.8\.3" is not available/);
+  }
+});
+
+test('a missing vendor copy is an error, never a download from a CDN', async () => {
+  await assert.rejects(
+    loadEngine('vendor', { vendorUrl: 'file:///nonexistent-smaltkit-test/vendor/smaltdb/', baseUrl: 'file:///nonexistent-smaltkit-test/' }),
+    /the vendor copy of the engine is missing/,
+  );
 });
