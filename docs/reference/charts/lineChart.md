@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { lineChart } from 'smaltkit/charts';
 function lineChart(ctx: ChartContext): void;
 ```

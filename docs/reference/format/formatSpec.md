@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatSpec } from 'smaltkit/format';
 function formatSpec(f: Format | undefined): FormatSpec;
 ```

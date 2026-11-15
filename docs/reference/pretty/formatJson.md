@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatJson } from 'smaltkit/pretty';
 function formatJson(value: unknown, options?: JsonFormatOptions): string;
 ```

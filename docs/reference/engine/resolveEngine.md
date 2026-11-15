@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { resolveEngine } from 'smaltkit/engine';
 function resolveEngine(spec: string, vendorUrl: string | URL, baseUrl: string | URL): EngineLocation;
 ```

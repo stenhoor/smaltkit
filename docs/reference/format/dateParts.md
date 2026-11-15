@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { dateParts } from 'smaltkit/format';
 function dateParts(v: Value): {
     y: number;

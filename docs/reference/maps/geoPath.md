@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { geoPath } from 'smaltkit/maps';
 function geoPath(g: Geometry | null, project: Projection): string;
 ```

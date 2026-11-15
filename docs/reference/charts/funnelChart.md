@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { funnelChart } from 'smaltkit/charts';
 function funnelChart(ctx: ChartContext): void;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { searchControl } from 'smaltkit/controls';
 function searchControl(el: ControlElement, o: SearchOptions): void;
 ```

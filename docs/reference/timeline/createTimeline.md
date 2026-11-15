@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { createTimeline } from 'smaltkit/timeline';
 function createTimeline(host: HTMLElement, options: TimelineOptions): Timeline;
 ```

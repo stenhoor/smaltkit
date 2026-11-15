@@ -61,7 +61,7 @@ Each has a page of its own.
 
 #### CellFormat {#CellFormat}
 
-```ts
+```ts noplay
 interface CellFormat {
     tone?: CellTone;
     fill?: boolean;
@@ -76,7 +76,7 @@ interface CellFormat {
 
 #### ChartColumn {#ChartColumn}
 
-```ts
+```ts noplay
 interface ChartColumn {
     key: string;
     role: string;
@@ -100,7 +100,7 @@ One column of a result, tagged with the role it plays in a chart (category, seri
 
 #### ChartContext {#ChartContext}
 
-```ts
+```ts noplay
 interface ChartContext {
     el: {
         innerHTML: string;
@@ -130,7 +130,7 @@ interface ChartContext {
 
 #### ChartData {#ChartData}
 
-```ts
+```ts noplay
 interface ChartData {
     rows: number;
     columns: ChartColumn[];
@@ -146,7 +146,7 @@ interface ChartData {
 
 #### Rect {#Rect}
 
-```ts
+```ts noplay
 interface Rect {
     x: number;
     y: number;
@@ -157,7 +157,7 @@ interface Rect {
 
 #### RefLine {#RefLine}
 
-```ts
+```ts noplay
 interface RefLine {
     value?: number;
     stat?: 'avg' | 'median' | 'min' | 'max';
@@ -170,7 +170,7 @@ A reference line across the plot: a fixed value, or a statistic of the first ser
 
 #### TreeNode {#TreeNode}
 
-```ts
+```ts noplay
 interface TreeNode {
     i: number;
     v: number;
@@ -181,13 +181,13 @@ interface TreeNode {
 
 #### CellIcon {#CellIcon}
 
-```ts
+```ts noplay
 type CellIcon = 'up' | 'down' | 'flat' | 'check' | 'cross' | 'warn' | 'dot';
 ```
 
 #### CellTone {#CellTone}
 
-```ts
+```ts noplay
 type CellTone = 'good' | 'bad' | 'warn' | 'accent';
 ```
 

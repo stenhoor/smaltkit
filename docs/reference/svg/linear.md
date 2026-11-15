@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { linear } from 'smaltkit/svg';
 function linear(lo: number, hi: number, r0: number, r1: number, opts?: {
     zero?: boolean;

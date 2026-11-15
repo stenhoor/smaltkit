@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { pieChart } from 'smaltkit/charts';
 function pieChart(ctx: ChartContext): void;
 ```

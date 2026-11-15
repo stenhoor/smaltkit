@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { seqColor } from 'smaltkit/svg';
 function seqColor(t: number): string;
 ```

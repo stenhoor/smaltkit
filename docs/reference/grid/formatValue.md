@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatValue } from 'smaltkit/grid';
 function formatValue(v: GridValue): string | null;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { mapChart } from 'smaltkit/maps';
 function mapChart(ctx: ChartContext): void;
 ```

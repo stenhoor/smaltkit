@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { resultsToGraph } from 'smaltkit/graph';
 function resultsToGraph(values: unknown, options?: ResultsGraphOptions): ResultsGraph;
 ```

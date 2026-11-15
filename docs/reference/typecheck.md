@@ -43,7 +43,7 @@ Each has a page of its own.
 
 #### TypeCheckSetup {#TypeCheckSetup}
 
-```ts
+```ts noplay
 interface TypeCheckSetup {
     files: Record<string, string>;
     packages?: Record<string, string>;
@@ -67,7 +67,7 @@ What the checked code can use.
 
 #### TypeCheckWorker {#TypeCheckWorker}
 
-```ts
+```ts noplay
 interface TypeCheckWorker {
     check(code: string): Promise<TypeWarning[] | null>;
     close(): void;
@@ -83,7 +83,7 @@ A type checker in a worker.
 
 #### TypeWarning {#TypeWarning}
 
-```ts
+```ts noplay
 interface TypeWarning {
     start: number;
     end: number;
@@ -104,7 +104,7 @@ An error in the checked code, as a warning: where (offsets, and a 1-based line a
 
 #### TypeCheckReply {#TypeCheckReply}
 
-```ts
+```ts noplay
 type TypeCheckReply = {
     id: number;
     warnings: TypeWarning[];
@@ -118,7 +118,7 @@ What the worker sends back: a check's warnings, or why it couldn't check.
 
 #### TypeCheckRequest {#TypeCheckRequest}
 
-```ts
+```ts noplay
 type TypeCheckRequest = {
     kind: 'setup';
     setup: TypeCheckSetup;

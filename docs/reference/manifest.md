@@ -64,7 +64,7 @@ Each has a page of its own.
 
 #### ApplyOptions {#ApplyOptions}
 
-```ts
+```ts noplay
 interface ApplyOptions<D extends StepDatabase = StepDatabase> {
     base: string;
     io: StepIO<D>;
@@ -81,7 +81,7 @@ interface ApplyOptions<D extends StepDatabase = StepDatabase> {
 
 #### ColumnDef {#ColumnDef}
 
-```ts
+```ts noplay
 interface ColumnDef {
     name: string;
     type?: string;
@@ -90,7 +90,7 @@ interface ColumnDef {
 
 #### DataManifest {#DataManifest}
 
-```ts
+```ts noplay
 interface DataManifest {
     database?: {
         name?: string;
@@ -110,7 +110,7 @@ The database part of a manifest. Apps add their own fields (saved queries, noteb
 
 #### ExternalTableSpec {#ExternalTableSpec}
 
-```ts
+```ts noplay
 interface ExternalTableSpec {
     table: string;
     location: string;
@@ -124,7 +124,7 @@ interface ExternalTableSpec {
 
 #### FileStore {#FileStore}
 
-```ts
+```ts noplay
 interface FileStore {
     get(name: string): Promise<Blob | null>;
 }
@@ -134,7 +134,7 @@ Files kept in this browser, addressed in steps as `local:<name>`.
 
 #### StepDatabase {#StepDatabase}
 
-```ts
+```ts noplay
 interface StepDatabase {
     exec(sql: string): Promise<{
         changes: number;
@@ -147,7 +147,7 @@ What the steps need of a database: smaltdb's client `Database` has these.
 
 #### StepIO {#StepIO}
 
-```ts
+```ts noplay
 interface StepIO<D = StepDatabase> {
     importCSV(db: D, table: string, source: Blob | string, options?: Record<string, unknown>): Promise<{
         rows: number;
@@ -165,13 +165,13 @@ The engine plugins' client helpers (`@smaltdb/io/client`, `@smaltdb/external/cli
 
 #### DataFormat {#DataFormat}
 
-```ts
+```ts noplay
 type DataFormat = 'csv' | 'tsv' | 'json' | 'ndjson' | 'parquet';
 ```
 
 #### ManifestStep {#ManifestStep}
 
-```ts
+```ts noplay
 type ManifestStep = {
     sql: string;
 } | {
@@ -202,7 +202,7 @@ One step. The key that says what it does is `sql`, `sqlFile`, `import`, `link`, 
 
 #### ReaderOptions {#ReaderOptions}
 
-```ts
+```ts noplay
 type ReaderOptions = Record<string, string | number | boolean | null | undefined>;
 ```
 
@@ -210,13 +210,13 @@ Reader options for imports and external tables (header, delimiter, quote, null, 
 
 #### StepLog {#StepLog}
 
-```ts
+```ts noplay
 type StepLog = (level: 'ok' | 'warn', text: string) => void;
 ```
 
 #### StepParams {#StepParams}
 
-```ts
+```ts noplay
 type StepParams = readonly (string | number | bigint | Uint8Array | null)[];
 ```
 

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { applySteps } from 'smaltkit/manifest';
 function applySteps<D extends StepDatabase>(db: D, steps: readonly ManifestStep[], options: ApplyOptions<D>): Promise<void>;
 ```

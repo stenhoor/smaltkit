@@ -41,7 +41,7 @@ Each has a page of its own.
 
 #### CYPHER_FUNCTIONS {#CYPHER_FUNCTIONS}
 
-```ts
+```ts noplay
 const CYPHER_FUNCTIONS: readonly string[];
 ```
 
@@ -49,7 +49,7 @@ The functions smaltcy's library documents, as Cypher spells them.
 
 #### CYPHER_KEYWORDS {#CYPHER_KEYWORDS}
 
-```ts
+```ts noplay
 const CYPHER_KEYWORDS: readonly string[];
 ```
 
@@ -59,7 +59,7 @@ The clause and expression keywords smaltcy's parser reads, upper-cased.
 
 #### CypherCompletion {#CypherCompletion}
 
-```ts
+```ts noplay
 interface CypherCompletion {
     label: string;
     kind: string;
@@ -73,7 +73,7 @@ interface CypherCompletion {
 
 #### CypherStatement {#CypherStatement}
 
-```ts
+```ts noplay
 interface CypherStatement {
     sql: string;
     start: number;
@@ -85,7 +85,7 @@ A statement and where it is in the text. (`sql` holds its text, as `Statement` d
 
 #### CypherToken {#CypherToken}
 
-```ts
+```ts noplay
 interface CypherToken {
     type: CypherTokenType;
     text: string;
@@ -96,7 +96,7 @@ interface CypherToken {
 
 #### CypherVocabulary {#CypherVocabulary}
 
-```ts
+```ts noplay
 interface CypherVocabulary {
     labels: readonly string[];
     types: readonly string[];
@@ -110,7 +110,7 @@ What completion knows about a graph: its labels, relationship types and property
 
 #### CypherTokenType {#CypherTokenType}
 
-```ts
+```ts noplay
 type CypherTokenType = 'ws' | 'comment' | 'string' | 'ident' | 'number' | 'param' | 'word' | 'punct';
 ```
 

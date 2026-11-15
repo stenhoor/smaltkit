@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { arc } from 'smaltkit/svg';
 function arc(cx: number, cy: number, r0: number, r1: number, a0: number, a1: number): string;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { defaultCaption } from 'smaltkit/graph';
 function defaultCaption(n: ResultNodeLike): string;
 ```

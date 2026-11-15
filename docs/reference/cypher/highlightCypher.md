@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { highlightCypher } from 'smaltkit/cypher';
 function highlightCypher(text: string): string;
 ```

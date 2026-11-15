@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { unquote } from 'smaltkit/sql';
 function unquote(s: string): string;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { areaChart } from 'smaltkit/charts';
 function areaChart(ctx: ChartContext): void;
 ```

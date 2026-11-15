@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { changesSchema } from 'smaltkit/sql';
 function changesSchema(sql: string): boolean;
 ```

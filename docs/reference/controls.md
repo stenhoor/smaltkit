@@ -35,7 +35,7 @@ Each has a page of its own.
 
 #### ChoiceOptions {#ChoiceOptions}
 
-```ts
+```ts noplay
 interface ChoiceOptions {
     values: readonly Value[];
     selected: readonly Value[] | null;
@@ -57,7 +57,7 @@ interface ChoiceOptions {
 
 #### RangeOptions {#RangeOptions}
 
-```ts
+```ts noplay
 interface RangeOptions {
     kind: 'number' | 'date';
     min: Value;
@@ -82,7 +82,7 @@ interface RangeOptions {
 
 #### SearchOptions {#SearchOptions}
 
-```ts
+```ts noplay
 interface SearchOptions {
     value: string;
     placeholder?: string;
@@ -99,13 +99,13 @@ interface SearchOptions {
 
 #### ChoiceStyle {#ChoiceStyle}
 
-```ts
+```ts noplay
 type ChoiceStyle = 'list' | 'dropdown' | 'buttons';
 ```
 
 #### ControlElement {#ControlElement}
 
-```ts
+```ts noplay
 type ControlElement = Pick<HTMLElement, 'innerHTML' | 'querySelector' | 'querySelectorAll'>;
 ```
 

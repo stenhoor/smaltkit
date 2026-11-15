@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { wordBefore } from 'smaltkit/sql';
 function wordBefore(text: string, pos: number): {
     word: string;

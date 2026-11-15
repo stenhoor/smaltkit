@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { typeChecker } from 'smaltkit/typechecker';
 function typeChecker(setup: TypeCheckSetup): TypeChecker;
 ```

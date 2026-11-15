@@ -128,11 +128,14 @@ function tags(sym, name) {
 const cell = (text) => prose(text).replace(/\n+/g, ' ').replace(/\|/g, '\\|');
 const typeText = (node, sf) => (node ? printer.printNode(ts.EmitHint.Unspecified, node, sf).replace(/\s+/g, ' ') : 'unknown');
 
-/** The generated part of a function's page: import, signature, summary, parameters, returns, errors. */
+/**
+ * The generated part of a function's page: import, signature, summary, parameters, returns, errors. Its code is
+ * declarations, so its fences are `noplay`: not playgrounds, whatever follows them.
+ */
 function functionApi(module, { name, sym, decl }) {
   const sf = decl.getSourceFile();
   const decls = sym.declarations.filter((d) => ts.isFunctionDeclaration(d));
-  let out = '```ts\n' + `import { ${name} } from 'smaltkit/${module}';\n` + decls.map(signature).join('\n') + '\n```\n\n';
+  let out = '```ts noplay\n' + `import { ${name} } from 'smaltkit/${module}';\n` + decls.map(signature).join('\n') + '\n```\n\n';
   const summary = summaryOf(sym);
   if (summary) out += `${prose(summary)}\n\n`;
   const docOf = new Map(
@@ -183,7 +186,7 @@ function api(module) {
         continue;
       }
       const sigs = sym.declarations.filter((d) => !ts.isSourceFile(d)).map(signature).filter(Boolean);
-      out += '```ts\n' + sigs.join('\n') + '\n```\n\n';
+      out += '```ts noplay\n' + sigs.join('\n') + '\n```\n\n';
       const d = docs(sym);
       if (d) out += `${prose(d)}\n\n`;
       const ms = members(decl)?.filter((m) => m.doc);

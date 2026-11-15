@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { leadingKeyword } from 'smaltkit/sql';
 function leadingKeyword(sql: string): string;
 ```

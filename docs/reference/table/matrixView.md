@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { matrixView } from 'smaltkit/table';
 function matrixView(ctx: ChartContext): void;
 ```

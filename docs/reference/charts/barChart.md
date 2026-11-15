@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { barChart } from 'smaltkit/charts';
 function barChart(ctx: ChartContext): void;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { listOpfsDatabases } from 'smaltkit/engine';
 function listOpfsDatabases(): Promise<OpfsDatabase[]>;
 ```

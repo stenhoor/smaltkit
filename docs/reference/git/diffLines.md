@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { diffLines } from 'smaltkit/git';
 function diffLines(a: string, b: string): DiffLine[];
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { toFeatures } from 'smaltkit/maps';
 function toFeatures(input: unknown, object?: string): Feature[];
 ```

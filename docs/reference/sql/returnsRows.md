@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { returnsRows } from 'smaltkit/sql';
 function returnsRows(sql: string): boolean;
 ```

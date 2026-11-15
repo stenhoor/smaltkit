@@ -38,7 +38,7 @@ Each has a page of its own.
 
 #### Timeline {#Timeline}
 
-```ts
+```ts noplay
 interface Timeline {
     readonly value: number;
     setValue(version: number): void;
@@ -64,7 +64,7 @@ interface Timeline {
 
 #### TimelineCommit {#TimelineCommit}
 
-```ts
+```ts noplay
 interface TimelineCommit {
     version: number;
     time: number;
@@ -81,7 +81,7 @@ interface TimelineCommit {
 
 #### TimelineOptions {#TimelineOptions}
 
-```ts
+```ts noplay
 interface TimelineOptions {
     commits: readonly TimelineCommit[];
     value?: number;
@@ -105,7 +105,7 @@ interface TimelineOptions {
 
 #### Axis {#Axis}
 
-```ts
+```ts noplay
 type Axis = 'commit' | 'time';
 ```
 

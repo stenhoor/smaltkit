@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { niceTicks } from 'smaltkit/svg';
 function niceTicks(lo: number, hi: number, count?: number): {
     ticks: number[];

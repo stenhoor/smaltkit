@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { setEngineSpec } from 'smaltkit/engine';
 function setEngineSpec(storageKey: string, spec: string): void;
 ```

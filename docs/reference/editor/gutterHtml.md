@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { gutterHtml } from 'smaltkit/editor';
 function gutterHtml(text: string, lines: number, warnings: readonly EditorWarning[]): string;
 ```

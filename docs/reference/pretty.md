@@ -60,7 +60,7 @@ Each has a page of its own.
 
 #### InspectOptions {#InspectOptions}
 
-```ts
+```ts noplay
 interface InspectOptions {
     width?: number;
 }
@@ -72,7 +72,7 @@ interface InspectOptions {
 
 #### JsonFormatOptions {#JsonFormatOptions}
 
-```ts
+```ts noplay
 interface JsonFormatOptions {
     width?: number;
     indent?: number;
@@ -86,7 +86,7 @@ interface JsonFormatOptions {
 
 #### TsFormatOptions {#TsFormatOptions}
 
-```ts
+```ts noplay
 interface TsFormatOptions {
     indent?: number;
 }

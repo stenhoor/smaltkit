@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { markdown } from 'smaltkit/markdown';
 function markdown(src: string, options?: MarkdownOptions): string;
 ```

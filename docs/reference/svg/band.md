@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { band } from 'smaltkit/svg';
 function band(n: number, r0: number, r1: number, pad?: number, outer?: number): Band;
 ```

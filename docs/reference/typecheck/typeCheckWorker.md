@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { typeCheckWorker } from 'smaltkit/typecheck';
 function typeCheckWorker(setup: TypeCheckSetup, options?: {
     workerUrl?: string | URL;

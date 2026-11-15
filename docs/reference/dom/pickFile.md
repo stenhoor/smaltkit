@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { pickFile } from 'smaltkit/dom';
 function pickFile(accept: string): Promise<File | null>;
 ```

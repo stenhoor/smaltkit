@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { truncate } from 'smaltkit/svg';
 function truncate(s: string, maxPx: number, fontPx: number): string;
 ```

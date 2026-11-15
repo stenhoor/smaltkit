@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { inspect } from 'smaltkit/pretty';
 function inspect(value: unknown, options?: InspectOptions): string;
 ```

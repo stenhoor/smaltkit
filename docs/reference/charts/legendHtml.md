@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { legendHtml } from 'smaltkit/charts';
 function legendHtml(names: string[], palette: number, offset?: number): string;
 ```

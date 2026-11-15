@@ -8,6 +8,8 @@ Every function has a page of its own, listed under its module: its signature, pa
 errors it raises, then examples, a demo and related functions.
 
 Examples with their output under them are tests: CI runs them against the built package and checks what they print.
+Each is also a playground: Run it here, or edit it and Run, and it runs in your browser against this site's copy of
+smaltkit.
 Examples that need a browser (dialogs, menus, the graph view, loading the engine) are type-checked only; renderers
 that write HTML, such as the charts and tables, run in CI too, drawing into a plain object.
 

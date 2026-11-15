@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { showMenu } from 'smaltkit/dom';
 function showMenu(x: number, y: number, items: MenuItem[]): void;
 ```

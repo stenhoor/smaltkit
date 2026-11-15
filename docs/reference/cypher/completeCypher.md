@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { completeCypher } from 'smaltkit/cypher';
 function completeCypher(text: string, pos: number, vocab: CypherVocabulary | null, explicit: boolean): {
     items: CypherCompletion[];

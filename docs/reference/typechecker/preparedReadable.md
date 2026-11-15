@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { preparedReadable } from 'smaltkit/typechecker';
 function preparedReadable(setup: TypeCheckSetup): boolean;
 ```

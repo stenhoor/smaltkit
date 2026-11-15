@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { valueScale } from 'smaltkit/svg';
 function valueScale(lo: number, hi: number, r0: number, r1: number, opts?: {
     count?: number;

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { corsHint } from 'smaltkit/urls';
 function corsHint(message: unknown): string;
 ```

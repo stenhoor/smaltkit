@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { highlightTypeScript } from 'smaltkit/editor';
 function highlightTypeScript(text: string): string;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { aliasesIn } from 'smaltkit/sql';
 function aliasesIn(sql: string, tableNames: Set<string>): Map<string, string>;
 ```

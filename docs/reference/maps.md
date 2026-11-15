@@ -40,7 +40,7 @@ Each has a page of its own.
 
 #### MAP_ROLES {#MAP_ROLES}
 
-```ts
+```ts noplay
 const MAP_ROLES: readonly [
     "location",
     "latitude",
@@ -56,7 +56,7 @@ The columns a map reads by role (for apps that list a map's fields).
 
 #### Feature {#Feature}
 
-```ts
+```ts noplay
 interface Feature {
     type: 'Feature';
     id?: string | number;
@@ -67,7 +67,7 @@ interface Feature {
 
 #### Projection {#Projection}
 
-```ts
+```ts noplay
 interface Projection {
     (p: Position): Position;
     kind: ProjectionKind;
@@ -80,7 +80,7 @@ A projection: lon/lat in degrees to x/y in px (y down).
 
 #### Geometry {#Geometry}
 
-```ts
+```ts noplay
 type Geometry = {
     type: 'Point';
     coordinates: Position;
@@ -107,13 +107,13 @@ type Geometry = {
 
 #### MapRole {#MapRole}
 
-```ts
+```ts noplay
 type MapRole = (typeof MAP_ROLES)[number];
 ```
 
 #### Position {#Position}
 
-```ts
+```ts noplay
 type Position = [
     number,
     number
@@ -122,7 +122,7 @@ type Position = [
 
 #### ProjectionKind {#ProjectionKind}
 
-```ts
+```ts noplay
 type ProjectionKind = 'mercator' | 'equirectangular';
 ```
 

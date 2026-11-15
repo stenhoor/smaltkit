@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { fileName } from 'smaltkit/dom';
 function fileName(s: string, fallback?: string): string;
 ```

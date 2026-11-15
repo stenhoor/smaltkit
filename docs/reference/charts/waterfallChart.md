@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { waterfallChart } from 'smaltkit/charts';
 function waterfallChart(ctx: ChartContext): void;
 ```

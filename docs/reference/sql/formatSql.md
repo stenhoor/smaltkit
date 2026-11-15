@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatSql } from 'smaltkit/sql';
 function formatSql(sql: string): string;
 ```

@@ -38,7 +38,7 @@ Each has a page of its own.
 
 #### MenuItem {#MenuItem}
 
-```ts
+```ts noplay
 interface MenuItem {
     label: string;
     action?: () => void;

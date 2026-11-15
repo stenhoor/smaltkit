@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { typeCheckHandler } from 'smaltkit/typechecker';
 function typeCheckHandler(): (request: TypeCheckRequest) => TypeCheckReply | undefined;
 ```

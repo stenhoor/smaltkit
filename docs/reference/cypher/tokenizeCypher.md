@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { tokenizeCypher } from 'smaltkit/cypher';
 function tokenizeCypher(text: string): CypherToken[];
 ```

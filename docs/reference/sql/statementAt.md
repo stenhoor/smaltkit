@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { statementAt } from 'smaltkit/sql';
 function statementAt(text: string, pos: number): Statement | null;
 ```

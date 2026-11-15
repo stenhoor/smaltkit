@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { highlight } from 'smaltkit/sql';
 function highlight(text: string, names?: Set<string>): string;
 ```

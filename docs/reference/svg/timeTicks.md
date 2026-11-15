@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { timeTicks } from 'smaltkit/svg';
 function timeTicks(lo: number, hi: number, count?: number): {
     ticks: number[];

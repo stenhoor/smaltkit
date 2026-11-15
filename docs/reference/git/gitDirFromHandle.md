@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { gitDirFromHandle } from 'smaltkit/git';
 function gitDirFromHandle(root: FileSystemDirectoryHandle): GitDir;
 ```

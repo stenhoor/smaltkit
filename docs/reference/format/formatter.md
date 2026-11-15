@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatter } from 'smaltkit/format';
 function formatter(f: Format | undefined, type?: ColumnType, locale?: string): Formatter;
 ```

@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { tokenize } from 'smaltkit/sql';
 function tokenize(text: string): Token[];
 ```

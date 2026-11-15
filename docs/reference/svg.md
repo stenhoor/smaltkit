@@ -57,7 +57,7 @@ Each has a page of its own.
 
 #### r2 {#r2}
 
-```ts
+```ts noplay
 const r2: (n: number) => number;
 ```
 
@@ -65,7 +65,7 @@ const r2: (n: number) => number;
 
 #### Band {#Band}
 
-```ts
+```ts noplay
 interface Band {
     (i: number): number;
     bandwidth: number;
@@ -75,7 +75,7 @@ interface Band {
 
 #### Linear {#Linear}
 
-```ts
+```ts noplay
 interface Linear {
     (v: number): number;
     domain: [

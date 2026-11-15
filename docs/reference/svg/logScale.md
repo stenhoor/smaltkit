@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { logScale } from 'smaltkit/svg';
 function logScale(lo: number, hi: number, r0: number, r1: number): Linear;
 ```

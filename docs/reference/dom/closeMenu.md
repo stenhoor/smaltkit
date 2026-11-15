@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { closeMenu } from 'smaltkit/dom';
 function closeMenu(): void;
 ```

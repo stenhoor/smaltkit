@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { formatTypeScript } from 'smaltkit/pretty';
 function formatTypeScript(code: string, options?: TsFormatOptions): string;
 ```

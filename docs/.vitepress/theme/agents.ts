@@ -96,7 +96,7 @@ export function toTwin(source: string, page: string, options: Pick<AgentDocsOpti
         out.push(`${indent}${ticks}ebnf`, ...names.map((n) => rules.get(n) ?? `${n} ::= /* in the grammar */`), `${indent}${ticks}`)
         continue
       }
-      const flags = rest.trim().split(/\s+/).filter((f) => f && f !== 'play')
+      const flags = rest.trim().split(/\s+/).filter((f) => f && f !== 'play' && f !== 'noplay')
       out.push(`${indent}${ticks}${lang}${flags.length ? ' ' + flags.join(' ') : ''}`)
       fence = ticks
       continue

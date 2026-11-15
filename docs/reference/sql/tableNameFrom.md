@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { tableNameFrom } from 'smaltkit/sql';
 function tableNameFrom(source: string): string;
 ```

@@ -36,7 +36,7 @@ Each has a page of its own.
 
 #### Editor {#Editor}
 
-```ts
+```ts noplay
 class Editor {
     opts: EditorOptions;
     language: EditorLanguage;
@@ -95,7 +95,7 @@ class Editor {
 
 #### cypherLanguage {#cypherLanguage}
 
-```ts
+```ts noplay
 const cypherLanguage: EditorLanguage;
 ```
 
@@ -104,7 +104,7 @@ and the schema's graph vocabulary (labels after `:` in a node, types in a relati
 
 #### sqlLanguage {#sqlLanguage}
 
-```ts
+```ts noplay
 const sqlLanguage: EditorLanguage;
 ```
 
@@ -112,7 +112,7 @@ SQL (smaltql's dialect): highlighting, `--` comments, statement shading and comp
 
 #### typescriptLanguage {#typescriptLanguage}
 
-```ts
+```ts noplay
 const typescriptLanguage: EditorLanguage;
 ```
 
@@ -123,7 +123,7 @@ Completion comes from a language service.
 
 #### CompletionItem {#CompletionItem}
 
-```ts
+```ts noplay
 interface CompletionItem {
     label: string;
     kind: string;
@@ -137,7 +137,7 @@ interface CompletionItem {
 
 #### EditorLanguage {#EditorLanguage}
 
-```ts
+```ts noplay
 interface EditorLanguage {
     name: string;
     highlight(text: string, names?: Set<string>): string;
@@ -167,7 +167,7 @@ What the editor needs to know about a language.
 
 #### EditorOptions {#EditorOptions}
 
-```ts
+```ts noplay
 interface EditorOptions {
     value?: string;
     onChange?: (value: string) => void;
@@ -186,7 +186,7 @@ interface EditorOptions {
 
 #### EditorSchema {#EditorSchema}
 
-```ts
+```ts noplay
 interface EditorSchema {
     names: Set<string>;
     tables: Map<string, SchemaTable>;
@@ -202,7 +202,7 @@ What the editor needs from the schema: lower-cased object names (for highlightin
 
 #### EditorWarning {#EditorWarning}
 
-```ts
+```ts noplay
 interface EditorWarning {
     start: number;
     end: number;
@@ -214,7 +214,7 @@ A warning the editor marks: a range of the text, and what is wrong there (a type
 
 #### SchemaColumn {#SchemaColumn}
 
-```ts
+```ts noplay
 interface SchemaColumn {
     name: string;
     type?: string | null;
@@ -230,7 +230,7 @@ A column as completion knows it.
 
 #### SchemaTable {#SchemaTable}
 
-```ts
+```ts noplay
 type SchemaTable = SchemaColumn[] & {
     kind?: string;
     type?: string;

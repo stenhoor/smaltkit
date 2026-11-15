@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { completeSql } from 'smaltkit/editor';
 function completeSql(text: string, pos: number, schema: EditorSchema, explicit: boolean): {
     items: CompletionItem[];

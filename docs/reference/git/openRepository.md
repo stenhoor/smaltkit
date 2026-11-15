@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { openRepository } from 'smaltkit/git';
 function openRepository(dir: GitDir): Promise<Repository>;
 ```

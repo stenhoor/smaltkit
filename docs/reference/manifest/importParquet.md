@@ -2,7 +2,7 @@
 
 <!-- api:start -->
 
-```ts
+```ts noplay
 import { importParquet } from 'smaltkit/manifest';
 function importParquet<D extends StepDatabase>(db: D, io: Pick<StepIO<D>, 'registerFile'>, table: string, blob: Blob): Promise<{
     rows: number;
