@@ -51,6 +51,7 @@ interface TypeCheckSetup {
     prepared?: ArrayBuffer | Uint8Array;
     fallback?: string;
     syntax?: 'strict' | 'tolerant';
+    checks?: readonly ('this' | 'overloads' | 'variables')[];
 }
 ```
 
@@ -64,6 +65,7 @@ What the checked code can use.
 | `prepared?` | The libraries prepared: smaltty's `prepare()` buffer for them, as an app's build writes it beside their text. The checker reads it in place of parsing their text, so the first check is quicker. A buffer this smaltty can't read (a build by another smaltty, kept by the browser from an earlier deploy) is ignored: the text in `files` is read instead, or, in typeCheckWorker's worker, the text fetched from `fallback`. |
 | `fallback?` | An absolute URL of the libraries' text as a TypeCheckSetup (JSON: the app's `types.json`), which typeCheckWorker's worker fetches only if `prepared` can't be read; its files, packages and globals fill in what this setup lacks. typeChecker(), in the page's thread, fetches nothing: it reads `files`. |
 | `syntax?` | How a syntax error in the checked code is taken (smaltty 0.14.0's `syntax` option). `'strict'`, the default: code with a syntax error gets no warnings, as before. `'tolerant'`: the statement the error is in is set aside and the error is a warning (a code under 2000, as tsc's syntax errors), and the rest of the code is checked. An app turns it on when it stops reporting syntax errors its own way, so none is shown twice. |
+| `checks?` | More checks, each off unless named (smaltty 0.15.0's `checks` option): `'this'`, a method's `this` type is the value it is called on, so a model awaited from `fit(): Promise<this>` has its members checked; `'overloads'`, an argument count no overload of a function takes; `'variables'`, an annotated variable whose value can't be assigned to it. An app turns each on once the code it checks has none of the errors it finds. |
 
 #### TypeCheckWorker {#TypeCheckWorker}
 

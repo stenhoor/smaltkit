@@ -48,6 +48,22 @@ test('a type guard: no warning where it narrows; the same call unguarded still w
   assert.deepEqual(check(code('v.head(1);\n')).map((w) => w.code), [2339]);
 });
 
+test("checks: off by default; named, a method's `this`, overload counts and annotated variables are checked", () => {
+  const lib = `export declare class Model { coef: number; fit(x: number[]): Promise<this>; fitSync(x: number[]): this }
+export declare function split(x: number[], y: number[]): number[];
+export declare function split(x: number[]): number[];
+`;
+  const withModels: TypeCheckSetup = { files: { '/ml/index.d.ts': lib }, packages: { ml: '/ml/index.d.ts' } };
+  const code = "import { Model, split } from 'ml';\nconst m = new Model().fitSync([1]);\nm.coeff;\nsplit();\nconst n: number = 'a';\n";
+  assert.deepEqual(typeChecker(withModels)(code), [], 'none by default, as before');
+  const on = typeChecker({ ...withModels, checks: ['this', 'overloads', 'variables'] })(code);
+  assert.deepEqual(on.map((w) => [w.line, w.code, w.message]), [
+    [3, 2551, "Property 'coeff' does not exist on type 'Model'. Did you mean 'coef'?"],
+    [4, 2554, 'Expected 1-2 arguments, but got 0.'],
+    [5, 2322, "Type 'string' is not assignable to type 'number'."],
+  ]);
+});
+
 test('imports: the same library imported by name', () => {
   const check = typeChecker(setup);
   assert.deepEqual(check("import { table } from '@smaltdb/df';\ntable('a').fliter(1);\n").map((w) => [w.line, w.code]), [[2, 2551]]);

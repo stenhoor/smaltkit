@@ -43,6 +43,13 @@ export interface TypeCheckSetup {
    * on when it stops reporting syntax errors its own way, so none is shown twice.
    */
   syntax?: 'strict' | 'tolerant';
+  /**
+   * More checks, each off unless named (smaltty 0.15.0's `checks` option): `'this'`, a method's `this` type is the
+   * value it is called on, so a model awaited from `fit(): Promise<this>` has its members checked; `'overloads'`, an
+   * argument count no overload of a function takes; `'variables'`, an annotated variable whose value can't be assigned
+   * to it. An app turns each on once the code it checks has none of the errors it finds.
+   */
+  checks?: readonly ('this' | 'overloads' | 'variables')[];
 }
 
 /** An error in the checked code, as a warning: where (offsets, and a 1-based line and column) and what. */
