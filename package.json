@@ -102,6 +102,10 @@
       "types": "./dist/timeline.d.ts",
       "default": "./dist/timeline.js"
     },
+    "./simd": {
+      "types": "./dist/simd.d.ts",
+      "default": "./dist/simd.js"
+    },
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
   },

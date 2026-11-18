@@ -77,6 +77,7 @@ export default defineConfig({
           { text: 'Languages', collapsed: false, items: [ref('sql', 'sql'), ref('cypher', 'cypher'), ref('typescript', 'typescript'), ref('typecheck', 'typecheck'), ref('typechecker', 'typechecker')] },
           { text: 'Text', collapsed: false, items: [ref('format', 'format'), ref('markdown', 'markdown'), ref('pretty', 'pretty')] },
           { text: 'Drawing', collapsed: false, items: [ref('svg', 'svg'), ref('charts', 'charts'), ref('maps', 'maps'), ref('table', 'table'), ref('graph', 'graph'), ref('timeline', 'timeline')] },
+          { text: 'Compute', collapsed: false, items: [ref('simd', 'simd')] },
           { text: 'Interface', collapsed: false, items: [ref('grid', 'grid'), ref('editor', 'editor'), ref('controls', 'controls'), ref('dom', 'dom'), ref('ui.css', 'styles')] },
         ],
       },
