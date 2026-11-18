@@ -17,8 +17,8 @@ jobs:
       - run: npm test           # with test/docs.test.ts: the docs' examples print what they show
       - run: npm run docs:build # fails if the generated reference is out of date or an example doesn't type-check
 
-  # The graph view and the timeline in Chromium, from the built package: Playwright's image, with the SwiftShader
-  # WebGPU adapter for the graph view. Playwright is installed here only, not a dependency of the package.
+  # The graph view, the timeline and WebGPU compute in Chromium, from the built package: Playwright's image, with the
+  # SwiftShader WebGPU adapter for the graph view and compute. Playwright is installed here only, not a dependency of the package.
   browser:
     name: browser (${{ matrix.suite }})
     runs-on: ubuntu-latest
@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [graph, timeline, playgrounds]
+        suite: [graph, timeline, gpu, playgrounds]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
