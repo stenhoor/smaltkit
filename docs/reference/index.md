@@ -51,6 +51,12 @@ that write HTML, such as the charts and tables, run in CI too, drawing into a pl
 | [`smaltkit/graph`](./graph) | A graph view on the GPU (WebGPU), 2D and 3D, up to 100,000 nodes. |
 | [`smaltkit/timeline`](./timeline) | A timeline of versions to drag, zoom, step and play through. |
 
+## Compute
+
+| Module | What it does |
+| --- | --- |
+| [`smaltkit/simd`](./simd) | WebAssembly SIMD modules written from TypeScript at run time: instructions, modules, f64x2 exp and log, a memory that never grows. |
+
 ## Interface
 
 | Module | What it does |

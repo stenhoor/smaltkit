@@ -22,3 +22,4 @@ export * from './typecheck.js';
 export * from './typechecker.js';
 export * from './graph.js';
 export * from './timeline.js';
+export * from './simd.js';
