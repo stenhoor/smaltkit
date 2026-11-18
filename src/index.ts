@@ -23,3 +23,4 @@ export * from './typechecker.js';
 export * from './graph.js';
 export * from './timeline.js';
 export * from './simd.js';
+export * from './gpu.js';

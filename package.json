@@ -106,6 +106,10 @@
       "types": "./dist/simd.d.ts",
       "default": "./dist/simd.js"
     },
+    "./gpu": {
+      "types": "./dist/gpu.d.ts",
+      "default": "./dist/gpu.js"
+    },
     "./ui.css": "./dist/ui.css",
     "./package.json": "./package.json"
   },
@@ -124,7 +128,7 @@
     "prepare": "npm run build",
     "typecheck": "node node_modules/typescript7/bin/tsc -p .",
     "test": "npm run build && node --test test/*.test.ts",
-    "test:browser": "npm run build && node test/browser/graph.mjs --quick && node test/browser/timeline.mjs",
+    "test:browser": "npm run build && node test/browser/graph.mjs --quick && node test/browser/timeline.mjs && node test/browser/gpu.mjs",
     "docs:api": "node scripts/docs-api.mjs",
     "docs:examples": "node scripts/docs-examples.mjs --write",
     "docs:dev": "node scripts/docs-kit.mjs && vitepress dev docs",

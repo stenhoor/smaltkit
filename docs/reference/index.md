@@ -56,6 +56,7 @@ that write HTML, such as the charts and tables, run in CI too, drawing into a pl
 | Module | What it does |
 | --- | --- |
 | [`smaltkit/simd`](./simd) | WebAssembly SIMD modules written from TypeScript at run time: instructions, modules, f64x2 exp and log, a memory that never grows. |
+| [`smaltkit/gpu`](./gpu) | WebGPU compute: the device, compute pipelines from WGSL source, and the matrix product in 32-bit floats. |
 
 ## Interface
 
