@@ -61,6 +61,48 @@ test('loops and branches: a sum of 1 to n', async () => {
   assert.equal((instance.exports as { sum(n: number): number }).sum(101), 5050);
 });
 
+test('scalar loads, min, max, comparison, select and multiply: a gather by row number', async () => {
+  // gather(x, rows, m, th, out): over rows[0 … m − 1] (i32s), x[row] (f64s): out = [min, max, Σ x where x ≤ th, Σ x²].
+  const c = new Code(5);
+  const [X, R, M, TH, OUT] = [0, 1, 2, 3, 4];
+  const k = c.local(I32);
+  const v = c.local(F64);
+  const lo = c.local(F64);
+  const hi = c.local(F64);
+  const below = c.local(F64);
+  const sq = c.local(F64);
+  c.f64Const(Infinity).set(lo).f64Const(-Infinity).set(hi).f64Const(0).set(below).f64Const(0).set(sq);
+  c.i32(0).set(k);
+  c.block().loop();
+  c.get(k).get(M).i32GeU().brIf(1);
+  // v = x[rows[k]]: rows[k] is the i32 at R + 4k; its f64 is at X + 8 · rows[k].
+  c.get(X).get(R).get(k).i32(2).i32Shl().i32Add().i32Load().i32(3).i32Shl().i32Add().f64Load().set(v);
+  c.get(lo).get(v).f64Min().set(lo);
+  c.get(hi).get(v).f64Max().set(hi);
+  c.get(below).get(v).f64Const(0).get(v).get(TH).f64Le().select().f64Add().set(below);
+  c.get(sq).get(v).get(v).f64Mul().f64Add().set(sq);
+  c.get(k).i32(1).i32Add().set(k);
+  c.br(0).end().end();
+  c.get(OUT).get(lo).f64Store(0);
+  c.get(OUT).get(hi).f64Store(8);
+  c.get(OUT).get(below).f64Store(16);
+  c.get(OUT).get(sq).f64Store(24);
+  const bytes = new ModuleBuilder().memory(1).func('gather', [I32, I32, I32, F64, I32], [], c).encode();
+  assert.ok(WebAssembly.validate(bytes));
+  const memory = new WebAssembly.Memory({ initial: 1 });
+  const { instance } = (await WebAssembly.instantiate(bytes, { env: { memory } })) as unknown as WebAssembly.WebAssemblyInstantiatedSource;
+  const ex = instance.exports as { gather(x: number, rows: number, m: number, th: number, out: number): void };
+  const x = [2.5, -1, 7, 0.5, -3.25, 4];
+  const rows = [4, 0, 5, 1, 3];
+  new Float64Array(memory.buffer).set(x, 0);
+  new Int32Array(memory.buffer, 64, rows.length).set(rows);
+  ex.gather(0, 64, rows.length, 2.5, 128);
+  const picked = rows.map((r) => x[r]!);
+  let squares = 0;
+  for (const v of picked) squares += v * v;
+  assert.deepEqual([...new Float64Array(memory.buffer, 128, 4)], [Math.min(...picked), Math.max(...picked), picked.filter((v) => v <= 2.5).reduce((a, b) => a + b, 0), squares]);
+});
+
 test('Room: a larger reserve makes a new memory, zeroed, and never grows one', async () => {
   const c = new Code(1);
   c.get(0).f64Load().get(0).f64Load().f64Add();
