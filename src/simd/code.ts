@@ -91,6 +91,15 @@ export class Code {
   i32LtU(): this { return this.#op(0x49); }
   /** `i32.ge_u`: 1 when a ≥ b, unsigned. */
   i32GeU(): this { return this.#op(0x4f); }
+  /** `i32.shl`: a shifted left by b bits (b modulo 32). */
+  i32Shl(): this { return this.#op(0x74); }
+  /** `i32.load`, 4-byte aligned. */
+  i32Load(offset = 0): this { return this.#op(0x28, ...this.#mem(2, offset)); }
+
+  // Any type
+
+  /** `select`: a where the i32 on top of the stack isn't 0, else b (a, b, then the condition, on the stack). */
+  select(): this { return this.#op(0x1b); }
 
   // f64
 
@@ -100,6 +109,16 @@ export class Code {
   f64Store(offset = 0): this { return this.#op(0x39, ...this.#mem(3, offset)); }
   /** `f64.add` */
   f64Add(): this { return this.#op(0xa0); }
+  /** `f64.mul` */
+  f64Mul(): this { return this.#op(0xa2); }
+  /** `f64.min`: the smaller (−0 below +0; NaN if either is NaN). */
+  f64Min(): this { return this.#op(0xa4); }
+  /** `f64.max`: the larger (+0 above −0; NaN if either is NaN). */
+  f64Max(): this { return this.#op(0xa5); }
+  /** `f64.le`: 1 when a ≤ b, as an i32. */
+  f64Le(): this { return this.#op(0x65); }
+  /** `f64.const`: the number's eight little-endian bytes. */
+  f64Const(n: number): this { return this.#op(0x44, ...new Uint8Array(new Float64Array([n]).buffer)); }
 
   // v128 and f64x2: two 64-bit floats side by side
 

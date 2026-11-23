@@ -94,9 +94,17 @@ class Code {
     i32Ne(): this;
     i32LtU(): this;
     i32GeU(): this;
+    i32Shl(): this;
+    i32Load(offset?: number): this;
+    select(): this;
     f64Load(offset?: number): this;
     f64Store(offset?: number): this;
     f64Add(): this;
+    f64Mul(): this;
+    f64Min(): this;
+    f64Max(): this;
+    f64Le(): this;
+    f64Const(n: number): this;
     v128Load(offset?: number): this;
     v128Store(offset?: number): this;
     v128Zero(): this;
